@@ -1,0 +1,14 @@
+---
+const { size = "medium", class: className, ...rest } = Astro.props;
+const baseClass = `textarea inline-block`;
+const sizeMapping = {
+  extraSmall: "textarea-xs",
+  small: "textarea-sm",
+  medium: "textarea-md",
+  large: "textarea-lg",
+  extraLarge: "textarea-xl",
+};
+const globalClass = `${baseClass} ${sizeMapping[size] || ""} ${className || ""}`;
+---
+
+<textarea class={globalClass} {...rest}></textarea>

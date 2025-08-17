@@ -1,0 +1,51 @@
+---
+const {
+  label = "my dropdown",
+  position = "bottomCenter",
+  hover = false,
+  type = "menu", // menu or card
+  class: className,
+} = Astro.props;
+const positionMapping = {
+  bottomLeft: "dropdown-bottom dropdown-end",
+  bottomRight: "dropdown-bottom",
+  bottomCenter: "dropdown-bottom dropdown-center",
+  topRight: "dropdown-top",
+  topCenter: "dropdown-top dropdown-center",
+  topLeft: "dropdown-top dropdown-end",
+  leftBottom: "dropdown-left",
+  leftCenter: "dropdown-left dropdown-center",
+  leftTop: "dropdown-left dropdown-end",
+  rightBottom: "dropdown-right",
+  rightCenter: "dropdown-right dropdown-center",
+  rightTop: "dropdown-right dropdown-end",
+};
+// type can be menu (in a navbar link dropdown) or card (in a open modal window)
+const baseClass = "dropdown";
+const contentClass =
+  type === "menu"
+    ? "dropdown-content menu bg-base-300 rounded-box z-1 w-52 p-2 shadow-sm border border-base-200 rounded-md"
+    : "dropdown-content card card-sm bg-base-300 z-1 w-64 shadow-md border border-base-200 rounded-md";
+const labelClass = "btn m-1";
+const dropDownCardBody = "card-body";
+const globalClass = `${baseClass} ${positionMapping[position]} ${hover ? "dropdown-hover" : ""} ${className || ""}`;
+---
+
+<div class={globalClass}>
+  <div tabindex="0" role="button" class={labelClass}>
+    {label}
+  </div>
+  {
+    type === "menu" ? (
+      <ul tabindex="0" class={contentClass}>
+        <slot />
+      </ul>
+    ) : (
+      <div tabindex="0" class={contentClass}>
+        <div class={dropDownCardBody}>
+          <slot />
+        </div>
+      </div>
+    )
+  }
+</div>

@@ -1,0 +1,53 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import LoginForm from "../../components/features/astro/LoginForm.astro";
+import { AppUrls } from "../../utils/enumerators";
+import { getUserByEmail } from "../../utils/db-utils";
+import { comparePassword } from "../../utils/generic";
+import { delay } from "../../utils/generic";
+
+let error = "";
+let formInfo = {
+  email: "",
+  password: "",
+};
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+
+  formInfo.email = formData.get("email")?.toString() ?? "";
+  formInfo.password = formData.get("password")?.toString() ?? "";
+
+  try {
+    if (!formInfo.email || !formInfo.password) {
+      throw new Error("Missing required fields");
+    }
+
+    const user = await getUserByEmail(formInfo.email);
+    if (!user) {
+      throw new Error(`User with email ${formInfo.email} does not exist.`);
+    }
+
+    const isPasswordCorrect = await comparePassword({
+      password: formInfo.password,
+      hashedPassword: user.password,
+    });
+    if (!isPasswordCorrect) {
+      throw new Error("Incorrect password.");
+    }
+
+    await Astro.session.set("user", { id: user.id, email: user.email });
+    console.warn(`Session created for user ${user.email}`);
+
+    await delay(1500);
+
+    return Astro.redirect(AppUrls.HomePage);
+  } catch (err) {
+    console.error("Login error:", err);
+    error = err.message || "Internal server error.";
+  }
+}
+---
+
+<Layout>
+  <LoginForm error={error} formInfo={formInfo} />
+</Layout>

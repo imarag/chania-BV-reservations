@@ -1,0 +1,14 @@
+---
+const { placeholder, options, class: className, ...rest } = Astro.props;
+const baseClass = `select inline-block`;
+const globalClass = `${baseClass} ${className || ""}`;
+---
+
+<select class={globalClass} {...rest}>
+  {placeholder && <option disabled={true}>{placeholder}</option>}
+  {
+    options.map((option) => (
+      <option value={option.value}>{option.label}</option>
+    ))
+  }
+</select>

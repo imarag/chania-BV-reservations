@@ -1,0 +1,41 @@
+<!-- ---
+const { order } = Astro.props;
+import { getOrderItems, getProductById } from "@utils/db-utils";
+import Container from "./Container.astro";
+import Accordion from "./Accordion.astro";
+const items = await getOrderItems(order.id);
+const products = await Promise.all(
+  items.map((item) => getProductById(item.productId))
+);
+---
+
+<Container>
+  <div class="flex items-center gap-2 text-sm">
+    <h3>
+      <span class="font-semibold">Order number</span>
+      {order.id}
+    </h3>
+    <p class="text-sm">
+      <span class="font-semibold">Total expenditure:</span> ${order.total}
+    </p>
+    <p class="text-sm">
+      <span class="font-semibold">Order date:</span>
+      {new Date(order.date).toLocaleDateString()}
+    </p>
+  </div>
+  <div>
+    <Accordion label="Order Details">
+      <ul>
+        {
+          products.map((product) => (
+            <li class="mb-4">
+              <p>Product Name: {product.title}</p>
+              <p>Product Description: {product.description}</p>
+              <p>Price: ${product.price}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </Accordion>
+  </div>
+</Container> -->

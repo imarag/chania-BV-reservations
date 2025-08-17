@@ -1,0 +1,35 @@
+---
+const {
+  variant = "neutral",
+  checked = false,
+  size = "medium",
+  className,
+} = Astro.props;
+const variantMapping = {
+  primary: "toggle-primary",
+  secondary: "toggle-secondary",
+  accent: "toggle-accent",
+  neutral: "toggle-neutral",
+  info: "toggle-info",
+  success: "toggle-success",
+  warning: "toggle-warning",
+  error: "toggle-error",
+};
+const sizeMapping = {
+  extraSmall: "toggle-xs",
+  small: "toggle-sm",
+  medium: "toggle-md",
+  large: "toggle-lg",
+  extraLarge: "toggle-xl",
+};
+const baseClass = "toggle";
+const globalClass = `${baseClass} ${variantMapping[variant] || ""} ${sizeMapping[size] || ""} ${className || ""}`;
+---
+
+{
+  checked ? (
+    <input type="checkbox" checked="checked" class={globalClass} />
+  ) : (
+    <input type="checkbox" class={globalClass} />
+  )
+}

@@ -1,0 +1,14 @@
+<!-- ---
+import AccountLayout from "@layouts/AccountLayout.astro";
+import { AppUrls } from "@utils/enumerators";
+const currentUser = await Astro.session?.get("user");
+---
+
+<AccountLayout>
+  <div class="border-l border-gray-300 p-4 flex-grow">
+    <h2 class="text-lg font-semibold">Account Information</h2>
+    <p>Email: {currentUser.email}</p>
+    <p>Name: {currentUser.name}</p>
+    <p>Joined on: {new Date(currentUser.createdAt).toLocaleDateString()}</p>
+  </div>
+</AccountLayout> -->

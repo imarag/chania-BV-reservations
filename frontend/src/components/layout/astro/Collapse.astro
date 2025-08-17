@@ -1,0 +1,19 @@
+---
+const {
+  label = "my collapse",
+  collapseIcon = "arrow",
+  class: className,
+} = Astro.props;
+const baseClass = "collapse bg-base-100 border-base-300 border rounded-sm";
+const contentClass = `collapse-content text-sm`;
+const labelClass = "collapse-title font-semibold";
+const globalClass = `${baseClass} ${collapseIcon === "arrow" ? "collapse-arrow" : "collapse-plus"} ${className || ""}`;
+---
+
+<div class={globalClass}>
+  <input type="checkbox" />
+  <div class={labelClass}>{label}</div>
+  <div class={contentClass}>
+    <slot />
+  </div>
+</div>

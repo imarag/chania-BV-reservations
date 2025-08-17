@@ -1,0 +1,20 @@
+---
+import Layout from "./Layout.astro";
+// import { AppUrls } from "@utils/enumerators";
+---
+
+<Layout>
+  <!-- <div class="h-full flex flex-row gap-4 items-stretch">
+    <nav>
+      <ul class="flex flex-col gap-4">
+        <li><a class="link" href={AppUrls.AccountInfoPage}>Account</a></li>
+        <li><a class="link" href={AppUrls.AccountOrdersPage}>Orders</a></li>
+        <li><a class="link" href={AppUrls.LogoutAPI}>Logout</a></li>
+      </ul>
+    </nav>
+    <div class="border-l border-gray-300 p-4 flex-grow">
+      <slot />
+    </div>
+  </div> -->
+  <slot />
+</Layout>

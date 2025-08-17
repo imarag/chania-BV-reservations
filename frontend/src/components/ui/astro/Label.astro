@@ -1,0 +1,9 @@
+---
+const { class: className, ...rest } = Astro.props;
+const baseClass = `label inline-block`;
+const globalClass = `${baseClass} ${className || ""}`;
+---
+
+<label class={globalClass} {...rest}>
+  <slot />
+</label>

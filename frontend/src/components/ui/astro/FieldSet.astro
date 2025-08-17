@@ -1,0 +1,11 @@
+---
+const { legend = "", class: className, ...rest } = Astro.props;
+const baseClass = "fieldset";
+const legendClass = "fieldset-legend";
+const globalClass = `${baseClass} ${className || ""}`;
+---
+
+<fieldset class={globalClass} {...rest}>
+  <legend class={legendClass}>{legend}</legend>
+  <slot />
+</fieldset>

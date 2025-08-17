@@ -1,0 +1,27 @@
+---
+const {
+  label = "my accordion",
+  initialOpen = false,
+  accordionRadioName = "accordion",
+  accordionIcon = "arrow",
+  class: className,
+} = Astro.props;
+const baseClass = "collapse bg-base-100 border border-base-300 rounded-md";
+const contentClass = "collapse-content text-sm";
+const labelClass = "collapse-title font-semibold";
+const globalClass = `${baseClass} ${accordionIcon === "arrow" ? "collapse-arrow" : "collapse-plus"} ${className || ""} `;
+---
+
+<div class={globalClass}>
+  {
+    initialOpen ? (
+      <input type="radio" name={accordionRadioName} checked />
+    ) : (
+      <input type="radio" name={accordionRadioName} />
+    )
+  }
+  <div class={labelClass}>{label}</div>
+  <div class={contentClass}>
+    <slot />
+  </div>
+</div>

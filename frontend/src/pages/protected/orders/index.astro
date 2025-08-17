@@ -1,0 +1,15 @@
+<!-- ---
+import Layout from "@layouts/Layout.astro";
+import OrderInfo from "@components/astro/OrderInfo.astro";
+import { getUserOrders } from "@utils/db-utils";
+const currentUser = await Astro.session?.get("user");
+import PageTitle from "@components/astro/PageTitle.astro";
+const userOrders = await getUserOrders(currentUser.id);
+---
+
+<Layout>
+  <PageTitle class="mb-12">Your Orders</PageTitle>
+  <div class="space-y-4 my-4">
+    {userOrders.map((order) => <OrderInfo order={order} />)}
+  </div>
+</Layout> -->

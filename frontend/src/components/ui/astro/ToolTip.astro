@@ -1,0 +1,19 @@
+---
+const { message, variant = "neutral", className } = Astro.props;
+const variantMapping = {
+  primary: "tooltip-primary",
+  secondary: "tooltip-secondary",
+  accent: "tooltip-accent",
+  neutral: "tooltip-neutral",
+  info: "tooltip-info",
+  success: "tooltip-success",
+  warning: "tooltip-warning",
+  error: "tooltip-error",
+};
+const baseClass = "tooltip";
+const globalClass = `${baseClass} ${variantMapping[variant] || ""} ${className || ""}`;
+---
+
+<div class={globalClass} data-tip={message}>
+  <slot />
+</div>

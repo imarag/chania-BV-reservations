@@ -1,0 +1,14 @@
+---
+const { variant = "page", class: className, ...rest } = Astro.props;
+const variantMapping = {
+  page: "text-4xl font-semibold",
+  section: "text-3xl font-semibold",
+};
+const baseClass = "";
+const variantClass = variantMapping[variant] || "";
+const globalClass = `${baseClass} ${variantClass} ${className || ""}`;
+---
+
+<p class={globalClass} {...rest}>
+  <slot />
+</p>

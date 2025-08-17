@@ -1,0 +1,24 @@
+---
+const { currentUser } = Astro.props;
+import { AppUrls } from "../utils/enumerators";
+---
+
+<div class="dropdown dropdown-end">
+  <div tabindex="0" role="button" class="btn btn-warning btn-circle m-1">
+    {currentUser.email.slice(0, 1).toUpperCase()}
+  </div>
+  <ul
+    tabindex="0"
+    class="dropdown-content bg-white text-gray-800 menu rounded-box z-1 w-52 shadow-sm"
+  >
+    <li class="hover:bg-gray-100">
+      <a href={AppUrls.AccountPage}>Account</a>
+    </li>
+    <li class="hover:bg-gray-100">
+      <a href={AppUrls.OrdersPage}>Orders</a>
+    </li>
+    <li class="hover:bg-gray-100 border-t border-gray-200">
+      <a class="text-error" href={AppUrls.LogoutAPI}> Logout </a>
+    </li>
+  </ul>
+</div>

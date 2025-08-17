@@ -1,0 +1,31 @@
+---
+import { getUserById } from "../utils/db-utils";
+import { AppUrls } from "../utils/enumerators";
+const { posts } = Astro.props;
+const currentUser = await Astro.session?.get("user");
+---
+
+<div>
+  {
+    posts.map(async (post) => {
+      const author = await getUserById(post.userId);
+      return (
+        <div class="p-4 rounded-sm my-4 mx-auto relative">
+          <div class="flex gap-4 mb-3">
+            <h3 class="font-semibold">{post.title}</h3>
+            {currentUser.email === author?.email && (
+              <a
+                class="underline text-blue-500"
+                href={AppUrls.EditPostPage.replace(":id", post.id)}
+              >
+                edit post
+              </a>
+            )}
+          </div>
+          <p class="font-light">{post.body}</p>
+          <p class="text-sm mt-6 italic">by {author?.email}</p>
+        </div>
+      );
+    })
+  }
+</div>

@@ -1,15 +1,17 @@
 from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
 from core import app_paths
 
 
 class Settings(BaseSettings):
     host: str = "127.0.0.1"
     port: str = "8000"
-    SECRET_KEY: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
-    ALGORITHM: str
     model_config = SettingsConfigDict(env_file=".env")
+    SECRET_KEY: str | None = None
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ALGORITHM: str = "HS256"
 
     @staticmethod
     def create_temp_folder() -> None:

@@ -1,13 +1,11 @@
-from typing import Union
-
 from fastapi import HTTPException
 from sqlmodel import Session, select
 
-from models.db import Court, Reservation, TimeSlot, User
+from models.db_models import Court, Reservation, ReservationPlayer, TimeSlot, User
 
 
 def get_users(session: Session) -> list[User]:
-    return list(session.exec(select(User)))
+    return list(session.exec(select(User)).all())
 
 
 def get_courts(session: Session) -> list[Court]:
@@ -22,48 +20,52 @@ def get_reservations(session: Session) -> list[Reservation]:
     return list(session.exec(select(Reservation)))
 
 
-def get_user_by_email(session: Session, email: str) -> Union[User, None]:
+def get_reservation_players(session: Session) -> list[ReservationPlayer]:
+    return list(session.exec(select(ReservationPlayer)))
+
+
+def get_user_by_email(session: Session, email: str) -> User | None:
     user = session.exec(select(User).where(User.email == email)).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+    return User(**user.model_dump()) if user else None
 
 
-def get_user_by_id(session: Session, user_id: str) -> Union[User, None]:
+def get_user_by_id(session: Session, user_id: int) -> User | None:
     user = session.get(User, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+    return User(**user.model_dump()) if user else None
 
 
-def get_court_by_id(session: Session, court_id: str) -> Union[Court, None]:
+def get_court_by_id(session: Session, court_id: int) -> Court | None:
     court = session.get(Court, court_id)
-    if not court:
-        raise HTTPException(status_code=404, detail="Court not found")
-    return court
+    return court if court else None
 
 
-def get_time_slot_by_id(session: Session, time_slot_id: str) -> Union[TimeSlot, None]:
+def get_court_by_name(session: Session, court_name: str) -> Court | None:
+    court = session.exec(select(Court).where(Court.name == court_name)).first()
+    return court if court else None
+
+
+def get_time_slot_by_id(session: Session, time_slot_id: int) -> TimeSlot | None:
     time_slot = session.get(TimeSlot, time_slot_id)
-    if not time_slot:
-        raise HTTPException(status_code=404, detail="TimeSlot not found")
-    return time_slot
+    return time_slot if time_slot else None
 
 
-def get_reservation_by_id(
-    session: Session, reservation_id: str
-) -> Union[Reservation, None]:
+def get_reservation_by_id(session: Session, reservation_id: int) -> Reservation | None:
     reservation = session.get(Reservation, reservation_id)
-    if not reservation:
-        raise HTTPException(status_code=404, detail="Reservation not found")
-    return reservation
+    return reservation if reservation else None
+
+
+def get_reservation_player_by_id(
+    session: Session, reservation_player_id: int
+) -> ReservationPlayer | None:
+    reservation_player = session.get(ReservationPlayer, reservation_player_id)
+    return reservation_player if reservation_player else None
 
 
 def add_user(session: Session, user: User) -> User:
     session.add(user)
     session.commit()
     session.refresh(user)
-    return user
+    return User(**user.model_dump())
 
 
 def add_reservation(session: Session, reservation: Reservation) -> Reservation:
@@ -117,7 +119,7 @@ def update_time_slot(
     return existing_time_slot
 
 
-def get_user_reservations(session: Session, user_id: str) -> list[Reservation]:
+def get_user_reservations(session: Session, user_id: int) -> list[Reservation]:
     reservations = list(
         session.exec(select(Reservation).where(Reservation.user_id == user_id))
     )

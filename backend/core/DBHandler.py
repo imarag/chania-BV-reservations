@@ -1,10 +1,23 @@
 from pathlib import Path
 
 from sqlmodel import Session, SQLModel, create_engine
+from utils.auth_tools import get_password_hash
 
 from core.app_paths import AppPaths
-from models.db import *  # noqa: F403
-from utils.initialize_db import courts, reservations, timeslots, users
+from models.db_models import (  # noqa: F403
+    Court,
+    Reservation,
+    ReservationPlayer,
+    TimeSlot,
+    User,
+)
+from utils.initial_db_data import (
+    courts,
+    reservation_players,
+    reservations,
+    timeslots,
+    users,
+)
 
 
 class DatabaseHandler:
@@ -12,27 +25,38 @@ class DatabaseHandler:
         self.db_name = AppPaths.DATABASE_FILE_NAME
         self.db_file_path = Path(AppPaths.DATABASE_PATH.value)
         self.sqlite_url = f"sqlite:///{self.db_file_path}"
-        self.connect_args = {"check_same_thread": False}
-        self.engine = create_engine(self.sqlite_url, connect_args=self.connect_args)
+        self.create_engine()
+
+    def create_engine(self) -> None:
+        self.engine = create_engine(
+            self.sqlite_url, connect_args={"check_same_thread": False}
+        )
 
     def create_db_and_tables(self) -> None:
-        if self.db_file_path.exists():
-            try:
-                self.db_file_path.unlink()  # Remove the existing database file
-            except Exception as e:
-                print(f"Error deleting existing database file: {e}")
         SQLModel.metadata.create_all(self.engine)
 
     def populate_initial_data(self) -> None:
         with Session(self.engine) as session:
-            session.add_all([User(**user) for user in users])  # noqa: F405
+            session.add_all(
+                [
+                    User(**user, hashed_password=get_password_hash(user["password"]))
+                    for user in users
+                ]
+            )  # noqa: F405
             session.add_all([TimeSlot(**slot) for slot in timeslots])  # noqa: F405
             session.add_all([Court(**court) for court in courts])  # noqa: F405
             session.add_all(
                 [Reservation(**reservation) for reservation in reservations]  # noqa: F405
             )
+            session.add_all(
+                [
+                    ReservationPlayer(**reservation_player)
+                    for reservation_player in reservation_players
+                ]  # noqa: F405
+            )
             session.commit()
 
     def initialize_db(self) -> None:
-        self.create_db_and_tables()
-        self.populate_initial_data()
+        if not self.db_file_path.exists():
+            self.create_db_and_tables()
+            self.populate_initial_data()

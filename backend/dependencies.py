@@ -9,7 +9,7 @@ from sqlmodel import Session
 from core.config import settings
 from core.DBHandler import DatabaseHandler
 from models.token import TokenData
-from models.user_models import User
+from models.user_models import UserRead
 
 fake_users_db = [
     {
@@ -32,7 +32,7 @@ fake_users_db = [
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> UserRead:
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",

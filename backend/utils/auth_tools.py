@@ -1,10 +1,11 @@
 import re
 from datetime import datetime, timedelta, timezone
-from sqlmodel import Session
+
 import jwt
 from passlib.context import CryptContext
+from sqlmodel import Session
+from models.db_models import User
 from core.config import settings
-from models.user_models import UserInDB
 from utils.db_operations import get_user_by_email
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -18,13 +19,13 @@ def get_password_hash(plain_password: str) -> str:
     return pwd_context.hash(plain_password)
 
 
-def authenticate_user(session: Session, email: str, password: str) -> UserInDB | None:
+def authenticate_user(session: Session, email: str, password: str) -> User | None:
     user = get_user_by_email(session, email)
     if not user:
         return None
     if not verify_password(password, user.hashed_password):
         return None
-    return user
+    return User(**user.model_dump())
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
@@ -47,4 +48,10 @@ def validate_password(password: str) -> str | None:
 def validate_email(email: str) -> str | None:
     if not re.match(r"^[a-zA-Z-\.]+@([a-zA-Z-]+\.)+[a-zA-Z-]{2,4}$", email):
         return "Invalid email format"
+    return None
+
+
+def validate_name(name: str) -> str | None:
+    if not re.match(r"^[A-Za-z\s]{2,100}$", name):
+        return "Invalid name format. It must be 2-100 characters long and contain only letters and spaces."
     return None

@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from typing import Annotated
 
 import jwt
@@ -7,9 +8,10 @@ from jwt.exceptions import InvalidTokenError
 from sqlmodel import Session
 
 from core.config import settings
-from core.DBHandler import DatabaseHandler
+from core.db_handler import DBHandler
 from models.token import TokenData
 from models.user_models import UserRead
+from utils.db_operations import get_user_by_id
 
 fake_users_db = [
     {
@@ -29,10 +31,21 @@ fake_users_db = [
     },
 ]
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> UserRead:
+def get_session() -> Generator:
+    db_handler = DBHandler()
+    with Session(db_handler.engine) as session:
+        yield session
+
+
+SessionDep = Annotated[Session, Depends(get_session)]
+
+
+async def get_current_user(
+    session: SessionDep, token: Annotated[str, Depends(oauth2_scheme)]
+) -> UserRead:
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",
@@ -42,22 +55,17 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Use
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
-        username = payload.get("sub")
-        if username is None:
+        token_data = TokenData(**payload)
+        print(token_data, "****")
+        user_id = token_data.user_id
+        if user_id is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
     except InvalidTokenError:
         raise credentials_exception  # noqa: B904
-    user = get_user(username=token_data.username)
+    user = get_user_by_id(session, user_id)
     if user is None:
         raise credentials_exception
-    return user
+    return UserRead(**user.model_dump())
 
 
-def get_session():
-    db_handler = DatabaseHandler()
-    with Session(db_handler.engine) as session:
-        yield session
-
-
-SessionDep = Annotated[Session, Depends(get_session)]
+CurrentUserDep = Annotated[UserRead, Depends(get_current_user)]

@@ -1,9 +1,9 @@
 from pathlib import Path
 
 from sqlmodel import Session, SQLModel, create_engine
-from utils.auth_tools import get_password_hash
 
 from core.app_paths import AppPaths
+from core.auth_handler import AuthHandler
 from models.db_models import (  # noqa: F403
     Court,
     Reservation,
@@ -20,7 +20,7 @@ from utils.initial_db_data import (
 )
 
 
-class DatabaseHandler:
+class DBHandler:
     def __init__(self) -> None:
         self.db_name = AppPaths.DATABASE_FILE_NAME
         self.db_file_path = Path(AppPaths.DATABASE_PATH.value)
@@ -36,10 +36,16 @@ class DatabaseHandler:
         SQLModel.metadata.create_all(self.engine)
 
     def populate_initial_data(self) -> None:
+        auth_handler = AuthHandler(session=None)  # type: ignore
         with Session(self.engine) as session:
             session.add_all(
                 [
-                    User(**user, hashed_password=get_password_hash(user["password"]))
+                    User(
+                        **user,
+                        hashed_password=auth_handler.generate_password_hash(
+                            user["password"]
+                        ),
+                    )
                     for user in users
                 ]
             )  # noqa: F405

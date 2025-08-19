@@ -1,21 +1,14 @@
 from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, HTTPException
+from fastapi import APIRouter, Form, HTTPException
 
+from core.auth_handler import AuthHandler
 from core.config import settings
 from dependencies import SessionDep
+from models.api_models import LoginResponse, RegisterResponse
 from models.db_models import User
-from models.user_models import UserLogin, UserRegister
-from models.token import Token
-from utils.auth_tools import (
-    authenticate_user,
-    create_access_token,
-    get_password_hash,
-    validate_email,
-    validate_name,
-    validate_password,
-)
+from models.user_models import UserLogin, UserRead, UserRegister
 from utils.db_operations import add_user, get_user_by_email
 
 router = APIRouter()
@@ -24,21 +17,12 @@ router = APIRouter()
 @router.post("/register")
 async def register(
     form_data: Annotated[UserRegister, Form()], session: SessionDep
-) -> dict:
-    validate_name_error = validate_name(form_data.name)
-    if validate_name_error:
-        raise HTTPException(status_code=400, detail=validate_name_error)
+) -> RegisterResponse:
+    auth_handler = AuthHandler(session)
+    validation_error = auth_handler.validate_registration_data(form_data, session)
 
-    validate_password_error = validate_password(form_data.password)
-    if validate_password_error:
-        raise HTTPException(status_code=400, detail=validate_password_error)
-
-    validate_email_error = validate_email(form_data.email)
-    if validate_email_error:
-        raise HTTPException(status_code=400, detail=validate_email_error)
-    print("okkkkkkkkkkkk")
-    if form_data.password != form_data.password_confirm:
-        raise HTTPException(status_code=400, detail="Passwords do not match")
+    if validation_error:
+        raise HTTPException(status_code=400, detail=validation_error)
 
     # Check if user exists
     existing_user = get_user_by_email(session, form_data.email)
@@ -47,19 +31,26 @@ async def register(
 
     # Create new user
     new_user = User(
-        email=form_data.email,
-        name=form_data.name,
-        hashed_password=get_password_hash(form_data.password),
+        **form_data.model_dump(),
+        hashed_password=auth_handler.generate_password_hash(form_data.password),
     )
 
     add_user(session, new_user)
 
-    return {"message": "User registered successfully", "user_id": new_user.id}
+    return RegisterResponse(
+        message="User registered successfully", user=UserRead(**new_user.model_dump())
+    )
 
 
 @router.post("/login")
-async def login(form_data: Annotated[UserLogin, Form()], session: SessionDep) -> Token:
-    user = authenticate_user(session, form_data.email, form_data.password)
+async def login(
+    # form_data: Annotated[UserLogin, Form()], session: SessionDep
+    username: Annotated[str, Form()],
+    password: Annotated[str, Form()],
+    session: SessionDep,
+) -> LoginResponse:
+    auth_handler = AuthHandler(session)
+    user = auth_handler.authenticate_user(username, password)
     if not user:
         raise HTTPException(
             status_code=401,
@@ -67,7 +58,11 @@ async def login(form_data: Annotated[UserLogin, Form()], session: SessionDep) ->
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.id}, expires_delta=access_token_expires
+    access_token = auth_handler.create_access_token(
+        data={"user_id": user.id}, expires_delta=access_token_expires
     )
-    return Token(access_token=access_token, token_type="bearer")  # noqa: S106
+    return LoginResponse(
+        message="Login successful",
+        access_token=access_token,
+        token_type="bearer",  # noqa: S106
+    )

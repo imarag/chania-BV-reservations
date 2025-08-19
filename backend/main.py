@@ -6,13 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from core.app_paths import AppPaths
 from core.config import settings
-from core.DBHandler import DatabaseHandler
+from core.db_handler import DBHandler
 from routers import authentication, database_queries
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator:  # noqa: ARG001
-    db_handler = DatabaseHandler()
+    db_handler = DBHandler()
     settings.initialize_app()
     db_handler.initialize_db()
     yield
@@ -38,6 +38,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+from dependencies import CurrentUserDep
+
+
+@app.get("/data")
+async def get_data(current_user: CurrentUserDep) -> list:
+    print(current_user)
+    return [1, 2, 3]
+
 
 if __name__ == "__main__":
     import uvicorn

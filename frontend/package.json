@@ -1,27 +1,26 @@
 {
-  "name": "nebulous-nova",
+  "name": "frontend",
+  "private": true,
   "type": "module",
-  "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "build": "react-router build",
+    "dev": "react-router dev",
+    "start": "react-router-serve ./build/server/index.js"
   },
   "dependencies": {
-    "@astrojs/react": "^4.3.0",
-    "@auth/core": "^0.37.4",
-    "@tailwindcss/vite": "^4.1.11",
-    "astro": "^5.12.6",
-    "astro-icon": "^1.1.5",
-    "auth-astro": "^4.2.0",
-    "bcryptjs": "^3.0.2",
-    "daisyui": "^5.0.50",
-    "ioredis": "^5.7.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-icons": "^5.5.0",
-    "tailwindcss": "^4.1.11",
-    "uuid": "^11.1.0"
+    "@react-router/node": "^7.7.1",
+    "@react-router/serve": "^7.7.1",
+    "axios": "^1.11.0",
+    "daisyui": "^5.0.51",
+    "isbot": "^5.1.27",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router": "^7.7.1"
+  },
+  "devDependencies": {
+    "@react-router/dev": "^7.7.1",
+    "@tailwindcss/vite": "^4.1.12",
+    "tailwindcss": "^4.1.12",
+    "vite": "^6.3.3"
   }
 }

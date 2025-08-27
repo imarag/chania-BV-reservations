@@ -5,16 +5,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.app_paths import AppPaths
-from core.config import settings
+from dependencies import get_settings
 from core.db_handler import DBHandler
 from routers import authentication, database_queries
 
+settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator:  # noqa: ARG001
     db_handler = DBHandler()
-    settings.initialize_app()
     db_handler.initialize_db()
+    settings.initialize_app()
     yield
 
 
@@ -22,11 +23,11 @@ app = FastAPI(lifespan=lifespan)
 
 # include the routers
 app.include_router(
-    authentication.router, prefix=AppPaths.AUTH_API_SUFFIX.value, tags=["Auth"]
+    authentication.router, prefix=AppPaths.AUTH_EP.value, tags=["Auth"]
 )
 
 app.include_router(
-    database_queries.router, prefix=AppPaths.DB_API_SUFFIX.value, tags=["Database"]
+    database_queries.router, prefix=AppPaths.DB_EP.value, tags=["Database"]
 )
 
 origins = ["http://0.0.0.0:8000", "http://127.0.0.1:8000", "http://localhost:4321"]
@@ -40,12 +41,11 @@ app.add_middleware(
 )
 
 from dependencies import CurrentUserDep
-
-
-@app.get("/data")
-async def get_data(current_user: CurrentUserDep) -> list:
-    print(current_user)
-    return [1, 2, 3]
+from typing import Annotated
+from fastapi import Depends
+@app.get("/current_user")
+async def get_current_user(curr_user: CurrentUserDep):
+    return curr_user
 
 
 if __name__ == "__main__":

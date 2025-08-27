@@ -21,6 +21,3 @@ class Settings(BaseSettings):
 
     def initialize_app(self) -> None:
         self.create_temp_folder()
-
-
-settings = Settings()

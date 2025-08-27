@@ -2,22 +2,20 @@ from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Form, HTTPException
-
 from core.auth_handler import AuthHandler
-from core.config import settings
-from dependencies import SessionDep
+from models.token import Token
+from dependencies import SessionDep, SettingsDep
 from models.api_models import LoginResponse, RegisterResponse
-from models.db_models import User
-from models.user_models import UserLogin, UserRead, UserRegister
+from models.db_models import User, UserLogin, UserPublic, UserRegister
 from utils.db_operations import add_user, get_user_by_email
 
 router = APIRouter()
-
 
 @router.post("/register")
 async def register(
     form_data: Annotated[UserRegister, Form()], session: SessionDep
 ) -> RegisterResponse:
+    
     auth_handler = AuthHandler(session)
     validation_error = auth_handler.validate_registration_data(form_data, session)
 
@@ -38,19 +36,18 @@ async def register(
     add_user(session, new_user)
 
     return RegisterResponse(
-        message="User registered successfully", user=UserRead(**new_user.model_dump())
+        message="User registered successfully", 
+        user=UserPublic(**new_user.model_dump())
     )
 
 
 @router.post("/login")
 async def login(
-    # form_data: Annotated[UserLogin, Form()], session: SessionDep
-    username: Annotated[str, Form()],
-    password: Annotated[str, Form()],
-    session: SessionDep,
+    form_data: Annotated[UserLogin, Form()], session: SessionDep, settings: SettingsDep
 ) -> LoginResponse:
+    
     auth_handler = AuthHandler(session)
-    user = auth_handler.authenticate_user(username, password)
+    user = auth_handler.authenticate_user(form_data)
     if not user:
         raise HTTPException(
             status_code=401,
@@ -63,6 +60,8 @@ async def login(
     )
     return LoginResponse(
         message="Login successful",
-        access_token=access_token,
-        token_type="bearer",  # noqa: S106
+        token=Token(
+            access_token=access_token,
+            token_type="bearer",  # noqa: S106
+        )
     )

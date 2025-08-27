@@ -1,14 +1,13 @@
 from pydantic import BaseModel
-
-from models.user_models import UserRead
+from models.token import Token
+from models.db_models import UserPublic
 
 
 class RegisterResponse(BaseModel):
     message: str
-    user: UserRead
+    user: UserPublic
 
 
 class LoginResponse(BaseModel):
     message: str
-    access_token: str
-    token_type: str
+    token: Token

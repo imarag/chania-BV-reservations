@@ -7,7 +7,7 @@ from core.auth_handler import AuthHandler
 from models.db_models import (  # noqa: F403
     Court,
     Reservation,
-    ReservationPlayer,
+    ReservationUser,
     TimeSlot,
     User,
 )
@@ -56,7 +56,7 @@ class DBHandler:
             )
             session.add_all(
                 [
-                    ReservationPlayer(**reservation_player)
+                    ReservationUser(**reservation_player)
                     for reservation_player in reservation_players
                 ]  # noqa: F405
             )

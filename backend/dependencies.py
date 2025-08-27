@@ -6,46 +6,34 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from sqlmodel import Session
-
-from core.config import settings
-from core.db_handler import DBHandler
+from functools import lru_cache
+from core.config import Settings
 from models.token import TokenData
-from models.user_models import UserRead
-from utils.db_operations import get_user_by_id
+from models.db_models import UserPublic
 
-fake_users_db = [
-    {
-        "email": "johndoe@example.com",
-        "password": "secret123",
-        "hashed_password": "fakehashedsecret",
-    },
-    {
-        "email": "alice@example.com",
-        "password": "alicepass",
-        "hashed_password": "fakehashedsecret2",
-    },
-    {
-        "email": "bob@example.com",
-        "password": "bobthebuilder",
-        "hashed_password": "fakehashedsecret3",
-    },
-]
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
+
+SettingsDep = Annotated[Settings, Depends(get_settings)]      
 
 def get_session() -> Generator:
+    from core.db_handler import DBHandler
     db_handler = DBHandler()
     with Session(db_handler.engine) as session:
         yield session
 
-
 SessionDep = Annotated[Session, Depends(get_session)]
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 async def get_current_user(
-    session: SessionDep, token: Annotated[str, Depends(oauth2_scheme)]
-) -> UserRead:
+    session: SessionDep, token: Annotated[str, Depends(oauth2_scheme)] 
+) -> UserPublic:
+    from utils.db_operations import get_user_by_id
+    settings = get_settings()
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",
@@ -56,7 +44,6 @@ async def get_current_user(
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
         token_data = TokenData(**payload)
-        print(token_data, "****")
         user_id = token_data.user_id
         if user_id is None:
             raise credentials_exception
@@ -65,7 +52,7 @@ async def get_current_user(
     user = get_user_by_id(session, user_id)
     if user is None:
         raise credentials_exception
-    return UserRead(**user.model_dump())
+    return UserPublic(**user.model_dump())
 
 
-CurrentUserDep = Annotated[UserRead, Depends(get_current_user)]
+CurrentUserDep = Annotated[UserPublic, Depends(get_current_user)]

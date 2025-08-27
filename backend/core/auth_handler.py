@@ -1,14 +1,14 @@
 import re
 from datetime import datetime, timedelta, timezone
-
+from models.db_models import UserLogin, UserRegister
 import jwt
 from passlib.context import CryptContext
 from sqlmodel import Session
-from models.user_models import UserRegister
-from core.config import settings
 from models.db_models import User
-from utils.db_operations import get_user_by_email
+from utils.db_operations import get_user_by_email, get_user_by_name
+from dependencies import get_settings
 
+settings = get_settings()
 
 class AuthHandler:
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -22,7 +22,9 @@ class AuthHandler:
     def generate_password_hash(self, plain_password: str) -> str:
         return self.pwd_context.hash(plain_password)
 
-    def authenticate_user(self, email: str, password: str) -> User | None:
+    def authenticate_user(self, user: UserLogin) -> User | None:
+        password = user.password
+        email = user.email
         existing_user = get_user_by_email(self.session, email)
         if not existing_user:
             return None

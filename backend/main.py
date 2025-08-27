@@ -40,14 +40,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from dependencies import CurrentUserDep
-from typing import Annotated
-from fastapi import Depends
-@app.get("/current_user")
-async def get_current_user(curr_user: CurrentUserDep):
-    return curr_user
-
-
 if __name__ == "__main__":
     import uvicorn
 

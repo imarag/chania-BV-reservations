@@ -6,8 +6,10 @@ import FormContainer from "../utils/FormContainer";
 import { apiEndpoints, pagePaths } from "../../utils/appUrls";
 import { apiRequest } from "../../utils/apiRequest";
 import ErrorMessage from "../utils/ErrorMessage";
+import { useNavigate } from "react-router";
 
 export default function RegisterPage() {
+    const navigate = useNavigate();
     const [formInfo, setFormInfo] = useState({
         username: "",
         email: "",
@@ -41,7 +43,7 @@ export default function RegisterPage() {
             return;
         }
 
-        // handle success, redirect or notify user
+        navigate(pagePaths.login.path);
     }
 
     return (

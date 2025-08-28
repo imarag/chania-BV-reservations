@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getToken } from "./authentication";
 
 export async function apiRequest({
     url,
@@ -8,19 +9,20 @@ export async function apiRequest({
 }) {
     try {
         const isFormData = requestData instanceof FormData;
-        console.log("API Request:", {
-            url,
-            method,
-            requestData,
-            customHeaders,
-        });
 
         const headers = {
             ...customHeaders,
         };
 
+        // Add Content-Type for JSON data
         if (typeof requestData === "object" && !isFormData) {
             headers["Content-Type"] = "application/json";
+        }
+
+        // Add Authorization header if token exists
+        const token = getToken();
+        if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
         }
 
         const response = await axios({
@@ -30,6 +32,7 @@ export async function apiRequest({
             responseType: "json",
             headers: headers,
         });
+
         return { resData: response.data, errorMessage: null };
     } catch (error) {
         const globalErrorMessage =

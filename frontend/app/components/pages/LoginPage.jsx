@@ -6,8 +6,11 @@ import FormContainer from "../utils/FormContainer";
 import { apiEndpoints, pagePaths } from "../../utils/appUrls";
 import { apiRequest } from "../../utils/apiRequest";
 import ErrorMessage from "../utils/ErrorMessage";
+import { useNavigate } from "react-router";
+import { saveToken } from "../../utils/authentication";
 
 export default function LoginPage() {
+    const navigate = useNavigate();
     const [formInfo, setFormInfo] = useState({ email: "", password: "" });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -35,7 +38,10 @@ export default function LoginPage() {
             return;
         }
 
-        // handle success here, e.g. redirect, save token, etc.
+        if (resData.token) {
+            saveToken(resData.token.access_token);
+        }
+        window.location.replace(pagePaths.home.path);
     }
 
     return (

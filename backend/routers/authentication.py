@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Form, HTTPException
 from core.auth_handler import AuthHandler
 from models.token import Token
-from dependencies import SessionDep, SettingsDep
+from dependencies import SessionDep, SettingsDep, CurrentUserDep
 from models.api_models import LoginResponse, RegisterResponse
 from models.db_models import User, UserLogin, UserPublic, UserRegister
 from utils.db_operations import add_user, get_user_by_email
@@ -65,3 +65,11 @@ async def login(
             token_type="bearer",  # noqa: S106
         )
     )
+
+
+
+@router.get("/get-current-user", response_model=UserPublic)
+async def read_current_user(
+    current_user: CurrentUserDep
+) -> UserPublic:
+    return current_user

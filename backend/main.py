@@ -48,6 +48,14 @@ async def validation_exception_handler(request, exc):
         status_code=400,
         content={"error_message": ", ".join([f'{err["msg"]}' for err in errors])},
     )
+    
+from dependencies import CurrentUserDep
+@app.get("/get-token")
+async def get_token(
+    curr_user: CurrentUserDep
+) -> str | None:
+
+    return curr_user
 
 origins = [
     "http://0.0.0.0:8000", 

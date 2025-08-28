@@ -2,7 +2,7 @@ from datetime import datetime, time
 
 users = [
     {
-        "name": "Alice Smith",
+        "username": "Alice Smith",
         "email": "alice@example.com",
         "password": "alice123",
         "active": True,
@@ -11,7 +11,7 @@ users = [
         "role": "player",
     },
     {
-        "name": "Bob Johnson",
+        "username": "Bob Johnson",
         "email": "bob@example.com",
         "password": "bob456",
         "active": True,
@@ -20,7 +20,7 @@ users = [
         "role": "player",
     },
     {
-        "name": "Carol White",
+        "username": "Carol White",
         "email": "carol@example.com",
         "password": "carol789",
         "active": True,

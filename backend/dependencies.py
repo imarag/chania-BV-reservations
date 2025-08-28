@@ -6,34 +6,30 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from sqlmodel import Session
-from functools import lru_cache
+from core.app_paths import AppPaths
+from core.config import get_settings
+from utils.db_operations import get_user_by_id
 from core.config import Settings
 from models.token import TokenData
 from models.db_models import UserPublic
+from core.db_handler import DBHandler
 
-
-
-@lru_cache
-def get_settings() -> Settings:
-    return Settings()
 
 SettingsDep = Annotated[Settings, Depends(get_settings)]      
 
 def get_session() -> Generator:
-    from core.db_handler import DBHandler
     db_handler = DBHandler()
     with Session(db_handler.engine) as session:
         yield session
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=AppPaths.LOGIN_EP.value)
 
 async def get_current_user(
-    session: SessionDep, token: Annotated[str, Depends(oauth2_scheme)] 
+    session: SessionDep, settings: SettingsDep, token: Annotated[str, Depends(oauth2_scheme)] 
 ) -> UserPublic:
-    from utils.db_operations import get_user_by_id
-    settings = get_settings()
+    
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",

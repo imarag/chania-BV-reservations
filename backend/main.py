@@ -1,6 +1,8 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -21,16 +23,38 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:  # noqa: ARG001
 
 app = FastAPI(lifespan=lifespan)
 
-# include the routers
 app.include_router(
     authentication.router, prefix=AppPaths.AUTH_EP.value, tags=["Auth"]
 )
-
 app.include_router(
     database_queries.router, prefix=AppPaths.DB_EP.value, tags=["Database"]
 )
 
-origins = ["http://0.0.0.0:8000", "http://127.0.0.1:8000", "http://localhost:4321"]
+# this is for raising httpexception errors
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=404,
+        content={"error_message": str(exc.detail)},
+    )
+
+
+# this is for errors related to validations of pydantic
+# return the errors are comma separated strings
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    errors = exc.errors()
+    return JSONResponse(
+        status_code=400,
+        content={"error_message": ", ".join([f'{err["msg"]}' for err in errors])},
+    )
+
+origins = [
+    "http://0.0.0.0:8000", 
+    "http://127.0.0.1:8000", 
+    "http://localhost:4321",
+    "http://localhost:5173",
+    ]
 
 app.add_middleware(
     CORSMiddleware,

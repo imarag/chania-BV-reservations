@@ -5,12 +5,14 @@ import Anchor from "../ui/Anchor";
 import FormContainer from "../utils/FormContainer";
 import { apiEndpoints, pagePaths } from "../../utils/appUrls";
 import { apiRequest } from "../../utils/apiRequest";
+import ErrorMessage from "../utils/ErrorMessage";
 
 export default function RegisterPage() {
     const [formInfo, setFormInfo] = useState({
+        username: "",
         email: "",
         password: "",
-        "password-confirm": "",
+        password_confirm: "",
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -24,14 +26,9 @@ export default function RegisterPage() {
         e.preventDefault();
         setError(null);
 
-        if (formInfo.password !== formInfo["password-confirm"]) {
-            setError("Passwords do not match");
-            return;
-        }
-
         setLoading(true);
 
-        const { resData, error } = await apiRequest({
+        const { resData, errorMessage } = await apiRequest({
             url: apiEndpoints.REGISTER_USER,
             method: "post",
             requestData: formInfo,
@@ -39,8 +36,8 @@ export default function RegisterPage() {
 
         setLoading(false);
 
-        if (error) {
-            setError(error);
+        if (errorMessage) {
+            setError(errorMessage);
             return;
         }
 
@@ -49,10 +46,18 @@ export default function RegisterPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center">
-            <FormContainer
-                title="Register"
-                handleFormSubmit={handleSubmit}
-            >
+            <FormContainer title="Register" handleFormSubmit={handleSubmit}>
+                <div className="flex flex-col gap-2">
+                    <Label htmlFor="username">username</Label>
+                    <Input
+                        id="username"
+                        type="text"
+                        name="username"
+                        value={formInfo.username}
+                        onChange={handleChange}
+                        disabled={loading}
+                    />
+                </div>
                 <div className="flex flex-col gap-2">
                     <Label htmlFor="email">email</Label>
                     <Input
@@ -76,17 +81,17 @@ export default function RegisterPage() {
                     />
                 </div>
                 <div className="flex flex-col gap-2">
-                    <Label htmlFor="password-confirm">confirm password</Label>
+                    <Label htmlFor="password_confirm">confirm password</Label>
                     <Input
-                        id="password-confirm"
+                        id="password_confirm"
                         type="password"
-                        name="password-confirm"
-                        value={formInfo["password-confirm"]}
+                        name="password_confirm"
+                        value={formInfo["password_confirm"]}
                         onChange={handleChange}
                         disabled={loading}
                     />
                 </div>
-                {error && <p className="text-red-600">{error}</p>}
+                {error && <ErrorMessage errorMessage={error} />}
                 <p className="text-center text-sm flex flex-col md:flex-row items-center justify-center gap-2">
                     <span>Already have an account?</span>
                     <Anchor href={pagePaths.login.path}>Login now!</Anchor>

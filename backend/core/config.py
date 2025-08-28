@@ -1,23 +1,20 @@
 from pathlib import Path
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-from core import app_paths
-
+from core.app_paths import AppPaths
+from functools import lru_cache
 
 class Settings(BaseSettings):
     host: str = "127.0.0.1"
     port: str = "8000"
-    model_config = SettingsConfigDict(env_file=".env")
     SECRET_KEY: str | None = None
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     ALGORITHM: str = "HS256"
 
-    @staticmethod
-    def create_temp_folder() -> None:
-        Path(app_paths.AppPaths.TEMP_FOLDER_PATH.value).mkdir(
-            parents=True, exist_ok=True
-        )
+    model_config = SettingsConfigDict(env_file=".env")
 
     def initialize_app(self) -> None:
-        self.create_temp_folder()
+        Path(AppPaths.TEMP_FOLDER.value).mkdir(parents=True, exist_ok=True)
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()

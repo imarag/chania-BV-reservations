@@ -13,10 +13,10 @@ router = APIRouter()
 
 @router.post("/register")
 async def register(
-    form_data: Annotated[UserRegister, Form()], session: SessionDep
+    form_data: UserRegister, session: SessionDep
 ) -> RegisterResponse:
-    
-    auth_handler = AuthHandler(session)
+ 
+    auth_handler = AuthHandler()
     validation_error = auth_handler.validate_registration_data(form_data, session)
 
     if validation_error:
@@ -43,11 +43,11 @@ async def register(
 
 @router.post("/login")
 async def login(
-    form_data: Annotated[UserLogin, Form()], session: SessionDep, settings: SettingsDep
+    form_data: UserLogin, session: SessionDep, settings: SettingsDep
 ) -> LoginResponse:
-    
-    auth_handler = AuthHandler(session)
-    user = auth_handler.authenticate_user(form_data)
+
+    auth_handler = AuthHandler()
+    user = auth_handler.authenticate_user(form_data, session)
     if not user:
         raise HTTPException(
             status_code=401,

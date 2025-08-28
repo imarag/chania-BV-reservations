@@ -5,6 +5,7 @@ import Anchor from "../ui/Anchor";
 import FormContainer from "../utils/FormContainer";
 import { apiEndpoints, pagePaths } from "../../utils/appUrls";
 import { apiRequest } from "../../utils/apiRequest";
+import ErrorMessage from "../utils/ErrorMessage";
 
 export default function LoginPage() {
     const [formInfo, setFormInfo] = useState({ email: "", password: "" });
@@ -21,7 +22,7 @@ export default function LoginPage() {
         setError(null);
         setLoading(true);
 
-        const { resData, error } = await apiRequest({
+        const { resData, errorMessage } = await apiRequest({
             url: apiEndpoints.LOGIN_USER,
             method: "post",
             requestData: formInfo,
@@ -29,8 +30,8 @@ export default function LoginPage() {
 
         setLoading(false);
 
-        if (error) {
-            setError(error);
+        if (errorMessage) {
+            setError(errorMessage);
             return;
         }
 
@@ -39,10 +40,7 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center">
-            <FormContainer
-                title="Login"
-                handleFormSubmit={handleSubmit}
-            >
+            <FormContainer title="Login" handleFormSubmit={handleSubmit}>
                 <div className="flex flex-col gap-2">
                     <Label htmlFor="email">email</Label>
                     <Input
@@ -65,7 +63,7 @@ export default function LoginPage() {
                         disabled={loading}
                     />
                 </div>
-                {error && <p className="text-red-600">{error}</p>}
+                {error && <ErrorMessage errorMessage={error} />}
                 <p className="text-center text-sm flex flex-col md:flex-row items-center justify-center gap-2">
                     <span>Don't have an account?</span>{" "}
                     <Anchor href={pagePaths.register.path}>

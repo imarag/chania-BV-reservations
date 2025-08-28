@@ -8,20 +8,28 @@ export async function apiRequest({
 }) {
     try {
         const isFormData = requestData instanceof FormData;
+        console.log("API Request:", {
+            url,
+            method,
+            requestData,
+            customHeaders,
+        });
+
+        const headers = {
+            ...customHeaders,
+        };
+
+        if (typeof requestData === "object" && !isFormData) {
+            headers["Content-Type"] = "application/json";
+        }
 
         const response = await axios({
             url,
             method,
             data: requestData,
             responseType: "json",
-            headers: {
-                "Content-Type": isFormData
-                    ? "multipart/form-data"
-                    : "application/json",
-                ...customHeaders,
-            },
+            headers: headers,
         });
-
         return { resData: response.data, errorMessage: null };
     } catch (error) {
         const globalErrorMessage =

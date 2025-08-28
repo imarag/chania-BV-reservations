@@ -25,7 +25,8 @@ export const pagePaths = {
     },
 };
 
-const baseApiUrl = "/api";
+const serverUrl = "http://localhost:8000";
+const baseApiUrl = `${serverUrl}/api`;
 const baseAuthUrl = `${baseApiUrl}/auth`;
 
 export const apiEndpoints = {

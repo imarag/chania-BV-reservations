@@ -64,7 +64,7 @@ class TimeSlotPublic(TimeSlotBase):
 
 # ----- User Models -----
 class UserBase(SQLModel):
-    name: str
+    username: str
     email: EmailStr
     active: bool = Field(default=True)
     created_at: datetime = Field(default_factory=datetime.now)
@@ -86,7 +86,7 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(SQLModel):
-    name: str | None = None
+    username: str | None = None
     email: EmailStr | None= None
     active: bool | None = None
     created_at: datetime | None = None
@@ -101,9 +101,10 @@ class UserLogin(SQLModel):
     
     
 class UserRegister(SQLModel):
-    name: str
+    username: str
     email: EmailStr
     password: str
+    password_confirm: str
 
 # ----- Reservation Models -----
 class ReservationBase(SQLModel):

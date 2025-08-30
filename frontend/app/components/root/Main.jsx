@@ -1,6 +1,6 @@
 export default function main({ children }) {
     return (
-        <main>
+        <main className="pt-20">
             { children }
         </main>
     )

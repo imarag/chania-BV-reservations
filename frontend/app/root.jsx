@@ -37,7 +37,7 @@ export function Layout({ children }) {
                 <Meta />
                 <Links />
             </head>
-            <body className="text-base-content bg-base-100 font-normal">
+            <body className="text-base-content bg-base-100 font-normal container mx-auto px-2">
                 <Header />
                 <Main>{children}</Main>
                 <Footer />

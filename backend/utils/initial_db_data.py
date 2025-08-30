@@ -1,7 +1,11 @@
 from datetime import datetime, time
 
+from datetime import datetime, time
+
+# --- Users ---
 users = [
     {
+        "id": 1,
         "username": "Alice Smith",
         "email": "alice@example.com",
         "password": "alice123",
@@ -11,6 +15,7 @@ users = [
         "role": "player",
     },
     {
+        "id": 2,
         "username": "Bob Johnson",
         "email": "bob@example.com",
         "password": "bob456",
@@ -20,6 +25,7 @@ users = [
         "role": "player",
     },
     {
+        "id": 3,
         "username": "Carol White",
         "email": "carol@example.com",
         "password": "carol789",
@@ -28,18 +34,116 @@ users = [
         "phone_number": "3456789012",
         "role": "admin",
     },
+    {
+        "id": 4,
+        "username": "David Lee",
+        "email": "david@example.com",
+        "password": "david123",
+        "active": True,
+        "created_at": datetime(2025, 8, 17, 10, 15),
+        "phone_number": "4567890123",
+        "role": "player",
+    },
+    {
+        "id": 5,
+        "username": "Emma Davis",
+        "email": "emma@example.com",
+        "password": "emma456",
+        "active": True,
+        "created_at": datetime(2025, 8, 17, 10, 20),
+        "phone_number": "5678901234",
+        "role": "player",
+    },
+    {
+        "id": 6,
+        "username": "Frank Miller",
+        "email": "frank@example.com",
+        "password": "frank123",
+        "active": True,
+        "created_at": datetime(2025, 8, 17, 10, 25),
+        "phone_number": "6789012345",
+        "role": "player",
+    },
+    {
+        "id": 7,
+        "username": "Grace Lee",
+        "email": "grace@example.com",
+        "password": "grace456",
+        "active": True,
+        "created_at": datetime(2025, 8, 17, 10, 30),
+        "phone_number": "7890123456",
+        "role": "player",
+    },
+    {
+        "id": 8,
+        "username": "Henry Adams",
+        "email": "henry@example.com",
+        "password": "henry123",
+        "active": True,
+        "created_at": datetime(2025, 8, 17, 10, 35),
+        "phone_number": "8901234567",
+        "role": "player",
+    },
+    {
+        "id": 9,
+        "username": "Isabel Clark",
+        "email": "isabel@example.com",
+        "password": "isabel456",
+        "active": True,
+        "created_at": datetime(2025, 8, 17, 10, 40),
+        "phone_number": "9012345678",
+        "role": "player",
+    },
+    {
+        "id": 10,
+        "username": "Jack Turner",
+        "email": "jack@example.com",
+        "password": "jack123",
+        "active": True,
+        "created_at": datetime(2025, 8, 17, 10, 45),
+        "phone_number": "0123456789",
+        "role": "player",
+    },
+    {
+        "id": 11,
+        "username": "Karen Hall",
+        "email": "karen@example.com",
+        "password": "karen456",
+        "active": True,
+        "created_at": datetime(2025, 8, 17, 10, 50),
+        "phone_number": "1123456789",
+        "role": "player",
+    },
+    {
+        "id": 12,
+        "username": "Leo Scott",
+        "email": "leo@example.com",
+        "password": "leo123",
+        "active": True,
+        "created_at": datetime(2025, 8, 17, 10, 55),
+        "phone_number": "2123456789",
+        "role": "player",
+    },
 ]
 
+# --- Courts ---
 courts = [
-    {"name": "Court 1", "status": "available", "description": "Main court"},
-    {"name": "Court 2", "status": "available", "description": "Side court"},
-    {"name": "Court 3", "status": "maintenance", "description": "Under repair"},
-    {"name": "Court 4", "status": "available", "description": "Outdoor court"},
-    {"name": "Court 5", "status": "available", "description": "Indoor court"},
+    {"id": 1, "name": "Court 1", "status": "available", "description": "Main court"},
+    {"id": 2, "name": "Court 2", "status": "available", "description": "Side court"},
+    {
+        "id": 3,
+        "name": "Court 3",
+        "status": "maintenance",
+        "description": "Under repair",
+    },
+    {"id": 4, "name": "Court 4", "status": "available", "description": "Outdoor court"},
+    {"id": 5, "name": "Court 5", "status": "available", "description": "Indoor court"},
 ]
 
+# --- Timeslots ---
 timeslots = [
     {
+        "id": 1,
         "start_time": time(16, 30),
         "end_time": time(18, 0),
         "name": "16:30-18:00",
@@ -47,6 +151,7 @@ timeslots = [
         "description": "",
     },
     {
+        "id": 2,
         "start_time": time(18, 0),
         "end_time": time(19, 30),
         "name": "18:00-19:30",
@@ -54,6 +159,7 @@ timeslots = [
         "description": "",
     },
     {
+        "id": 3,
         "start_time": time(19, 30),
         "end_time": time(21, 0),
         "name": "19:30-21:00",
@@ -61,6 +167,7 @@ timeslots = [
         "description": "",
     },
     {
+        "id": 4,
         "start_time": time(21, 0),
         "end_time": time(22, 30),
         "name": "21:00-22:30",
@@ -69,16 +176,19 @@ timeslots = [
     },
 ]
 
+# --- Reservations (1 per court × timeslot combination) ---
 reservations = [
     {
+        "id": 1,
         "user_id": 1,
         "court_id": 1,
         "timeslot_id": 1,
         "reservation_date": datetime(2025, 8, 18, 16, 30),
-        "status": "pending",
-        "notes": "First reservation",
+        "status": "confirmed",
+        "notes": "",
     },
     {
+        "id": 2,
         "user_id": 2,
         "court_id": 2,
         "timeslot_id": 2,
@@ -87,18 +197,28 @@ reservations = [
         "notes": "",
     },
     {
+        "id": 3,
         "user_id": 3,
         "court_id": 4,
         "timeslot_id": 3,
         "reservation_date": datetime(2025, 8, 18, 19, 30),
-        "status": "pending",
-        "notes": "Admin test reservation",
+        "status": "confirmed",
+        "notes": "",
     },
 ]
 
+# --- Reservation Players (4 players per reservation) ---
 reservation_players = [
     {"reservation_id": 1, "user_id": 1},
     {"reservation_id": 1, "user_id": 2},
+    {"reservation_id": 1, "user_id": 3},
+    {"reservation_id": 1, "user_id": 4},
     {"reservation_id": 2, "user_id": 2},
+    {"reservation_id": 2, "user_id": 5},
+    {"reservation_id": 2, "user_id": 6},
+    {"reservation_id": 2, "user_id": 7},
     {"reservation_id": 3, "user_id": 3},
+    {"reservation_id": 3, "user_id": 8},
+    {"reservation_id": 3, "user_id": 9},
+    {"reservation_id": 3, "user_id": 10},
 ]

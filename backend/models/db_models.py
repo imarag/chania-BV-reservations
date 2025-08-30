@@ -87,7 +87,7 @@ class UserCreate(UserBase):
 
 class UserUpdate(SQLModel):
     username: str | None = None
-    email: EmailStr | None= None
+    email: EmailStr | None = None
     active: bool | None = None
     created_at: datetime | None = None
     phone_number: str | None = None
@@ -98,13 +98,14 @@ class UserUpdate(SQLModel):
 class UserLogin(SQLModel):
     email: EmailStr
     password: str
-    
-    
+
+
 class UserRegister(SQLModel):
     username: str
     email: EmailStr
     password: str
     password_confirm: str
+
 
 # ----- Reservation Models -----
 class ReservationBase(SQLModel):
@@ -127,6 +128,19 @@ class ReservationCreate(ReservationBase):
     pass
 
 
-class ReservationUser(SQLModel, table=True):
+class ReservationUserBase(SQLModel):
     user_id: int = Field(foreign_key="user.id", primary_key=True)
     reservation_id: int = Field(foreign_key="reservation.id", primary_key=True)
+
+
+class ReservationUser(ReservationUserBase, table=True):
+    pass
+
+
+class ReservationUserPublic(SQLModel):
+    user_id: int
+    reservation_id: int
+
+
+class ReservationUserCreate(ReservationUserBase):
+    pass

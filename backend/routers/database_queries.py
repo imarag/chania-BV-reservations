@@ -1,23 +1,93 @@
+import time
 from fastapi import APIRouter
 
 from dependencies import SessionDep
-from models.db_models import Court, Reservation, ReservationUser, TimeSlot
-from models.db_models import UserPublic
-# from utils.db_operations import (
-#     get_court_by_id,
-#     get_court_by_name,
-#     get_courts,
-#     get_reservation_by_id,
-#     get_reservation_players,
-#     get_reservations,
-#     get_time_slot_by_id,
-#     get_time_slots,
-#     get_user_by_email,
-#     get_user_by_id,
-#     get_users,
-# )
+from models.db_models import (
+    UserPublic,
+    CourtPublic,
+    TimeSlotPublic,
+    ReservationPublic,
+    ReservationUserPublic,
+)
+from utils.db_operations import (
+    get_courts,
+    get_time_slots,
+    get_reservations,
+    get_reservation_players,
+    get_users,
+)
 
 router = APIRouter()
+
+
+@router.get("/get-booking-cells")
+async def get_booking_cells(session: SessionDep) -> dict:
+
+    # Fetch all courts, timeslots, reservations, and reservation_players
+    all_users = get_users(session)
+    all_courts = get_courts(session)
+    all_timeslots = get_time_slots(session)
+    reservations = get_reservations(session)
+    reservation_players = get_reservation_players(session)
+
+    # Dictionary mapping: user_id -> user details
+    user_map = {u.id: u for u in all_users}
+
+    # Dictionary mapping: reservation_id -> list of user_ids
+    reservation_players_map = {}
+    for rp in reservation_players:
+        if rp.reservation_id not in reservation_players_map:
+            reservation_players_map[rp.reservation_id] = [
+                UserPublic(**user_map[rp.user_id].model_dump())
+            ]
+        else:
+            reservation_players_map[rp.reservation_id].append(
+                UserPublic(**user_map[rp.user_id].model_dump())
+            )
+
+    # Dictionary mapping: (court_id, timeslot_id) -> reservation
+    reservation_map = {(r.court_id, r.timeslot_id): r for r in reservations}
+
+    # Build flattened schedule cells
+    schedule_cells = {
+        "courts": [CourtPublic(**c.model_dump()) for c in all_courts],
+        "timeslots": [TimeSlotPublic(**t.model_dump()) for t in all_timeslots],
+        "bookings": {},
+    }
+    for t in all_timeslots:
+        for c in all_courts:
+            booking_id = f"{c.id}-{t.id}"
+            cell = {}
+
+            # Check if this (court_id, timeslot_id) is booked
+            r = reservation_map.get((c.id, t.id))
+            if r is not None:
+                cell["booking_user"] = user_map[
+                    r.user_id
+                ].username  # The user who made the reservation
+                cell["reservation"] = ReservationPublic(**r.model_dump())
+                cell["booked"] = True  # There is a reservation
+                cell["players"] = reservation_players_map.get(
+                    r.id, []
+                )  # List of user_ids
+            else:
+                cell["reservation"] = None
+                cell["booked"] = False  # No reservation
+                cell["players"] = []  # No players
+
+            schedule_cells["bookings"][booking_id] = cell
+
+    return schedule_cells
+
+
+# @router.get("/get-courts-timeslots")
+# async def get_courts_timeslots(session: SessionDep) -> dict[str, list]:
+#     all_courts = get_courts(session)
+#     all_timeslots = get_time_slots(session)
+#     return {
+#         "courts": all_courts,
+#         "time_slots": all_timeslots,
+#     }
 
 
 # @router.get("/users")

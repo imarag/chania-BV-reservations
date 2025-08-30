@@ -1,3 +1,3 @@
 export default function Logo() {
-    return <span>Logo</span>;
+    return <img src="/logo-no-bg.png" alt="Logo" className="w-12 h-12" />;
 }

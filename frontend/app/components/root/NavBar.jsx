@@ -19,8 +19,6 @@ export default function NavBar() {
                 method: "get",
             });
 
-            console.log(resData, errorMessage, "**");
-
             if (errorMessage) {
                 setCurrentUser(null);
             }

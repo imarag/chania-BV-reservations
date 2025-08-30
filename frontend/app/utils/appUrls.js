@@ -38,6 +38,7 @@ export const pagePaths = {
 const serverUrl = "http://localhost:8000";
 const baseApiUrl = `${serverUrl}/api`;
 const baseAuthUrl = `${baseApiUrl}/auth`;
+const baseDBUrl = `${baseApiUrl}/db`;
 
 export const apiEndpoints = {
     LOGIN_USER: `${baseAuthUrl}/login`,
@@ -45,4 +46,5 @@ export const apiEndpoints = {
     LOGOUT_USER: `${baseAuthUrl}/logout`,
     GET_CURRENT_USER: `${baseAuthUrl}/get-current-user`,
     GET_SCHEDULE: `${baseApiUrl}/schedule`,
+    GET_BOOKING_CELLS: `${baseDBUrl}/get-booking-cells`,
 };

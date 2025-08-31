@@ -6,9 +6,7 @@ import {
     Scripts,
     ScrollRestoration,
 } from "react-router";
-import Header from "./components/root/Header";
-import Footer from "./components/root/Footer";
-import Main from "./components/root/Main";
+import NavBar from "./components/root/NavBar";
 
 import "./app.css";
 
@@ -27,8 +25,19 @@ export const links = () => [
 
 export function Layout({ children }) {
     return (
-        <html lang="en">
+        <html lang="en" data-theme="dark">
             <head>
+                <link
+                    rel="stylesheet"
+                    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+                    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+                    crossOrigin=""
+                />
+                <script
+                    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+                    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+                    crossOrigin=""
+                ></script>
                 <meta charSet="utf-8" />
                 <meta
                     name="viewport"
@@ -37,10 +46,14 @@ export function Layout({ children }) {
                 <Meta />
                 <Links />
             </head>
-            <body className="text-base-content bg-base-100 font-normal container mx-auto px-2">
-                <Header />
-                <Main>{children}</Main>
-                <Footer />
+            <body className="flex items-stretch text-base-content h-screen font-normal">
+                <header className="flex-none bg-base-300">
+                    <NavBar />
+                </header>
+                <main className="grow-1 bg-base-100 container mx-auto px-2">
+                    {children}
+                </main>
+                ;
                 <ScrollRestoration />
                 <Scripts />
             </body>

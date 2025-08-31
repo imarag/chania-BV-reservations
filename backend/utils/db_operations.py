@@ -1,13 +1,16 @@
 from fastapi import HTTPException
 from sqlmodel import select, Session
 from models.db_models import (
-    Court, Reservation, ReservationUser, 
-    TimeSlot, User, UserUpdate
+    Court,
+    Reservation,
+    ReservationUser,
+    TimeSlot,
+    User,
 )
 
 
 def get_users(session: Session) -> list[User]:
-    return list(session.exec(select(User)).all())
+    return session.exec(select(User)).all()
 
 
 def add_user(session: Session, user: User) -> User:
@@ -18,20 +21,20 @@ def add_user(session: Session, user: User) -> User:
 
 
 def get_user_by_email(session: Session, email: str) -> User | None:
-    user = session.exec(select(User).where(User.email == email)).first()
-    return User(**user.model_dump()) if user else None
+    return session.exec(select(User).where(User.email == email)).first()
 
 
 def get_user_by_id(session: Session, user_id: int) -> User | None:
-    user = session.get(User, user_id)
-    return User(**user.model_dump()) if user else None
+    return session.get(User, user_id)
 
 
-def update_user(session: Session, user_id: int, user: UserUpdate) -> User:
+def update_user(session: Session, user_id: int, updated_data: dict) -> User:
     user_db = get_user_by_id(session, user_id)
-    user_data = user.model_dump(exclude_unset=True)
+    if not user_db:
+        raise HTTPException(status_code=404, detail="User not found")
 
-    user_db.sqlmodel_update(user_data)
+    for key, value in updated_data.items():
+        setattr(user_db, key, value)
 
     session.add(user_db)
     session.commit()
@@ -40,7 +43,8 @@ def update_user(session: Session, user_id: int, user: UserUpdate) -> User:
 
 
 def delete_user(session: Session, user_id: int) -> User:
-    user = get_user_by_id(session, user_id)
+    user = session.get(User, user_id)
+    print(user, user_id, "%^&")
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     session.delete(user)
@@ -49,41 +53,37 @@ def delete_user(session: Session, user_id: int) -> User:
 
 
 def get_courts(session: Session) -> list[Court]:
-    return list(session.exec(select(Court)))
+    return session.exec(select(Court)).all()
 
 
 def get_time_slots(session: Session) -> list[TimeSlot]:
-    return list(session.exec(select(TimeSlot)))
+    return session.exec(select(TimeSlot)).all()
 
 
 def get_reservations(session: Session) -> list[Reservation]:
-    return list(session.exec(select(Reservation)))
+    return session.exec(select(Reservation)).all()
 
 
 def get_reservation_players(session: Session) -> list[ReservationUser]:
-    return list(session.exec(select(ReservationUser)))
+    return session.exec(select(ReservationUser)).all()
 
 
 def get_court_by_id(session: Session, court_id: int) -> Court | None:
-    court = session.get(Court, court_id)
-    return court if court else None
+    return session.get(Court, court_id)
 
 
 def get_time_slot_by_id(session: Session, time_slot_id: int) -> TimeSlot | None:
-    time_slot = session.get(TimeSlot, time_slot_id)
-    return time_slot if time_slot else None
+    return session.get(TimeSlot, time_slot_id)
 
 
 def get_reservation_by_id(session: Session, reservation_id: int) -> Reservation | None:
-    reservation = session.get(Reservation, reservation_id)
-    return reservation if reservation else None
+    return session.get(Reservation, reservation_id)
 
 
 def get_reservation_player_by_id(
     session: Session, reservation_player_id: int
 ) -> ReservationUser | None:
-    reservation_player = session.get(ReservationUser, reservation_player_id)
-    return reservation_player if reservation_player else None
+    return session.get(ReservationUser, reservation_player_id)
 
 
 def add_reservation(session: Session, reservation: Reservation) -> Reservation:
@@ -102,9 +102,7 @@ def delete_reservation(session: Session, reservation: Reservation) -> Reservatio
 def update_reservation(
     session: Session, reservation: Reservation, update_field: str
 ) -> Reservation:
-    existing_reservation = session.exec(
-        select(Reservation).where(Reservation.id == reservation.id)
-    ).first()
+    existing_reservation = session.get(Reservation, reservation.id)
     if not existing_reservation:
         raise HTTPException(status_code=404, detail="Reservation not found")
     setattr(existing_reservation, update_field, getattr(reservation, update_field))
@@ -114,7 +112,7 @@ def update_reservation(
 
 
 def update_court(session: Session, court: Court, update_field: str) -> Court:
-    existing_court = session.exec(select(Court).where(Court.id == court.id)).first()
+    existing_court = session.get(Court, court.id)
     if not existing_court:
         raise HTTPException(status_code=404, detail="Court not found")
     setattr(existing_court, update_field, getattr(court, update_field))
@@ -126,9 +124,7 @@ def update_court(session: Session, court: Court, update_field: str) -> Court:
 def update_time_slot(
     session: Session, time_slot: TimeSlot, update_field: str
 ) -> TimeSlot:
-    existing_time_slot = session.exec(
-        select(TimeSlot).where(TimeSlot.id == time_slot.id)
-    ).first()
+    existing_time_slot = session.get(TimeSlot, time_slot.id)
     if not existing_time_slot:
         raise HTTPException(status_code=404, detail="TimeSlot not found")
     setattr(existing_time_slot, update_field, getattr(time_slot, update_field))
@@ -138,9 +134,9 @@ def update_time_slot(
 
 
 def get_user_reservations(session: Session, user_id: int) -> list[Reservation]:
-    reservations = list(
-        session.exec(select(Reservation).where(Reservation.user_id == user_id))
-    )
+    reservations = session.exec(
+        select(Reservation).where(Reservation.user_id == user_id)
+    ).all()
     if not reservations:
         raise HTTPException(
             status_code=404, detail="No reservations found for this user"

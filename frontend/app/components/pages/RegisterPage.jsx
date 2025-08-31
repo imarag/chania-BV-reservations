@@ -5,7 +5,7 @@ import Anchor from "../ui/Anchor";
 import FormContainer from "../utils/FormContainer";
 import { apiEndpoints, pagePaths } from "../../utils/appUrls";
 import { apiRequest } from "../../utils/apiRequest";
-import ErrorMessage from "../utils/ErrorMessage";
+import Message from "../utils/Message";
 import { useNavigate } from "react-router";
 
 export default function RegisterPage() {
@@ -93,7 +93,7 @@ export default function RegisterPage() {
                         disabled={loading}
                     />
                 </div>
-                {error && <ErrorMessage errorMessage={error} />}
+                {error && <Message message={error} />}
                 <p className="text-center text-sm flex flex-col md:flex-row items-center justify-center gap-2">
                     <span>Already have an account?</span>
                     <Anchor href={pagePaths.login.path}>Login now!</Anchor>

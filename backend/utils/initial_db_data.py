@@ -1,6 +1,6 @@
 from datetime import date, datetime, time
 
-# --- Users ---
+# --- USERS (12 total) ---
 users = [
     {
         "id": 1,
@@ -8,12 +8,12 @@ users = [
         "email": "alice@example.com",
         "password": "alice123",
         "active": True,
-        "created_at": datetime(2025, 8, 17, 10, 0),
         "phone_number": "1234567890",
         "role": "player",
-        "address": None,
+        "address": "Athens, Greece",
         "date_of_birth": date(1990, 1, 15),
-        "profession": None,
+        "profession": "Engineer",
+        "created_at": datetime(2025, 8, 31, 8, 0),
     },
     {
         "id": 2,
@@ -21,12 +21,12 @@ users = [
         "email": "bob@example.com",
         "password": "bob456",
         "active": True,
-        "created_at": datetime(2025, 8, 17, 10, 5),
         "phone_number": "2345678901",
         "role": "player",
-        "address": None,
+        "address": "Crete, Greece",
         "date_of_birth": date(1988, 5, 20),
-        "profession": None,
+        "profession": "Teacher",
+        "created_at": datetime(2025, 8, 31, 8, 5),
     },
     {
         "id": 3,
@@ -34,17 +34,147 @@ users = [
         "email": "carol@example.com",
         "password": "carol789",
         "active": True,
-        "created_at": datetime(2025, 8, 17, 10, 10),
         "phone_number": "3456789012",
         "role": "admin",
-        "address": None,
+        "address": "Thessaloniki, Greece",
         "date_of_birth": date(1985, 3, 10),
         "profession": "Manager",
+        "created_at": datetime(2025, 8, 31, 8, 10),
     },
-    # ... similar for users 4–12
+    {
+        "id": 4,
+        "full_name": "David Lee",
+        "email": "david@example.com",
+        "password": "david123",
+        "active": True,
+        "phone_number": "4567890123",
+        "role": "player",
+        "address": "Patras, Greece",
+        "date_of_birth": date(1992, 7, 12),
+        "profession": "Doctor",
+        "created_at": datetime(2025, 8, 31, 8, 15),
+    },
+    {
+        "id": 5,
+        "full_name": "Emma Davis",
+        "email": "emma@example.com",
+        "password": "emma456",
+        "active": True,
+        "phone_number": "5678901234",
+        "role": "player",
+        "address": "Rhodes, Greece",
+        "date_of_birth": date(1991, 9, 30),
+        "profession": "Artist",
+        "created_at": datetime(2025, 8, 31, 8, 20),
+    },
+    {
+        "id": 6,
+        "full_name": "Frank Miller",
+        "email": "frank@example.com",
+        "password": "frank123",
+        "active": True,
+        "phone_number": "6789012345",
+        "role": "player",
+        "address": "Larissa, Greece",
+        "date_of_birth": date(1987, 11, 5),
+        "profession": "Engineer",
+        "created_at": datetime(2025, 8, 31, 8, 25),
+    },
+    {
+        "id": 7,
+        "full_name": "Grace Lee",
+        "email": "grace@example.com",
+        "password": "grace456",
+        "active": True,
+        "phone_number": "7890123456",
+        "role": "player",
+        "address": "Kavala, Greece",
+        "date_of_birth": date(1993, 4, 18),
+        "profession": "Lawyer",
+        "created_at": datetime(2025, 8, 31, 8, 30),
+    },
+    {
+        "id": 8,
+        "full_name": "Henry Adams",
+        "email": "henry@example.com",
+        "password": "henry123",
+        "active": True,
+        "phone_number": "8901234567",
+        "role": "player",
+        "address": "Ioannina, Greece",
+        "date_of_birth": date(1989, 6, 22),
+        "profession": "Teacher",
+        "created_at": datetime(2025, 8, 31, 8, 35),
+    },
+    {
+        "id": 9,
+        "full_name": "Isabel Clark",
+        "email": "isabel@example.com",
+        "password": "isabel456",
+        "active": True,
+        "phone_number": "9012345678",
+        "role": "player",
+        "address": "Chania, Greece",
+        "date_of_birth": date(1994, 2, 14),
+        "profession": "Engineer",
+        "created_at": datetime(2025, 8, 31, 8, 40),
+    },
+    {
+        "id": 10,
+        "full_name": "Jack Turner",
+        "email": "jack@example.com",
+        "password": "jack123",
+        "active": True,
+        "phone_number": "0123456789",
+        "role": "player",
+        "address": "Volos, Greece",
+        "date_of_birth": date(1990, 12, 3),
+        "profession": "Designer",
+        "created_at": datetime(2025, 8, 31, 8, 45),
+    },
+    {
+        "id": 11,
+        "full_name": "Karen Hall",
+        "email": "karen@example.com",
+        "password": "karen456",
+        "active": True,
+        "phone_number": "1123456789",
+        "role": "player",
+        "address": "Heraklion, Greece",
+        "date_of_birth": date(1986, 10, 8),
+        "profession": "Nurse",
+        "created_at": datetime(2025, 8, 31, 8, 50),
+    },
+    {
+        "id": 12,
+        "full_name": "Leo Scott",
+        "email": "leo@example.com",
+        "password": "leo123",
+        "active": True,
+        "phone_number": "2123456789",
+        "role": "player",
+        "address": "Mykonos, Greece",
+        "date_of_birth": date(1995, 8, 9),
+        "profession": "Student",
+        "created_at": datetime(2025, 8, 31, 8, 55),
+    },
+    {
+        "id": 13,
+        "full_name": "Ioannis Maragkakis",
+        "email": "giannis.marar@hotmail.com",
+        "password": "ioannis123",
+        "active": True,
+        "phone_number": "6982972144",
+        "role": "admin",
+        "address": "Chania, Greece",
+        "date_of_birth": date(1995, 4, 9),
+        "profession": "Data Scientist",
+        "created_at": datetime(2025, 8, 31, 8, 55),
+    },
 ]
 
-# --- Courts ---
+
+# --- COURTS (5 total) ---
 courts = [
     {
         "id": 1,
@@ -83,7 +213,7 @@ courts = [
     },
 ]
 
-# --- Timeslots ---
+# --- TIMESLOTS (4 total) ---
 timeslots = [
     {
         "id": 1,
@@ -115,46 +245,46 @@ timeslots = [
     },
 ]
 
-# --- Reservations ---
+# --- RESERVATIONS (3 reservations × 4 players each) ---
 reservations = [
     {
         "id": 1,
         "user_id": 1,
         "court_id": 1,
         "timeslot_id": 1,
-        "reservation_date": date(2025, 8, 18),
+        "reservation_date": date(2025, 8, 31),
         "status": "confirmed",
     },
     {
         "id": 2,
-        "user_id": 2,
+        "user_id": 5,
         "court_id": 2,
         "timeslot_id": 2,
-        "reservation_date": date(2025, 8, 18),
+        "reservation_date": date(2025, 8, 31),
         "status": "confirmed",
     },
     {
         "id": 3,
-        "user_id": 3,
+        "user_id": 9,
         "court_id": 4,
         "timeslot_id": 3,
-        "reservation_date": date(2025, 8, 18),
+        "reservation_date": date(2025, 8, 31),
         "status": "confirmed",
     },
 ]
 
-# --- Reservation Players ---
+# --- RESERVATION USERS (linking each reservation to 4 players) ---
 reservation_players = [
     {"reservation_id": 1, "user_id": 1},
     {"reservation_id": 1, "user_id": 2},
     {"reservation_id": 1, "user_id": 3},
     {"reservation_id": 1, "user_id": 4},
-    {"reservation_id": 2, "user_id": 2},
     {"reservation_id": 2, "user_id": 5},
     {"reservation_id": 2, "user_id": 6},
     {"reservation_id": 2, "user_id": 7},
-    {"reservation_id": 3, "user_id": 3},
-    {"reservation_id": 3, "user_id": 8},
+    {"reservation_id": 2, "user_id": 8},
     {"reservation_id": 3, "user_id": 9},
     {"reservation_id": 3, "user_id": 10},
+    {"reservation_id": 3, "user_id": 11},
+    {"reservation_id": 3, "user_id": 12},
 ]

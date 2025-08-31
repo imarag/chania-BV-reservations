@@ -9,7 +9,8 @@ export default function Input({ size = "medium", type = "text", className, ...re
         number: "input",
         range: "range",
         file: "file-input",
-        search: "input"
+        search: "input",
+        date: "input"
     };
     const sizeMappingInput = {
         extraSmall: "input-xs",
@@ -48,7 +49,8 @@ export default function Input({ size = "medium", type = "text", className, ...re
         number: sizeMappingInput,
         range: sizeMappingRange,
         file: sizeMappingInput,
-        search: sizeMappingInput
+        search: sizeMappingInput,
+        date: sizeMappingInput
     };
     const baseClass = `${typeMapping[type] || "input"} w-full inline-block`;
     const globalClass = `${baseClass} ${sizeMappingElement[type][size] || ""}  ${className || ""}`;

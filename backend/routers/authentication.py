@@ -5,15 +5,13 @@ from core.auth_handler import AuthHandler
 from dependencies import SessionDep, SettingsDep, CurrentUserDep
 from models.api_models import LoginResponse, RegisterResponse
 from models.db_models import User, UserLogin, UserUpdate, UserPublic, UserRegister
-from utils.db_operations import add_user, update_user, get_user_by_email
+from utils.db_operations import add_user, update_user, get_user_by_email, get_user_by_id
 
 router = APIRouter()
 
 
 @router.post("/register", response_model=RegisterResponse)
-async def register(
-    form_data: UserRegister, session: SessionDep
-) -> RegisterResponse:
+async def register(form_data: UserRegister, session: SessionDep) -> RegisterResponse:
 
     auth_handler = AuthHandler()
 
@@ -53,15 +51,14 @@ async def login(
     return {
         "message": "Login successful",
         "token": {
-            "access_token":access_token,
-            "token_type":"bearer",  # noqa: S106
-        }
+            "access_token": access_token,
+            "token_type": "bearer",  # noqa: S106
+        },
     }
 
+
 @router.get("/get-current-user", response_model=UserPublic)
-async def read_current_user(
-    current_user: CurrentUserDep
-) -> UserPublic:
+async def read_current_user(current_user: CurrentUserDep) -> UserPublic:
     return current_user
 
 
@@ -77,9 +74,3 @@ async def read_current_user(
 #     session.refresh(hero_db)
 #     return hero_db
 
-
-@router.post("/update-user-info", response_model=UserPublic)
-async def update_user_info(
-    user_id: int, user: UserUpdate, session: SessionDep) -> UserPublic:
-    updated_user = update_user(session, user_id, user)
-    return updated_user

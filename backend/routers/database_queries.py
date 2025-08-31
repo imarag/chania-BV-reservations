@@ -1,6 +1,6 @@
 import time
 from fastapi import APIRouter
-
+from core.auth_handler import AuthHandler
 from dependencies import SessionDep
 from models.db_models import (
     UserPublic,
@@ -8,6 +8,7 @@ from models.db_models import (
     TimeSlotPublic,
     ReservationPublic,
     ReservationUserPublic,
+    UserUpdate,
 )
 from utils.db_operations import (
     get_courts,
@@ -15,6 +16,8 @@ from utils.db_operations import (
     get_reservations,
     get_reservation_players,
     get_users,
+    update_user,
+    delete_user,
 )
 
 router = APIRouter()
@@ -35,14 +38,18 @@ async def get_booking_cells(session: SessionDep) -> dict:
 
     # Dictionary mapping: reservation_id -> list of user_ids
     reservation_players_map = {}
+    print(user_map)
     for rp in reservation_players:
-        if rp.reservation_id not in reservation_players_map:
+        user_id = rp.user_id
+        reservation_id = rp.reservation_id
+
+        if reservation_id not in reservation_players_map:
             reservation_players_map[rp.reservation_id] = [
-                UserPublic(**user_map[rp.user_id].model_dump())
+                UserPublic(**user_map[user_id].model_dump())
             ]
         else:
             reservation_players_map[rp.reservation_id].append(
-                UserPublic(**user_map[rp.user_id].model_dump())
+                UserPublic(**user_map[user_id].model_dump())
             )
 
     # Dictionary mapping: (court_id, timeslot_id) -> reservation
@@ -84,6 +91,25 @@ async def get_booking_cells(session: SessionDep) -> dict:
 async def get_users_route(session: SessionDep) -> list[UserPublic]:
     users = get_users(session)
     return [UserPublic(**user.model_dump()) for user in users]
+
+
+@router.post("/update-user-info", response_model=UserPublic)
+async def update_user_info(
+    user_id: int, user: UserUpdate, session: SessionDep
+) -> UserPublic:
+    updated_data = user.model_dump(exclude_unset=True)
+    if "password" in updated_data:
+        updated_data["hashed_password"] = AuthHandler().generate_password_hash(
+            updated_data.pop("password")
+        )
+    updated_user = update_user(session, user_id, updated_data)
+    return updated_user
+
+
+@router.get("/delete-user", response_model=UserPublic)
+async def delete_user_route(user_id: int, session: SessionDep) -> UserPublic:
+    deleted_user = delete_user(session, user_id)
+    return deleted_user
 
 
 # @router.get("/get-courts-timeslots")

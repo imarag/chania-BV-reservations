@@ -8,11 +8,7 @@ import Button from "../ui/Button";
 export default function AccountSettings() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [userInfo, setUserInfo] = useState({
-        email: "",
-        password: "",
-        password_confirm: "",
-    });
+    const [userInfo, setUserInfo] = useState(null);
     useEffect(() => {
         async function fetch_user_info() {
             const { resData, errorMessage } = await apiRequest({
@@ -37,7 +33,7 @@ export default function AccountSettings() {
                     id="email"
                     type="email"
                     name="email"
-                    value={userInfo.email}
+                    value={userInfo?.email || ""}
                     onChange={handleChange}
                     disabled={loading}
                 />
@@ -48,7 +44,7 @@ export default function AccountSettings() {
                     id="password"
                     type="password"
                     name="password"
-                    value={userInfo.password}
+                    value={userInfo?.password || ""}
                     onChange={handleChange}
                     disabled={loading}
                 />
@@ -59,13 +55,15 @@ export default function AccountSettings() {
                     id="password_confirm"
                     type="password"
                     name="password_confirm"
-                    value={userInfo.password_confirm}
+                    value={userInfo?.password_confirm || ""}
                     onChange={handleChange}
                     disabled={loading}
                 />
             </div>
             <div className="mt-6">
-                <Button variant="primary" outline={true}>Update</Button>
+                <Button variant="primary" outline={true}>
+                    Update
+                </Button>
             </div>
         </div>
     );

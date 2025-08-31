@@ -33,6 +33,7 @@ class DBHandler:
     def populate_initial_data(self) -> None:
         from core.auth_handler import AuthHandler  # lazy import to avoid cycles
         auth_handler = AuthHandler()
+        
 
         with Session(self.engine) as session:
             users_with_hash = [

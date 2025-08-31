@@ -40,6 +40,12 @@ export const pagePaths = {
         isHome: false,
         isPage: true,
     },
+    admin: {
+        name: "Admin",
+        path: "/admin",
+        isHome: false,
+        isPage: true,
+    },
 };
 
 const serverUrl = "http://localhost:8000";
@@ -56,4 +62,6 @@ export const apiEndpoints = {
     GET_BOOKING_CELLS: `${baseDBUrl}/get-booking-cells`,
     GET_ALL_USERS: `${baseDBUrl}/users`,
     GET_CURRENT_USER: `${baseAuthUrl}/get-current-user`,
+    UPDATE_USER_INFO: `${baseDBUrl}/update-user-info?user_id=:id`,
+    DELETE_USER: `${baseDBUrl}/delete-user?user_id=:id`,
 };

@@ -12,6 +12,9 @@ import { MdAlternateEmail } from "react-icons/md";
 import { MdOutlineLocalPhone } from "react-icons/md";
 import { LuUser } from "react-icons/lu";
 import { LuSearch } from "react-icons/lu";
+import { LiaBirthdayCakeSolid } from "react-icons/lia";
+import { MdOutlineBusinessCenter } from "react-icons/md";
+import { BiHome } from "react-icons/bi";
 
 function UserInfoItem({ label, value, IconComponent }) {
     return (
@@ -19,7 +22,7 @@ function UserInfoItem({ label, value, IconComponent }) {
             <Symbol IconComponent={IconComponent} className="mb-2" />
             <div>
                 <p className="font-semibold">{label}:</p>
-                <p className="text-base-content/70">{value}</p>
+                <p className="text-base-content/70">{value || "-"}</p>
             </div>
         </div>
     );
@@ -30,7 +33,7 @@ function UsersList({ usersData }) {
         <ul className="space-y-2">
             {usersData.map((user) => (
                 <li key={user.id}>
-                    <Collapse label={user.full_name}>
+                    <Collapse className={"bg-base-200"} label={user.full_name}>
                         <UserInfoItem
                             IconComponent={LuIdCard}
                             label="Full Name"
@@ -51,6 +54,21 @@ function UsersList({ usersData }) {
                             label="User Role"
                             value={user.role}
                         />
+                        <UserInfoItem
+                            IconComponent={BiHome}
+                            label="Home Address"
+                            value={user.address}
+                        />
+                        <UserInfoItem
+                            IconComponent={MdOutlineBusinessCenter}
+                            label="Profession"
+                            value={user.profession}
+                        />
+                        <UserInfoItem
+                            IconComponent={LiaBirthdayCakeSolid}
+                            label="Birth Date"
+                            value={user.date_of_birth}
+                        />
                     </Collapse>
                 </li>
             ))}
@@ -61,9 +79,15 @@ function UsersList({ usersData }) {
 function SearchUserInput({ searchTerm, setSearchTerm }) {
     return (
         <div className="w-lg mx-auto mb-12 flex items-center gap-2 border border-base-content/20 text-base-content/80 rounded-md px-4">
-            <Symbol IconComponent={LuSearch} className="text-base-content/50" />
+            <label htmlFor="search">
+                <Symbol
+                    IconComponent={LuSearch}
+                    className="text-base-content/50"
+                />
+            </label>
             <Input
                 type="search"
+                id="search"
                 className={"border-0 outline-0 hover:outline-0 focus:outline-0"}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -106,10 +130,10 @@ export default function UsersPage() {
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
             />
-            {filteredUsers ? (
+            {filteredUsers.length > 0 ? (
                 <UsersList usersData={filteredUsers} />
             ) : (
-                <p>Loading players...</p>
+                <p>No players found...</p>
             )}
         </div>
     );

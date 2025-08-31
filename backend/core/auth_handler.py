@@ -31,24 +31,6 @@ class AuthHandler:
             return None
         return existing_user  # no need to reconstruct
 
-    def validate_registration_data(
-        self, form_data: UserRegister, session: Session
-    ) -> str | None:
-        print(form_data, "((()))")
-        if name_error := self.validate_full_name(form_data.full_name):
-            return name_error
-        if password_error := self.validate_password(form_data.password):
-            return password_error
-        if email_error := self.validate_email(form_data.email):
-            return email_error
-
-        if form_data.password != form_data.password_confirm:
-            return "Passwords do not match"
-
-        if get_user_by_email(session, form_data.email):
-            return "Email already registered"
-
-        return None
 
     @staticmethod
     def create_access_token(
@@ -88,4 +70,8 @@ class AuthHandler:
     def validate_full_name(full_name: str) -> str | None:
         if not re.match(r"^[A-Za-z\s]{2,100}$", full_name):
             return "Invalid full name format. It must be 2-100 characters long and contain only letters and spaces."
+        return None
+
+    @staticmethod
+    def validate_phone_number(phone_number: str) -> str | None:
         return None

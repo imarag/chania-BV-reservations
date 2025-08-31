@@ -55,4 +55,5 @@ export const apiEndpoints = {
     GET_SCHEDULE: `${baseApiUrl}/schedule`,
     GET_BOOKING_CELLS: `${baseDBUrl}/get-booking-cells`,
     GET_ALL_USERS: `${baseDBUrl}/users`,
+    GET_CURRENT_USER: `${baseAuthUrl}/get-current-user`,
 };

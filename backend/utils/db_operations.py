@@ -2,12 +2,50 @@ from fastapi import HTTPException
 from sqlmodel import select, Session
 from models.db_models import (
     Court, Reservation, ReservationUser, 
-    TimeSlot, User
+    TimeSlot, User, UserUpdate
 )
 
 
 def get_users(session: Session) -> list[User]:
     return list(session.exec(select(User)).all())
+
+
+def add_user(session: Session, user: User) -> User:
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
+def get_user_by_email(session: Session, email: str) -> User | None:
+    user = session.exec(select(User).where(User.email == email)).first()
+    return User(**user.model_dump()) if user else None
+
+
+def get_user_by_id(session: Session, user_id: int) -> User | None:
+    user = session.get(User, user_id)
+    return User(**user.model_dump()) if user else None
+
+
+def update_user(session: Session, user_id: int, user: UserUpdate) -> User:
+    user_db = get_user_by_id(session, user_id)
+    user_data = user.model_dump(exclude_unset=True)
+
+    user_db.sqlmodel_update(user_data)
+
+    session.add(user_db)
+    session.commit()
+    session.refresh(user_db)
+    return user_db
+
+
+def delete_user(session: Session, user_id: int) -> User:
+    user = get_user_by_id(session, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    session.delete(user)
+    session.commit()
+    return user
 
 
 def get_courts(session: Session) -> list[Court]:
@@ -26,21 +64,6 @@ def get_reservation_players(session: Session) -> list[ReservationUser]:
     return list(session.exec(select(ReservationUser)))
 
 
-def get_user_by_email(session: Session, email: str) -> User | None:
-    user = session.exec(select(User).where(User.email == email)).first()
-    return User(**user.model_dump()) if user else None
-
-
-def get_user_by_full_name(session: Session, full_name: str) -> User | None:
-    user = session.exec(select(User).where(User.full_name == full_name)).first()
-    return User(**user.model_dump()) if user else None
-
-
-def get_user_by_id(session: Session, user_id: int) -> User | None:
-    user = session.get(User, user_id)
-    return User(**user.model_dump()) if user else None
-
-
 def get_court_by_id(session: Session, court_id: int) -> Court | None:
     court = session.get(Court, court_id)
     return court if court else None
@@ -56,22 +79,11 @@ def get_reservation_by_id(session: Session, reservation_id: int) -> Reservation 
     return reservation if reservation else None
 
 
-
-
-
-
 def get_reservation_player_by_id(
     session: Session, reservation_player_id: int
 ) -> ReservationUser | None:
     reservation_player = session.get(ReservationUser, reservation_player_id)
     return reservation_player if reservation_player else None
-
-
-def add_user(session: Session, user: User) -> User:
-    session.add(user)
-    session.commit()
-    session.refresh(user)
-    return User(**user.model_dump())
 
 
 def add_reservation(session: Session, reservation: Reservation) -> Reservation:

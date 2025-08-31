@@ -1,8 +1,29 @@
+import { Link } from "react-router";
+
+/*
+the structure of menu links contains two version:
+1. if path points to a real page (page: true) or 
+2. if it is just a button (page: false)
+example:
+Version 1:
+{
+    label: "",
+    path: "",
+    page: true
+}
+Version 2:
+{
+    label: "",
+    path: "",
+    page: false
+    onClick: () => {}
+}
+*/
+
 export default function DropDown({
-    label = "my dropdown",
+    menuLinks,
     position = "dropdown-start",
     hover = false,
-    type = "menu", // menu or card
     className,
     children,
 }) {
@@ -20,27 +41,44 @@ export default function DropDown({
         rightCenter: "dropdown-right dropdown-center",
         rightTop: "dropdown-right dropdown-end",
     };
-    // type can be menu (in a navbar link dropdown) or card (in a open modal window)
     const baseClass = "dropdown";
     const contentClass =
-        type === "menu"
-            ? "dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
-            : "dropdown-content card card-sm bg-base-100 z-1 w-64 shadow-md";
-    const labelClass = "btn m-1";
-    const dropDownCardBody = "card-body";
+        "dropdown-content menu bg-base-200 rounded-box z-1 w-52 p-2 shadow-sm";
     const globalClass = `${baseClass} ${positionMapping[position]} ${hover ? "dropdown-hover" : ""} ${className || ""}`;
     return (
         <div className={globalClass}>
-            <div tabIndex={0} role="button" className={labelClass}>
-                {label}
-            </div>
-            {type === "menu" ? (
-                <ul tabIndex={0} className={contentClass}>{children}</ul>
-            ) : (
-                <div tabIndex={0} className={contentClass}>
-                    <div className={dropDownCardBody}>{children}</div>
-                </div>
-            )}
+            <button
+                className="btn btn-ghost flex items-center gap-1"
+                tabIndex={0}
+            >
+                {children}
+            </button>
+            <ul tabIndex={0} className={contentClass}>
+                {menuLinks?.map((linkItem, index) => (
+                    <li key={linkItem.label}>
+                        {linkItem.page ? (
+                            <Link
+                                to={linkItem.path}
+                                className={linkItem.className}
+                            >
+                                {linkItem.label || "My link"}
+                            </Link>
+                        ) : (
+                            <a
+                                className={linkItem.className}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    if (linkItem.onClick) {
+                                        linkItem.onClick();
+                                    }
+                                }}
+                            >
+                                {linkItem.label || "My link"}
+                            </a>
+                        )}
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 }

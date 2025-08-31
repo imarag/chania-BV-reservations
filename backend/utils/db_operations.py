@@ -31,8 +31,8 @@ def get_user_by_email(session: Session, email: str) -> User | None:
     return User(**user.model_dump()) if user else None
 
 
-def get_user_by_username(session: Session, username: str) -> User | None:
-    user = session.exec(select(User).where(User.username == username)).first()
+def get_user_by_full_name(session: Session, full_name: str) -> User | None:
+    user = session.exec(select(User).where(User.full_name == full_name)).first()
     return User(**user.model_dump()) if user else None
 
 

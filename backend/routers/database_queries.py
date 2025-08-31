@@ -64,7 +64,7 @@ async def get_booking_cells(session: SessionDep) -> dict:
             if r is not None:
                 cell["booking_user"] = user_map[
                     r.user_id
-                ].username  # The user who made the reservation
+                ].full_name  # The user who made the reservation
                 cell["reservation"] = ReservationPublic(**r.model_dump())
                 cell["booked"] = True  # There is a reservation
                 cell["players"] = reservation_players_map.get(
@@ -80,6 +80,12 @@ async def get_booking_cells(session: SessionDep) -> dict:
     return schedule_cells
 
 
+@router.get("/users")
+async def get_users_route(session: SessionDep) -> list[UserPublic]:
+    users = get_users(session)
+    return [UserPublic(**user.model_dump()) for user in users]
+
+
 # @router.get("/get-courts-timeslots")
 # async def get_courts_timeslots(session: SessionDep) -> dict[str, list]:
 #     all_courts = get_courts(session)
@@ -88,12 +94,6 @@ async def get_booking_cells(session: SessionDep) -> dict:
 #         "courts": all_courts,
 #         "time_slots": all_timeslots,
 #     }
-
-
-# @router.get("/users")
-# async def get_all_users_route(session: SessionDep) -> list[UserPublic]:
-#     users = get_users(session)
-#     return [UserPublic(**user.model_dump()) for user in users]
 
 
 # @router.get("/courts")

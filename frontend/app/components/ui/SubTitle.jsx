@@ -1,10 +1,15 @@
-export default function SubTitle({ variant = "page", className, children, ...rest }) {
+export default function SubTitle({
+    variant = "page",
+    className,
+    children,
+    ...rest
+}) {
     const variantMapping = {
-        page: "text-lg font-semibold",
+        page: "text-lg",
         section: "text-base font-light",
-        hero: "text-xl font-semibold"
+        hero: "text-xl font-semibold",
     };
-    const baseClass = "";
+    const baseClass = "text-base-content/70";
     const variantClass = variantMapping[variant] || "";
     const globalClass = `${baseClass} ${variantClass} ${className || ""}`;
     return (

@@ -32,7 +32,7 @@ function BookedContent({ booking }) {
             <p className="font-bold">Players</p>
             <ul className="space-y-1">
                 {booking.players.map((player) => (
-                    <li key={player.id}>{player.username}</li>
+                    <li key={player.id}>{player.full_name}</li>
                 ))}
             </ul>
         </>

@@ -25,17 +25,21 @@ class AuthHandler:
         existing_user = get_user_by_email(session, user.email)
         if not existing_user:
             return None
-        if not self.validate_password_hash(user.password, existing_user.hashed_password):
+        if not self.validate_password_hash(
+            user.password, existing_user.hashed_password
+        ):
             return None
-        return existing_user   # no need to reconstruct
+        return existing_user  # no need to reconstruct
 
-    def validate_registration_data(self, form_data: UserRegister, session: Session) -> str | None:
+    def validate_registration_data(
+        self, form_data: UserRegister, session: Session
+    ) -> str | None:
         print(form_data, "((()))")
-        if (name_error := self.validate_username(form_data.username)):
+        if name_error := self.validate_full_name(form_data.full_name):
             return name_error
-        if (password_error := self.validate_password(form_data.password)):
+        if password_error := self.validate_password(form_data.password):
             return password_error
-        if (email_error := self.validate_email(form_data.email)):
+        if email_error := self.validate_email(form_data.email):
             return email_error
 
         if form_data.password != form_data.password_confirm:
@@ -47,7 +51,9 @@ class AuthHandler:
         return None
 
     @staticmethod
-    def create_access_token(data: dict = {}, expires_delta: timedelta | None = None) -> str:
+    def create_access_token(
+        data: dict = {}, expires_delta: timedelta | None = None
+    ) -> str:
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
         to_encode.update({"exp": expire})
@@ -56,7 +62,9 @@ class AuthHandler:
     @staticmethod
     def decode_access_token(token: str) -> dict:
         try:
-            return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+            return jwt.decode(
+                token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            )
         except jwt.ExpiredSignatureError:
             raise ValueError("Token expired")
         except jwt.PyJWTError:
@@ -77,7 +85,7 @@ class AuthHandler:
         return None
 
     @staticmethod
-    def validate_username(username: str) -> str | None:
-        if not re.match(r"^[A-Za-z\s]{2,100}$", username):
-            return "Invalid username format. It must be 2-100 characters long and contain only letters and spaces."
+    def validate_full_name(full_name: str) -> str | None:
+        if not re.match(r"^[A-Za-z\s]{2,100}$", full_name):
+            return "Invalid full name format. It must be 2-100 characters long and contain only letters and spaces."
         return None

@@ -6,7 +6,7 @@ from datetime import datetime, time
 users = [
     {
         "id": 1,
-        "username": "Alice Smith",
+        "full_name": "Alice Smith",
         "email": "alice@example.com",
         "password": "alice123",
         "active": True,
@@ -16,7 +16,7 @@ users = [
     },
     {
         "id": 2,
-        "username": "Bob Johnson",
+        "full_name": "Bob Johnson",
         "email": "bob@example.com",
         "password": "bob456",
         "active": True,
@@ -26,7 +26,7 @@ users = [
     },
     {
         "id": 3,
-        "username": "Carol White",
+        "full_name": "Carol White",
         "email": "carol@example.com",
         "password": "carol789",
         "active": True,
@@ -36,7 +36,7 @@ users = [
     },
     {
         "id": 4,
-        "username": "David Lee",
+        "full_name": "David Lee",
         "email": "david@example.com",
         "password": "david123",
         "active": True,
@@ -46,7 +46,7 @@ users = [
     },
     {
         "id": 5,
-        "username": "Emma Davis",
+        "full_name": "Emma Davis",
         "email": "emma@example.com",
         "password": "emma456",
         "active": True,
@@ -56,7 +56,7 @@ users = [
     },
     {
         "id": 6,
-        "username": "Frank Miller",
+        "full_name": "Frank Miller",
         "email": "frank@example.com",
         "password": "frank123",
         "active": True,
@@ -66,7 +66,7 @@ users = [
     },
     {
         "id": 7,
-        "username": "Grace Lee",
+        "full_name": "Grace Lee",
         "email": "grace@example.com",
         "password": "grace456",
         "active": True,
@@ -76,7 +76,7 @@ users = [
     },
     {
         "id": 8,
-        "username": "Henry Adams",
+        "full_name": "Henry Adams",
         "email": "henry@example.com",
         "password": "henry123",
         "active": True,
@@ -86,7 +86,7 @@ users = [
     },
     {
         "id": 9,
-        "username": "Isabel Clark",
+        "full_name": "Isabel Clark",
         "email": "isabel@example.com",
         "password": "isabel456",
         "active": True,
@@ -96,7 +96,7 @@ users = [
     },
     {
         "id": 10,
-        "username": "Jack Turner",
+        "full_name": "Jack Turner",
         "email": "jack@example.com",
         "password": "jack123",
         "active": True,
@@ -106,7 +106,7 @@ users = [
     },
     {
         "id": 11,
-        "username": "Karen Hall",
+        "full_name": "Karen Hall",
         "email": "karen@example.com",
         "password": "karen456",
         "active": True,
@@ -116,7 +116,7 @@ users = [
     },
     {
         "id": 12,
-        "username": "Leo Scott",
+        "full_name": "Leo Scott",
         "email": "leo@example.com",
         "password": "leo123",
         "active": True,

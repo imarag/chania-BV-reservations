@@ -2,36 +2,43 @@ export const pagePaths = {
     home: {
         name: "Home",
         path: "/",
-        extraClassName: "",
         isHome: true,
         isPage: true,
     },
     schedule: {
         name: "Schedule",
         path: "/schedule",
-        extraClassName: "",
         isHome: false,
         isPage: true,
     },
     login: {
         name: "Login",
         path: "/auth/login",
-        extraClassName: "ms-auto",
         isHome: false,
         isPage: true,
     },
     register: {
         name: "Register",
         path: "/auth/register",
-        extraClassName: "",
         isHome: false,
         isPage: true,
     },
     logout: {
         name: "Logout",
-        extraClassName: "",
         isHome: false,
         isPage: false,
+    },
+    users: {
+        name: "Players",
+        path: "/users",
+        isHome: false,
+        isPage: true,
+    },
+    account: {
+        name: "Account",
+        path: "/acount",
+        isHome: false,
+        isPage: true,
     },
 };
 
@@ -47,4 +54,5 @@ export const apiEndpoints = {
     GET_CURRENT_USER: `${baseAuthUrl}/get-current-user`,
     GET_SCHEDULE: `${baseApiUrl}/schedule`,
     GET_BOOKING_CELLS: `${baseDBUrl}/get-booking-cells`,
+    GET_ALL_USERS: `${baseDBUrl}/users`,
 };

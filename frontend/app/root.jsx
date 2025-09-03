@@ -46,14 +46,13 @@ export function Layout({ children }) {
                 <Meta />
                 <Links />
             </head>
-            <body className="flex items-stretch text-base-content h-screen font-normal">
-                <header className="flex-none bg-base-300">
+            <body className="flex flex-row items-stretch text-base-content h-screen font-normal">
+                <header className="bg-base-100 flex-none">
                     <NavBar />
                 </header>
-                <main className="grow-1 bg-base-100 container mx-auto px-2">
+                <main className="grow-1 bg-base-300 px-2 overflow-y-scroll">
                     {children}
                 </main>
-                ;
                 <ScrollRestoration />
                 <Scripts />
             </body>

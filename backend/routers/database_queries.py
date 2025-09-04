@@ -1,5 +1,6 @@
 import time
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
+from typing import Annotated
 from core.auth_handler import AuthHandler
 from dependencies import SessionDep
 from models.db_models import (
@@ -9,6 +10,7 @@ from models.db_models import (
     ReservationPublic,
     ReservationUserPublic,
     UserUpdate,
+    ReservationCreate,
 )
 from utils.db_operations import (
     get_courts,
@@ -18,6 +20,8 @@ from utils.db_operations import (
     get_users,
     update_user,
     delete_user,
+    add_reservation,
+    add_reservation_users,
 )
 
 router = APIRouter()
@@ -112,6 +116,26 @@ async def delete_user_route(user_id: int, session: SessionDep) -> UserPublic:
     return deleted_user
 
 
+@router.post("/create-reservation", response_model=ReservationPublic)
+async def create_reservation_api(
+    reservation: ReservationCreate,
+    reservationUsers: Annotated[list, Body()],
+    session: SessionDep,
+) -> ReservationPublic:
+    print(reservation, reservationUsers, "&&&3")
+    new_reservation = add_reservation(session, reservation)
+
+    new_reservation_usrs = add_reservation_users(
+        session, new_reservation.id, reservationUsers
+    )
+    return new_reservation
+
+
+@router.get("/reservations")
+async def reservations_api(session: SessionDep) -> list[ReservationPublic]:
+    return get_reservations(session)
+
+
 # @router.get("/get-courts-timeslots")
 # async def get_courts_timeslots(session: SessionDep) -> dict[str, list]:
 #     all_courts = get_courts(session)
@@ -130,11 +154,6 @@ async def delete_user_route(user_id: int, session: SessionDep) -> UserPublic:
 # @router.get("/time-slots")
 # async def get_all_time_slots_route(session: SessionDep) -> list[TimeSlot]:
 #     return get_time_slots(session)
-
-
-# @router.get("/reservations")
-# async def get_all_reservations_route(session: SessionDep) -> list[Reservation]:
-#     return get_reservations(session)
 
 
 # @router.get("/reservation-players")

@@ -6,6 +6,9 @@ from models.db_models import (
     ReservationUser,
     TimeSlot,
     User,
+    ReservationCreate,
+    ReservationUserCreate,
+    ReservationUserPublic,
 )
 
 
@@ -86,11 +89,41 @@ def get_reservation_player_by_id(
     return session.get(ReservationUser, reservation_player_id)
 
 
-def add_reservation(session: Session, reservation: Reservation) -> Reservation:
-    session.add(reservation)
+def add_reservation(session: Session, reservation: ReservationCreate) -> Reservation:
+    reservation_db = Reservation.model_validate(reservation)
+    print(reservation_db, "&&&55")
+    session.add(reservation_db)
     session.commit()
-    session.refresh(reservation)
-    return reservation
+    session.refresh(reservation_db)
+    return reservation_db
+
+
+# @app.post("/heroes/", response_model=HeroPublic)
+# def create_hero(hero: HeroCreate, session: SessionDep):
+#     db_hero = Hero.model_validate(hero)
+#     session.add(db_hero)
+#     session.commit()
+#     session.refresh(db_hero)
+#     return db_hero
+
+
+def add_reservation_users(
+    session: Session, reservation_id: int, reservation_user_ids: list[int]
+) -> list[ReservationUserCreate]:
+    reservation_users = [
+        ReservationUser(reservation_id=reservation_id, user_id=u_id)
+        for u_id in reservation_user_ids
+    ]
+    print(reservation_users, "&&&")
+    session.add_all(reservation_users)
+    session.commit()
+
+    for ru in reservation_users:
+        session.refresh(ru)
+
+    print([ru.model_dump() for ru in reservation_users], "^&^^^^")
+
+    return [ReservationUserPublic(**ru.model_dump()) for ru in reservation_users]
 
 
 def delete_reservation(session: Session, reservation: Reservation) -> Reservation:

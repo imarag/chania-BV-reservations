@@ -1,7 +1,7 @@
 from datetime import date, datetime, time
 from enum import Enum
 from pydantic import EmailStr, field_validator, model_validator, computed_field
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, SQLModel, UniqueConstraint
 import re
 
 # ----- Validators -----
@@ -241,10 +241,10 @@ class UserRegister(UserBase):
 
 # ----- Reservation Models -----
 class ReservationBase(SQLModel):
-    user_id: int = Field(foreign_key="user.id", primary_key=True)
-    court_id: int = Field(foreign_key="court.id", primary_key=True)
-    timeslot_id: int = Field(foreign_key="timeslot.id", primary_key=True)
-    reservation_date: date = Field(default_factory=date.today, primary_key=True)
+    user_id: int = Field(foreign_key="user.id")
+    court_id: int = Field(foreign_key="court.id")
+    timeslot_id: int = Field(foreign_key="timeslot.id")
+    reservation_date: date = Field(default_factory=date.today)
     status: ReservationStatus = Field(default=ReservationStatus.pending)
 
 

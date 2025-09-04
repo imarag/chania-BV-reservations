@@ -1,127 +1,185 @@
 import Button from "../ui/Button";
+import Anchor from "../ui/Anchor";
 import Symbol from "../ui/Symbol";
 import { GiTennisCourt } from "react-icons/gi";
 import { IoMdTime } from "react-icons/io";
 import Collapse from "../ui/Collapse";
-
-function ScheduleColumn({ courts }) {
-    const headerClass = "font-bold bg-base-300 border border-base-100";
-    const headerLabelClass =
-        "flex items-center justify-center gap-2 text-base-content/50";
-    return (
-        <thead>
-            <tr>
-                <th className={headerClass}></th>
-                {courts.map((court) => (
-                    <th className={headerClass} key={`${court.id}`}>
-                        <span className={headerLabelClass}>
-                            <Symbol IconComponent={GiTennisCourt} />
-                            {court.name}
-                        </span>
-                    </th>
-                ))}
-            </tr>
-        </thead>
-    );
-}
+import { useContext } from "react";
+import { currentUserContext } from "../../context/currentUserContext.js";
+import { useState } from "react";
+import { apiRequest } from "../../utils/apiRequest";
+import { apiEndpoints, pagePaths } from "../../utils/appUrls";
 
 function BookedContent({ booking }) {
+    const [showMoreInfo, setShowMoreInfo] = useState(false);
     return (
-        <div className="text-sm space-y-4">
-            <p>
-                Booked by{" "}
-                <span className="font-semibold">{booking.booking_user}</span>
-            </p>
-            <Collapse
-                label="Players"
+        <div className="text-sm">
+            {/* <Collapse
+                label="reserved"
                 collapseIcon="plus"
-                className="font-light bg-transparent"
+                className="font-light w-40 bg-base-content/20"
             >
                 <ul className="space-y-1">
                     {booking.players.map((player) => (
                         <li key={player.id}>{player.full_name}</li>
                     ))}
                 </ul>
-            </Collapse>
+            </Collapse> */}
+            <Button
+                type="button"
+                variant="error"
+                className="font-bold w-40"
+                onClick={() => setShowMoreInfo(!showMoreInfo)}
+            >
+                reserved
+            </Button>
+            {showMoreInfo && (
+                <div className="rounded-md p-4 bg-base-100/80 text-base-content mt-2 space-y-4">
+                    <p>
+                        Booked by{" "}
+                        <span className="font-bold">
+                            {booking.booking_user}
+                        </span>{" "}
+                    </p>
+                    <ul className="space-y-1">
+                        {booking.players.map((player) => (
+                            <li key={player.id}>{player.full_name}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </div>
+        // <div className="text-sm space-y-4">
+        //     <p>
+        //         Booked by{" "}
+        //         <span className="font-semibold">{booking.booking_user}</span>
+        //     </p>
+        //     <Collapse
+        //         label="Players"
+        //         collapseIcon="plus"
+        //         className="font-light bg-transparent"
+        //     >
+        //         <ul className="space-y-1">
+        //             {booking.players.map((player) => (
+        //                 <li key={player.id}>{player.full_name}</li>
+        //             ))}
+        //         </ul>
+        //     </Collapse>
+        // </div>
     );
 }
 
-function NotBookedContent() {
+function NotBookedContent({ courtId, timeslotId, currentUser, label }) {
     return (
         <div className="text-sm">
-            <p>Book this court</p>
-            <Button variant="ghost" className="font-bold">
-                Reserve
-            </Button>
+            <Anchor
+                type="button"
+                variant="neutral"
+                className="font-bold w-40"
+                href={pagePaths.reserve.path
+                    .replace(":court_id", courtId)
+                    .replace(":timeslot_id", timeslotId)
+                    .replace(":user_id", currentUser.id)}
+            >
+                {label}
+            </Anchor>
         </div>
     );
 }
 
-function ReservationCell({ booking, cellKey }) {
-    const cellClass =
-        "w-40 h-56 border border-base-content/5 px-4 py-2 text-base-content/80";
+function CourtRectangle({ timeslots, courtId, currentUser, bookings, title }) {
     return (
-        <td className={`${cellClass} ${booking.booked ? "bg-error/80" : "bg-base-200"}`} key={cellKey}>
-            <div className={"space-y-2 text-center"}>
-                {booking.booked ? (
-                    <BookedContent booking={booking} />
-                ) : (
-                    <NotBookedContent />
-                )}
+        <div className="p-8 z-50  bg-white/10 border-4 border-white/40 rounded-md flex flex-col">
+            <h2 className="flex-none text-xl uppercase text-center font-bold text-base-content mb-8">
+                {title}
+            </h2>
+            <div className="flex-grow-1 flex flex-col justify-center items-center gap-2">
+                {timeslots.map((timeslot) => {
+                    const bookingKey = `${courtId}-${timeslot.id}`;
+                    const booking = bookings[bookingKey];
+                    return booking.booked ? (
+                        <BookedContent booking={booking} />
+                    ) : (
+                        <NotBookedContent
+                            courtId={courtId}
+                            timeslotId={timeslot.id}
+                            currentUser={currentUser}
+                            label={timeslot.name}
+                        />
+                    );
+                })}
             </div>
-        </td>
-    );
-}
-
-function ScheduleIndex({ timeslot }) {
-    const headerClass =
-        "font-bold bg-base-300  border border-base-100";
-    const headerLabelClass =
-        "flex flex-col items-center justify-center gap-2 text-base-content/50 ";
-    return (
-        <td className={`w-20 ${headerClass}`}>
-            <span className={headerLabelClass}>
-                <Symbol IconComponent={IoMdTime} />
-                {timeslot.name}
-            </span>
-        </td>
-    );
-}
-
-function ScheduleBody({ timeslots, courts, bookings }) {
-    return (
-        <tbody>
-            {timeslots.map((timeslot, ind) => (
-                <tr
-                    key={timeslot.id}
-                >
-                    <ScheduleIndex timeslot={timeslot} />
-                    {courts.map((court) => {
-                        const booking = bookings[`${court.id}-${timeslot.id}`];
-                        return (
-                            <ReservationCell
-                                booking={booking}
-                                cellKey={`${court.id}-${timeslot.id}`}
-                            />
-                        );
-                    })}
-                </tr>
-            ))}
-        </tbody>
+        </div>
     );
 }
 
 export default function ScheduleTable({ courts, timeslots, bookings }) {
+    const currentUser = useContext(currentUserContext);
     const tableClass = "table text-base-content/80";
     return (
-        <table className={tableClass}>
-            <ScheduleColumn courts={courts} />
-            <ScheduleBody
-                timeslots={timeslots}
-                courts={courts}
-                bookings={bookings}
-            />
-        </table>
+        <div className="text-center">
+            <div className="h-screen relative inline-block mx-auto">
+                <img
+                    src="/bv-courts.png"
+                    className="size-full object-cover brightness-40"
+                />
+                <div className="absolute inset-0 flex flex-col gap-8 p-8">
+                    <div className="flex-grow-1 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <CourtRectangle
+                            timeslots={timeslots}
+                            courtId={
+                                courts.find((court) => court.name === "Court 4")
+                                    .id
+                            }
+                            currentUser={currentUser}
+                            bookings={bookings}
+                            title="Court 4"
+                        />
+                        <CourtRectangle
+                            timeslots={timeslots}
+                            courtId={
+                                courts.find((court) => court.name === "Court 5")
+                                    .id
+                            }
+                            currentUser={currentUser}
+                            bookings={bookings}
+                            title="Court 5"
+                        />
+                    </div>
+                    <div className="flex-grow-1 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <CourtRectangle
+                            timeslots={timeslots}
+                            courtId={
+                                courts.find((court) => court.name === "Court 3")
+                                    .id
+                            }
+                            currentUser={currentUser}
+                            bookings={bookings}
+                            title="Court 3"
+                        />
+                        <CourtRectangle
+                            timeslots={timeslots}
+                            courtId={
+                                courts.find((court) => court.name === "Court 2")
+                                    .id
+                            }
+                            currentUser={currentUser}
+                            bookings={bookings}
+                            title="Court 2"
+                        />
+                        <CourtRectangle
+                            timeslots={timeslots}
+                            courtId={
+                                courts.find((court) => court.name === "Court 1")
+                                    .id
+                            }
+                            currentUser={currentUser}
+                            bookings={bookings}
+                            title="Court 1"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }

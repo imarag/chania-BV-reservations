@@ -46,6 +46,12 @@ export const pagePaths = {
         isHome: false,
         isPage: true,
     },
+    reserve: {
+        name: "Reserve",
+        path: `/reserve?court_id=:court_id&timeslot_id=:timeslot_id&user_id=:user_id`,
+        isHome: false,
+        isPage: true,
+    },
 };
 
 const serverUrl = "http://localhost:8000";
@@ -64,4 +70,5 @@ export const apiEndpoints = {
     GET_CURRENT_USER: `${baseAuthUrl}/get-current-user`,
     UPDATE_USER_INFO: `${baseDBUrl}/update-user-info?user_id=:id`,
     DELETE_USER: `${baseDBUrl}/delete-user?user_id=:id`,
+    CREATE_RESERVATION: `${baseDBUrl}/create-reservation`,
 };

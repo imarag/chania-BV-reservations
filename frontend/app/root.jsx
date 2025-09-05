@@ -7,7 +7,8 @@ import {
   ScrollRestoration,
 } from "react-router";
 import NavBar from "./components/root/NavBar";
-
+import NotificationProvider from "./components/utils/NotificationProvider";
+import CurrentUserProvider from "./components/utils/CurrentUserProvider";
 import "./app.css";
 
 export const links = () => [
@@ -44,13 +45,19 @@ export function Layout({ children }) {
         <Meta />
         <Links />
       </head>
-      <body className="flex flex-row items-stretch text-base-content h-screen font-normal">
-        <header className="bg-base-100 flex-none">
-          <NavBar />
-        </header>
-        <main className="grow-1 bg-base-300 px-2 overflow-y-scroll">
-          {children}
-        </main>
+      <body>
+        <CurrentUserProvider>
+          <NotificationProvider>
+            <div className="flex flex-row items-stretch text-base-content h-screen font-normal">
+              <header className="bg-base-100 flex-none">
+                <NavBar />
+              </header>
+              <main className="grow-1 bg-base-300 px-2 overflow-y-scroll">
+                {children}
+              </main>
+            </div>
+          </NotificationProvider>
+        </CurrentUserProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

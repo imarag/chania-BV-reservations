@@ -217,27 +217,34 @@ courts = [
 timeslots = [
     {
         "id": 1,
+        "start_time": time(15, 0),
+        "end_time": time(16, 30),
+        "status": "available",
+        "description": None,
+    },
+    {
+        "id": 2,
         "start_time": time(16, 30),
         "end_time": time(18, 0),
         "status": "available",
         "description": None,
     },
     {
-        "id": 2,
+        "id": 3,
         "start_time": time(18, 0),
         "end_time": time(19, 30),
         "status": "available",
         "description": None,
     },
     {
-        "id": 3,
+        "id": 4,
         "start_time": time(19, 30),
         "end_time": time(21, 0),
         "status": "available",
         "description": None,
     },
     {
-        "id": 4,
+        "id": 5,
         "start_time": time(21, 0),
         "end_time": time(22, 30),
         "status": "available",
@@ -246,45 +253,7 @@ timeslots = [
 ]
 
 # --- RESERVATIONS (3 reservations × 4 players each) ---
-reservations = [
-    {
-        "id": 1,
-        "user_id": 1,
-        "court_id": 1,
-        "timeslot_id": 1,
-        "reservation_date": date(2025, 8, 31),
-        "status": "confirmed",
-    },
-    {
-        "id": 2,
-        "user_id": 5,
-        "court_id": 2,
-        "timeslot_id": 2,
-        "reservation_date": date(2025, 8, 31),
-        "status": "confirmed",
-    },
-    {
-        "id": 3,
-        "user_id": 9,
-        "court_id": 4,
-        "timeslot_id": 3,
-        "reservation_date": date(2025, 8, 31),
-        "status": "confirmed",
-    },
-]
+reservations = []
 
 # --- RESERVATION USERS (linking each reservation to 4 players) ---
-reservation_players = [
-    {"reservation_id": 1, "user_id": 1},
-    {"reservation_id": 1, "user_id": 2},
-    {"reservation_id": 1, "user_id": 3},
-    {"reservation_id": 1, "user_id": 4},
-    {"reservation_id": 2, "user_id": 5},
-    {"reservation_id": 2, "user_id": 6},
-    {"reservation_id": 2, "user_id": 7},
-    {"reservation_id": 2, "user_id": 8},
-    {"reservation_id": 3, "user_id": 9},
-    {"reservation_id": 3, "user_id": 10},
-    {"reservation_id": 3, "user_id": 11},
-    {"reservation_id": 3, "user_id": 12},
-]
+reservation_players = []

@@ -4,37 +4,54 @@ import Symbol from "../ui/Symbol";
 import { GiTennisCourt } from "react-icons/gi";
 import { IoMdTime } from "react-icons/io";
 import Collapse from "../ui/Collapse";
-import { useContext } from "react";
+import { useContext, Fragment, useState } from "react";
 import { currentUserContext } from "../../context/currentUserContext.js";
-import { useState } from "react";
 import { apiRequest } from "../../utils/apiRequest";
 import { apiEndpoints, pagePaths } from "../../utils/appUrls";
+import { IoInformationCircleOutline } from "react-icons/io5";
+import { useNavigate } from "react-router";
+
+function ReserveButton({ children, booked = false, ...rest }) {
+  const baseClass = `
+    w-40
+    rounded-md
+    px-4 py-2
+    font-bold
+    text-white
+    transition
+  `;
+
+  const bookedClass = `
+    bg-error/70
+    cursor-not-allowed
+  `;
+
+  const availableClass = `
+    bg-black/50
+    cursor-pointer
+    hover:bg-black
+  `;
+
+  return (
+    <button
+      disabled={booked}
+      className={`${baseClass} ${booked ? bookedClass : availableClass}`}
+      {...rest}
+    >
+      {children}
+    </button>
+  );
+}
 
 function BookedContent({ booking }) {
   const [showMoreInfo, setShowMoreInfo] = useState(false);
   return (
     <div className="text-sm">
-      {/* <Collapse
-                label="reserved"
-                collapseIcon="plus"
-                className="font-light w-40 bg-base-content/20"
-            >
-                <ul className="space-y-1">
-                    {booking.players.map((player) => (
-                        <li key={player.id}>{player.full_name}</li>
-                    ))}
-                </ul>
-            </Collapse> */}
-      <Button
-        type="button"
-        variant="error"
-        className="font-bold w-40"
-        onClick={() => setShowMoreInfo(!showMoreInfo)}
-      >
-        reserved
-      </Button>
+      <ReserveButton booked={true}>
+        <span className="">reserved</span>
+      </ReserveButton>
       {showMoreInfo && (
-        <div className="rounded-md p-4 bg-base-100/80 text-base-content mt-2 space-y-4">
+        <div className="absolute rounded-md p-4 bg-base-100/80 text-base-content mt-2 space-y-4">
           <p>
             Booked by <span className="font-bold">{booking.booking_user}</span>{" "}
           </p>
@@ -46,47 +63,31 @@ function BookedContent({ booking }) {
         </div>
       )}
     </div>
-    // <div className="text-sm space-y-4">
-    //     <p>
-    //         Booked by{" "}
-    //         <span className="font-semibold">{booking.booking_user}</span>
-    //     </p>
-    //     <Collapse
-    //         label="Players"
-    //         collapseIcon="plus"
-    //         className="font-light bg-transparent"
-    //     >
-    //         <ul className="space-y-1">
-    //             {booking.players.map((player) => (
-    //                 <li key={player.id}>{player.full_name}</li>
-    //             ))}
-    //         </ul>
-    //     </Collapse>
-    // </div>
   );
 }
 
 function NotBookedContent({ courtId, timeslotId, currentUser, label }) {
+  const navigate = useNavigate();
+
+  function handleNavigate() {
+    const path = pagePaths.reserve.path
+      .replace(":court_id", courtId)
+      .replace(":timeslot_id", timeslotId)
+      .replace(":user_id", currentUser?.id);
+
+    navigate(path);
+  }
+
   return (
     <div className="text-sm">
-      <Anchor
-        type="button"
-        variant="neutral"
-        className="font-bold w-40"
-        href={pagePaths.reserve.path
-          .replace(":court_id", courtId)
-          .replace(":timeslot_id", timeslotId)
-          .replace(":user_id", currentUser.id)}
-      >
-        {label}
-      </Anchor>
+      <ReserveButton onClick={handleNavigate}>{label}</ReserveButton>
     </div>
   );
 }
 
 function CourtRectangle({ timeslots, courtId, currentUser, bookings, title }) {
   return (
-    <div className="p-8 z-50  bg-white/10 border-4 border-white/40 rounded-md flex flex-col">
+    <div className="p-8 z-50  bg-white/5 border-4 border-white/40 rounded-md flex flex-col">
       <h2 className="flex-none text-xl uppercase text-center font-bold text-base-content mb-8">
         {title}
       </h2>
@@ -94,15 +95,19 @@ function CourtRectangle({ timeslots, courtId, currentUser, bookings, title }) {
         {timeslots.map((timeslot) => {
           const bookingKey = `${courtId}-${timeslot.id}`;
           const booking = bookings[bookingKey];
-          return booking.booked ? (
-            <BookedContent booking={booking} />
-          ) : (
-            <NotBookedContent
-              courtId={courtId}
-              timeslotId={timeslot.id}
-              currentUser={currentUser}
-              label={timeslot.name}
-            />
+          return (
+            <Fragment key={timeslot.id}>
+              {booking.booked ? (
+                <BookedContent booking={booking} />
+              ) : (
+                <NotBookedContent
+                  courtId={courtId}
+                  timeslotId={timeslot.id}
+                  currentUser={currentUser}
+                  label={timeslot.name}
+                />
+              )}
+            </Fragment>
           );
         })}
       </div>
@@ -112,7 +117,7 @@ function CourtRectangle({ timeslots, courtId, currentUser, bookings, title }) {
 
 export default function ScheduleTable({ courts, timeslots, bookings }) {
   const currentUser = useContext(currentUserContext);
-  const tableClass = "table text-base-content/80";
+
   return (
     <div className="text-center">
       <div className="h-screen relative inline-block mx-auto">

@@ -62,11 +62,10 @@ export default function DropDown({
             ) : (
               <a
                 className={linkItem.className}
+                href="#" // optional, prevents default navigation
                 onClick={(e) => {
-                  e.preventDefault();
-                  if (linkItem.onClick) {
-                    linkItem.onClick();
-                  }
+                  e.preventDefault(); // stop browser from following the link
+                  linkItem.onClick?.(); // call the onClick function if it exists
                 }}
               >
                 {linkItem.label || "My link"}

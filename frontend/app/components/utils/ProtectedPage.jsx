@@ -1,31 +1,27 @@
-import { useEffect, useState } from "react";
-import { apiRequest } from "../../utils/apiRequest";
-import { apiEndpoints, pagePaths } from "../../utils/appUrls";
-import { currentUserContext } from "../../context/currentUserContext.js";
+import { useContext, useEffect } from "react";
+import { notificationContext } from "../../context/notificationContext";
+import { currentUserContext } from "../../context/currentUserContext";
+import { useNavigate } from "react-router";
+import { pagePaths } from "../../utils/appUrls";
 
 export default function ProtectedPage({ children }) {
-  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  const { currentUser } = useContext(currentUserContext);
+  const { showNotification } = useContext(notificationContext);
 
   useEffect(() => {
-    async function fetch_current_user() {
-      const { resData } = await apiRequest({
-        url: apiEndpoints.GET_CURRENT_USER,
-        method: "get",
-      });
-
-      if (!resData) {
-        window.location.replace(pagePaths.login.path);
-      } else {
-        setUser(resData);
-      }
+    if (!currentUser) {
+      showNotification("Please log in to access this page.", "error");
+      navigate(pagePaths.login.path, { replace: true });
+    } else if (!currentUser?.can_create_reservation) {
+      showNotification(
+        "You cannot book another court because you already have a reservation.",
+        "error"
+      );
+      navigate(pagePaths.home.path, { replace: true });
     }
-    fetch_current_user();
   }, []);
 
-  if (!user) return null;
-  return (
-    <currentUserContext.Provider value={user}>
-      {children}
-    </currentUserContext.Provider>
-  );
+  return <>{children}</>;
 }

@@ -15,6 +15,7 @@ export function meta() {
 
 export default function Reserve() {
   const [reserveParams] = useSearchParams();
+
   return (
     <ProtectedPage>
       <ReservePage

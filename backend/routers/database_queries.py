@@ -3,13 +3,25 @@ from typing import Annotated
 from core.auth_handler import AuthHandler
 from dependencies import SessionDep
 from fastapi import APIRouter, Body
-from models.db_models import (CourtPublic, ReservationCreate,
-                              ReservationPublic, TimeSlotPublic, UserPublic,
-                              UserUpdate)
-from utils.db_operations import (add_reservation, add_reservation_users,
-                                 delete_user, get_courts,
-                                 get_reservation_players, get_reservations,
-                                 get_time_slots, get_users, update_user)
+from models.db_models import (
+    CourtPublic,
+    ReservationCreate,
+    ReservationPublic,
+    TimeSlotPublic,
+    UserPublic,
+    UserUpdate,
+)
+from utils.db_operations import (
+    add_reservation,
+    add_reservation_users,
+    delete_user,
+    get_courts,
+    get_reservation_players,
+    get_reservations,
+    get_time_slots,
+    get_users,
+    update_user,
+)
 
 router = APIRouter()
 
@@ -29,7 +41,6 @@ async def get_booking_cells(session: SessionDep) -> dict:
 
     # Dictionary mapping: reservation_id -> list of user_ids
     reservation_players_map = {}
-    print(user_map)
     for rp in reservation_players:
         user_id = rp.user_id
         reservation_id = rp.reservation_id

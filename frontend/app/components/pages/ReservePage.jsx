@@ -162,7 +162,7 @@ function PlayersPanel({ courtId, timeslotId, userId }) {
         timeslot_id: timeslotId,
         user_id: userId,
       },
-      reservationUsers: users
+      reservation_users: users
         .filter((user) => !user.available)
         .map((user) => user.id),
     };

@@ -3,10 +3,9 @@ from pathlib import Path
 from core.app_paths import AppPaths
 from core.auth_handler import AuthHandler
 from models.db_models import Reservation  # noqa: F403
-from models.db_models import Court, ReservationUser, TimeSlot, User
+from models.db_models import Court, TimeSlot, User
 from sqlmodel import Session, SQLModel, create_engine
-from utils.initial_db_data import (courts, reservation_players, reservations,
-                                   timeslots, users)
+from utils.initial_db_data import courts, reservations, timeslots, users
 
 
 class DBHandler:
@@ -38,7 +37,6 @@ class DBHandler:
             session.add_all([TimeSlot(**slot) for slot in timeslots])
             session.add_all([Court(**court) for court in courts])
             session.add_all([Reservation(**r) for r in reservations])
-            session.add_all([ReservationUser(**rp) for rp in reservation_players])
             session.commit()
 
     def initialize_db(self) -> None:

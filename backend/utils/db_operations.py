@@ -1,7 +1,14 @@
 from fastapi import HTTPException
-from models.db_models import (Court, Reservation, ReservationCreate,
-                              ReservationUser, ReservationUserCreate,
-                              ReservationUserPublic, TimeSlot, User)
+from models.db_models import (
+    Court,
+    Reservation,
+    ReservationCreate,
+    ReservationUser,
+    ReservationUserCreate,
+    ReservationUserPublic,
+    TimeSlot,
+    User,
+)
 from sqlmodel import Session, select
 
 
@@ -40,7 +47,6 @@ def update_user(session: Session, user_id: int, updated_data: dict) -> User:
 
 def delete_user(session: Session, user_id: int) -> User:
     user = session.get(User, user_id)
-    print(user, user_id, "%^&")
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     session.delete(user)
@@ -82,6 +88,12 @@ def get_reservation_player_by_id(
     return session.get(ReservationUser, reservation_player_id)
 
 
+def get_reservation_by_user_id(session: Session, user_id: int) -> Reservation | None:
+    return session.exec(
+        select(Reservation).where(Reservation.user_id == user_id)
+    ).first()
+
+
 def add_reservation(session: Session, reservation: ReservationCreate) -> Reservation:
     reservation_db = Reservation.model_validate(reservation)
     session.add(reservation_db)
@@ -97,15 +109,11 @@ def add_reservation_users(
         ReservationUser(reservation_id=reservation_id, user_id=u_id)
         for u_id in reservation_user_ids
     ]
-    print(reservation_users, "&&&")
     session.add_all(reservation_users)
     session.commit()
 
     for ru in reservation_users:
         session.refresh(ru)
-
-    print([ru.model_dump() for ru in reservation_users], "^&^^^^")
-
     return [ReservationUserPublic(**ru.model_dump()) for ru in reservation_users]
 
 

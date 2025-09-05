@@ -18,13 +18,13 @@ import { PiCalendarDotsBold } from "react-icons/pi";
 import { PiUsersBold } from "react-icons/pi";
 import { FiLogIn } from "react-icons/fi";
 import { PiNotePencil } from "react-icons/pi";
-import { CgLogOut } from "react-icons/cg";
 import { IoClose } from "react-icons/io5";
 import { HiMenu } from "react-icons/hi";
 import { GrUserAdmin } from "react-icons/gr";
 
 function UserMenu({ isMenuOpen }) {
   function handleLogout() {
+    console.log("lkjlkjlkjk");
     removeToken();
     window.location.replace(pagePaths.home.path);
   }
@@ -51,7 +51,7 @@ function UserMenu({ isMenuOpen }) {
   ];
   return (
     <NavItem>
-      <NavLink path={pagePaths.home.path}>
+      <NavLink>
         <DropDown menuLinks={dropDownMenuLinks} position="topRight">
           <Symbol IconComponent={PiUserCircleLight} />
           {isMenuOpen && "Account"}

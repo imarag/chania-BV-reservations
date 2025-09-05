@@ -3,6 +3,7 @@ from datetime import date, datetime, time
 from enum import Enum
 
 from pydantic import EmailStr, computed_field, field_validator, model_validator
+from sqlalchemy import UniqueConstraint
 from sqlmodel import Field, SQLModel
 
 # ----- Validators -----
@@ -124,6 +125,7 @@ class UserBase(SQLModel):
     active: bool = Field(default=True)
     phone_number: str | None = None
     role: Role = Field(default=Role.player)
+    can_make_reservation: bool = Field(default=True)
     address: str | None = Field(default=None, max_length=255)
     date_of_birth: date | None = None
     profession: str | None = Field(default=None, max_length=100)
@@ -252,6 +254,14 @@ class ReservationBase(SQLModel):
 class Reservation(ReservationBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "reservation_date",
+            name="unique_reservation",
+        ),
+    )
+
 
 class ReservationPublic(ReservationBase):
     id: int
@@ -273,7 +283,13 @@ class ReservationUserBase(SQLModel):
 
 
 class ReservationUser(ReservationUserBase, table=True):
-    pass
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "reservation_id",
+            name="unique_reservation_user",
+        ),
+    )
 
 
 class ReservationUserPublic(SQLModel):

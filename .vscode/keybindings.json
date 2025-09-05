@@ -1,7 +1,7 @@
 [
-    {
-        "key": "ctrl+alt+s",
-        "command": "workbench.action.tasks.runTask",
-        "args": "Start Full Stack"
-    }
+  {
+    "key": "ctrl+alt+s",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Start Full Stack"
+  }
 ]

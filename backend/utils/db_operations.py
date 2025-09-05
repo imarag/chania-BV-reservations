@@ -1,15 +1,8 @@
 from fastapi import HTTPException
-from sqlmodel import select, Session
-from models.db_models import (
-    Court,
-    Reservation,
-    ReservationUser,
-    TimeSlot,
-    User,
-    ReservationCreate,
-    ReservationUserCreate,
-    ReservationUserPublic,
-)
+from models.db_models import (Court, Reservation, ReservationCreate,
+                              ReservationUser, ReservationUserCreate,
+                              ReservationUserPublic, TimeSlot, User)
+from sqlmodel import Session, select
 
 
 def get_users(session: Session) -> list[User]:
@@ -91,20 +84,10 @@ def get_reservation_player_by_id(
 
 def add_reservation(session: Session, reservation: ReservationCreate) -> Reservation:
     reservation_db = Reservation.model_validate(reservation)
-    print(reservation_db, "&&&55")
     session.add(reservation_db)
     session.commit()
     session.refresh(reservation_db)
     return reservation_db
-
-
-# @app.post("/heroes/", response_model=HeroPublic)
-# def create_hero(hero: HeroCreate, session: SessionDep):
-#     db_hero = Hero.model_validate(hero)
-#     session.add(db_hero)
-#     session.commit()
-#     session.refresh(db_hero)
-#     return db_hero
 
 
 def add_reservation_users(

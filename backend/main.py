@@ -1,17 +1,18 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
-from starlette.exceptions import HTTPException as StarletteHTTPException
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 from core.app_paths import AppPaths
-from dependencies import get_settings
 from core.db_handler import DBHandler
+from dependencies import get_settings
+from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from routers import authentication, database_queries
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 settings = get_settings()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator:  # noqa: ARG001
@@ -23,12 +24,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:  # noqa: ARG001
 
 app = FastAPI(lifespan=lifespan)
 
-app.include_router(
-    authentication.router, prefix=AppPaths.AUTH_EP.value, tags=["Auth"]
-)
+app.include_router(authentication.router, prefix=AppPaths.AUTH_EP.value, tags=["Auth"])
 app.include_router(
     database_queries.router, prefix=AppPaths.DB_EP.value, tags=["Database"]
 )
+
 
 # this is for raising httpexception errors
 @app.exception_handler(StarletteHTTPException)
@@ -48,21 +48,14 @@ async def validation_exception_handler(request, exc):
         status_code=400,
         content={"error_message": ", ".join([f'{err["msg"]}' for err in errors])},
     )
-    
-from dependencies import CurrentUserDep
-@app.get("/get-token")
-async def get_token(
-    curr_user: CurrentUserDep
-) -> str | None:
 
-    return curr_user
 
 origins = [
-    "http://0.0.0.0:8000", 
-    "http://127.0.0.1:8000", 
+    "http://0.0.0.0:8000",
+    "http://127.0.0.1:8000",
     "http://localhost:4321",
     "http://localhost:5173",
-    ]
+]
 
 app.add_middleware(
     CORSMiddleware,

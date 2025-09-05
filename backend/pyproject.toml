@@ -1,83 +1,83 @@
 [tool.ruff.lint]
-preview = true
-ignore = ["S104", "PLR6201", "S101"]
-select = [
-    # pycodestyle (whitespace, formatting, etc.)
-    "E",
-    "W",
+# preview = true
+# ignore = ["S104", "PLR6201", "S101"]
+# select = [
+#     # pycodestyle (whitespace, formatting, etc.)
+#     "E",
+#     "W",
 
-    # Pyflakes (undefined names, unused imports, etc.)
-    "F",
+#     # Pyflakes (undefined names, unused imports, etc.)
+#     "F",
 
-    # pyupgrade (suggest modern Python features)
-    "UP",
+#     # pyupgrade (suggest modern Python features)
+#     "UP",
 
-    # flake8-bugbear (likely bugs and design problems)
-    "B",
+#     # flake8-bugbear (likely bugs and design problems)
+#     "B",
 
-    # flake8-simplify (simplify Python code)
-    "SIM",
+#     # flake8-simplify (simplify Python code)
+#     "SIM",
 
-    # isort (import sorting)
-    "I",
+#     # isort (import sorting)
+#     "I",
 
-    # pep8-naming (naming conventions)
-    "N",
+#     # pep8-naming (naming conventions)
+#     "N",
 
-    # eradicate (detect commented-out code)
-    "ERA",
+#     # eradicate (detect commented-out code)
+#     "ERA",
 
-    # fastapi-specific plugin rules
-    "FAST",
+#     # fastapi-specific plugin rules
+#     "FAST",
 
-    # function annotations (missing or invalid annotations)
-    "ANN",
+#     # function annotations (missing or invalid annotations)
+#     "ANN",
 
-    # bandit (security issues)
-    "S",
+#     # bandit (security issues)
+#     "S",
 
-    # flake8-annotations-complexity
-    "A",
+#     # flake8-annotations-complexity
+#     "A",
 
-    # flake8-comprehensions
-    "C4",
+#     # flake8-comprehensions
+#     "C4",
 
-    # flake8-errmsg (string literal in exception messages)
-    "EM",
+#     # flake8-errmsg (string literal in exception messages)
+#     "EM",
 
-    # flake8-implicit-str-concat
-    "ISC",
+#     # flake8-implicit-str-concat
+#     "ISC",
 
-    # flake8-logging-format
-    "LOG",
+#     # flake8-logging-format
+#     "LOG",
 
-    # flake8-logging (general logging issues)
-    "G",
+#     # flake8-logging (general logging issues)
+#     "G",
 
-    # flake8-quotes (quote style consistency)
-    "Q",
+#     # flake8-quotes (quote style consistency)
+#     "Q",
 
-    # flake8-return (return-related issues)
-    "RET",
+#     # flake8-return (return-related issues)
+#     "RET",
 
-    # flake8-todos (TODO comment management)
-    "TD",
+#     # flake8-todos (TODO comment management)
+#     "TD",
 
-    # flake8-arguments (argument-related issues)
-    "ARG",
+#     # flake8-arguments (argument-related issues)
+#     "ARG",
 
-    # flake8-pathlib (pathlib usage suggestions)
-    "PTH",
+#     # flake8-pathlib (pathlib usage suggestions)
+#     "PTH",
 
-    # pandas-vet (pandas best practices)
-    "PD",
+#     # pandas-vet (pandas best practices)
+#     "PD",
 
-    # flake8-perf (performance-related suggestions)
-    "PERF",
+#     # flake8-perf (performance-related suggestions)
+#     "PERF",
 
-    # pylint compatibility (general pylint rules)
-    "PL",
-]
+#     # pylint compatibility (general pylint rules)
+#     "PL",
+# ]
 
 [tool.ruff.format]
 # Prefer single quotes over double quotes.

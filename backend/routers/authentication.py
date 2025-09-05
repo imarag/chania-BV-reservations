@@ -1,11 +1,11 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, Form, HTTPException
 from core.auth_handler import AuthHandler
-from dependencies import SessionDep, SettingsDep, CurrentUserDep
+from dependencies import CurrentUserDep, SessionDep, SettingsDep
+from fastapi import APIRouter, HTTPException
 from models.api_models import LoginResponse, RegisterResponse
-from models.db_models import User, UserLogin, UserUpdate, UserPublic, UserRegister
-from utils.db_operations import add_user, update_user, get_user_by_email, get_user_by_id
+from models.db_models import User, UserLogin, UserPublic, UserRegister
+from utils.db_operations import add_user, get_user_by_email
 
 router = APIRouter()
 
@@ -45,6 +45,7 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+
     access_token = auth_handler.create_access_token(
         data={"user_id": user.id}, expires_delta=access_token_expires
     )
@@ -73,4 +74,3 @@ async def read_current_user(current_user: CurrentUserDep) -> UserPublic:
 #     session.commit()
 #     session.refresh(hero_db)
 #     return hero_db
-

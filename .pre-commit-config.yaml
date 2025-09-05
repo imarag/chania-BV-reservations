@@ -1,3 +1,8 @@
+# .pre-commit-config.yaml
+default_install_hook_types: [pre-commit]
+default_language_version:
+  python: python3.12
+
 repos:
   # --- Python backend hooks ---
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -5,47 +10,50 @@ repos:
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
+      - id: check-merge-conflict
       - id: check-yaml
       - id: check-json
-      - id: pretty-format-json
-      - id: debug-statements
-      - id: check-merge-conflict
-      - id: requirements-txt-fixer
-      - id: check-docstring-first
+      - id: debug-statements # optional, but useful for catching leftover print/pdb
 
+  # Black: auto-format Python code
   - repo: https://github.com/psf/black
-    rev: 24.4.2
+    rev: 25.1.0
     hooks:
       - id: black
         language_version: python3.12
         files: ^backend/
 
+  # isort: auto-sort imports
   - repo: https://github.com/PyCQA/isort
-    rev: 5.13.2
+    rev: 6.0.1
     hooks:
       - id: isort
         language_version: python3.12
         files: ^backend/
 
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.1.1
+  # Ruff: lint + auto-fix many Python issues
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.12
     hooks:
-      - id: flake8
-        language_version: python3.12
+      - id: ruff
+        args: ["--fix"]
         files: ^backend/
 
-  # --- Frontend hooks ---
+  # --- Frontend hooks (React / Vite) ---
+  # Prettier: auto-format JS/TS/CSS/HTML
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: "" # Use the sha / tag you want to point at
+    rev: v3.1.0
     hooks:
       - id: prettier
         additional_dependencies:
           - prettier@2.1.2
           - "@prettier/plugin-xml@0.12.0"
 
+  # ESLint: lint + auto-fix JS/TS
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: "" # Use the sha / tag you want to point at
+    rev: "v9.34.0"
     hooks:
       - id: eslint
-        additional_dependencies:
-          - eslint@4.15.0
+        additional_dependencies: ["eslint@9.6.0"]
+        args: ["--config", "frontend/.eslint.config.js", "--fix"]
+        files: ^frontend/

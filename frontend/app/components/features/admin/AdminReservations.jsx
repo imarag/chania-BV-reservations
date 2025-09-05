@@ -1,3 +1,3 @@
 export default function AdminReservations() {
-    return <div></div>;
+  return <div></div>;
 }

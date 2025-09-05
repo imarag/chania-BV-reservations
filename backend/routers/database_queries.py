@@ -1,28 +1,15 @@
-import time
-from fastapi import APIRouter, Body
 from typing import Annotated
+
 from core.auth_handler import AuthHandler
 from dependencies import SessionDep
-from models.db_models import (
-    UserPublic,
-    CourtPublic,
-    TimeSlotPublic,
-    ReservationPublic,
-    ReservationUserPublic,
-    UserUpdate,
-    ReservationCreate,
-)
-from utils.db_operations import (
-    get_courts,
-    get_time_slots,
-    get_reservations,
-    get_reservation_players,
-    get_users,
-    update_user,
-    delete_user,
-    add_reservation,
-    add_reservation_users,
-)
+from fastapi import APIRouter, Body
+from models.db_models import (CourtPublic, ReservationCreate,
+                              ReservationPublic, TimeSlotPublic, UserPublic,
+                              UserUpdate)
+from utils.db_operations import (add_reservation, add_reservation_users,
+                                 delete_user, get_courts,
+                                 get_reservation_players, get_reservations,
+                                 get_time_slots, get_users, update_user)
 
 router = APIRouter()
 
@@ -106,94 +93,26 @@ async def update_user_info(
         updated_data["hashed_password"] = AuthHandler().generate_password_hash(
             updated_data.pop("password")
         )
-    updated_user = update_user(session, user_id, updated_data)
-    return updated_user
+    return update_user(session, user_id, updated_data)
 
 
 @router.get("/delete-user", response_model=UserPublic)
 async def delete_user_route(user_id: int, session: SessionDep) -> UserPublic:
-    deleted_user = delete_user(session, user_id)
-    return deleted_user
+    return delete_user(session, user_id)
 
 
 @router.post("/create-reservation", response_model=ReservationPublic)
 async def create_reservation_api(
     reservation: ReservationCreate,
-    reservationUsers: Annotated[list, Body()],
+    reservation_users: Annotated[list, Body()],
     session: SessionDep,
 ) -> ReservationPublic:
-    print(reservation, reservationUsers, "&&&3")
     new_reservation = add_reservation(session, reservation)
 
-    new_reservation_usrs = add_reservation_users(
-        session, new_reservation.id, reservationUsers
-    )
+    add_reservation_users(session, new_reservation.id, reservation_users)
     return new_reservation
 
 
 @router.get("/reservations")
 async def reservations_api(session: SessionDep) -> list[ReservationPublic]:
     return get_reservations(session)
-
-
-# @router.get("/get-courts-timeslots")
-# async def get_courts_timeslots(session: SessionDep) -> dict[str, list]:
-#     all_courts = get_courts(session)
-#     all_timeslots = get_time_slots(session)
-#     return {
-#         "courts": all_courts,
-#         "time_slots": all_timeslots,
-#     }
-
-
-# @router.get("/courts")
-# async def get_all_courts_route(session: SessionDep) -> list[Court]:
-#     return get_courts(session)
-
-
-# @router.get("/time-slots")
-# async def get_all_time_slots_route(session: SessionDep) -> list[TimeSlot]:
-#     return get_time_slots(session)
-
-
-# @router.get("/reservation-players")
-# async def get_all_reservation_players_route(
-#     session: SessionDep,
-# ) -> list[ReservationUser]:
-#     return get_reservation_players(session)
-
-
-# @router.get("/get-user-by-email")
-# async def get_user_by_email_route(email: str, session: SessionDep) -> UserPublic | None:
-#     user = get_user_by_email(session, email)
-#     return UserPublic(**user.model_dump()) if user else None
-
-
-# @router.get("/get-user-by-id")
-# async def get_user_by_id_route(user_id: int, session: SessionDep) -> UserPublic | None:
-#     user = get_user_by_id(session, user_id)
-#     return UserPublic(**user.model_dump()) if user else None
-
-
-# @router.get("/get-court-by-id")
-# async def get_court_by_id_route(court_id: int, session: SessionDep) -> Court | None:
-#     return get_court_by_id(session, court_id)
-
-
-# @router.get("/get-court-by-name")
-# async def get_court_by_name_route(court_name: str, session: SessionDep) -> Court | None:
-#     return get_court_by_name(session, court_name)
-
-
-# @router.get("/get-time-slot-by-id")
-# async def get_time_slot_by_id_route(
-#     time_slot_id: int, session: SessionDep
-# ) -> TimeSlot | None:
-#     return get_time_slot_by_id(session, time_slot_id)
-
-
-# @router.get("/get-reservation-by-id")
-# async def get_reservation_by_id_route(
-#     reservation_id: int, session: SessionDep
-# ) -> Reservation | None:
-#     return get_reservation_by_id(session, reservation_id)

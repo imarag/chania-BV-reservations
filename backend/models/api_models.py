@@ -1,8 +1,6 @@
-from pydantic import BaseModel
-from models.token import Token
-
-
 from models.db_models import UserPublic
+from models.token import Token
+from pydantic import BaseModel
 
 
 class RegisterResponse(BaseModel):

@@ -1,8 +1,9 @@
+import re
 from datetime import date, datetime, time
 from enum import Enum
-from pydantic import EmailStr, field_validator, model_validator, computed_field
-from sqlmodel import Field, SQLModel, UniqueConstraint
-import re
+
+from pydantic import EmailStr, computed_field, field_validator, model_validator
+from sqlmodel import Field, SQLModel
 
 # ----- Validators -----
 

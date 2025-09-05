@@ -1,23 +1,13 @@
 from pathlib import Path
 
-from sqlmodel import Session, SQLModel, create_engine
-
 from core.app_paths import AppPaths
 from core.auth_handler import AuthHandler
-from models.db_models import (  # noqa: F403
-    Court,
-    Reservation,
-    ReservationUser,
-    TimeSlot,
-    User,
-)
-from utils.initial_db_data import (
-    courts,
-    reservation_players,
-    reservations,
-    timeslots,
-    users,
-)
+from models.db_models import Reservation  # noqa: F403
+from models.db_models import Court, ReservationUser, TimeSlot, User
+from sqlmodel import Session, SQLModel, create_engine
+from utils.initial_db_data import (courts, reservation_players, reservations,
+                                   timeslots, users)
+
 
 class DBHandler:
     def __init__(self) -> None:
@@ -31,15 +21,16 @@ class DBHandler:
         SQLModel.metadata.create_all(self.engine)
 
     def populate_initial_data(self) -> None:
-        from core.auth_handler import AuthHandler  # lazy import to avoid cycles
+
         auth_handler = AuthHandler()
-        
 
         with Session(self.engine) as session:
             users_with_hash = [
                 User(
                     **user,
-                    hashed_password=auth_handler.generate_password_hash(user["password"]),
+                    hashed_password=auth_handler.generate_password_hash(
+                        user["password"]
+                    ),
                 )
                 for user in users
             ]
@@ -54,4 +45,3 @@ class DBHandler:
         if not self.db_file_path.exists():
             self.create_db_and_tables()
             self.populate_initial_data()
-

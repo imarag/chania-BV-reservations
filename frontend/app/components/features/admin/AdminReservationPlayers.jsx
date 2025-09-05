@@ -1,3 +1,3 @@
 export default function AdminReservationPlayers() {
-    return <div></div>;
+  return <div></div>;
 }

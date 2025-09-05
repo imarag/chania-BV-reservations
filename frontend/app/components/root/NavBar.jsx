@@ -23,153 +23,156 @@ import { IoClose } from "react-icons/io5";
 import { HiMenu } from "react-icons/hi";
 import { GrUserAdmin } from "react-icons/gr";
 
-
 function UserMenu({ isMenuOpen }) {
-    function handleLogout() {
-        removeToken();
-        window.location.replace(pagePaths.home.path);
-    }
-    const dropDownMenuLinks = [
-        {
-            label: pagePaths.account.name,
-            path: pagePaths.account.path,
-            page: true,
-            className: "",
-        },
-        {
-            label: pagePaths.schedule.name,
-            path: pagePaths.schedule.path,
-            page: true,
-            className: "",
-        },
-        {
-            label: pagePaths.logout.name,
-            path: "",
-            page: false,
-            onClick: handleLogout,
-            className: "text-error",
-        },
-    ];
-    return (
-        <NavItem>
-            <NavLink path={pagePaths.home.path}>
-                <DropDown menuLinks={dropDownMenuLinks} position="topRight">
-                    <Symbol IconComponent={PiUserCircleLight} />
-                    {isMenuOpen && "Account"}
-                </DropDown>
-            </NavLink>
-        </NavItem>
-    );
+  function handleLogout() {
+    removeToken();
+    window.location.replace(pagePaths.home.path);
+  }
+  const dropDownMenuLinks = [
+    {
+      label: pagePaths.account.name,
+      path: pagePaths.account.path,
+      page: true,
+      className: "",
+    },
+    {
+      label: pagePaths.schedule.name,
+      path: pagePaths.schedule.path,
+      page: true,
+      className: "",
+    },
+    {
+      label: pagePaths.logout.name,
+      path: "",
+      page: false,
+      onClick: handleLogout,
+      className: "text-error",
+    },
+  ];
+  return (
+    <NavItem>
+      <NavLink path={pagePaths.home.path}>
+        <DropDown menuLinks={dropDownMenuLinks} position="topRight">
+          <Symbol IconComponent={PiUserCircleLight} />
+          {isMenuOpen && "Account"}
+        </DropDown>
+      </NavLink>
+    </NavItem>
+  );
 }
 
 export default function NavBar() {
-    const navigate = useNavigate();
-    const [isMenuOpen, setIsMenuOpen] = useState(true);
-    const [currentUser, setCurrentUser] = useState(null);
-    useEffect(() => {
-        async function fetch_current_user() {
-            const { resData, errorMessage } = await apiRequest({
-                url: apiEndpoints.GET_CURRENT_USER,
-                method: "get",
-            });
+  const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
+  useEffect(() => {
+    async function fetch_current_user() {
+      const { resData, errorMessage } = await apiRequest({
+        url: apiEndpoints.GET_CURRENT_USER,
+        method: "get",
+      });
 
-            if (errorMessage) {
-                setCurrentUser(null);
-            }
-            setCurrentUser(resData);
-        }
-        fetch_current_user();
-    }, []);
+      if (errorMessage) {
+        setCurrentUser(null);
+      }
+      setCurrentUser(resData);
+    }
+    fetch_current_user();
+  }, []);
 
-    return (
-        <nav
-            className={`flex-none flex flex-col items-center h-full gap-8 ${isMenuOpen ? "w-64" : "w-auto"} pb-8 relative container mx-auto text-base-content/60 px-4`}
-        >
-            <div
-                className={`flex-none flex flex-col items-center text-center mt-20 gap-4`}
-            >
-                <Anchor href={pagePaths.home.path} className={"flex-none"}>
-                    <Logo />
-                </Anchor>
-                <p className="text-start text-xl font-semibold ">
-                    {isMenuOpen ? "Chania B.V." : "C.B.V"}
-                </p>
-            </div>
-            <hr className="border-t border-white/8 border-1 w-3/4 mx-auto" />
-            <ul
-                className={`grow flex flex-col ${isMenuOpen ? "items-start" : "items-center"} gap-6`}
-            >
-                <NavItem>
-                    <NavLink path={pagePaths.home.path}>
-                        <>
-                            <Symbol IconComponent={IoHomeOutline} />
-                            {isMenuOpen && pagePaths.home.name}
-                        </>
-                    </NavLink>
-                </NavItem>
-                <NavItem>
-                    <NavLink path={pagePaths.schedule.path}>
-                        <>
-                            <Symbol IconComponent={PiCalendarDotsBold} />
-                            {isMenuOpen && pagePaths.schedule.name}
-                        </>
-                    </NavLink>
-                </NavItem>
-                <NavItem>
-                    <NavLink path={pagePaths.users.path}>
-                        <>
-                            <Symbol IconComponent={PiUsersBold} />
-                            {isMenuOpen && pagePaths.users.name}
-                        </>
-                    </NavLink>
-                </NavItem>
-                {currentUser && currentUser.role == "admin" && (
-                    <NavItem className="flex items-start gap-4 hover:text-base-content hover:cursor-pointer">
-                        <NavLink path={pagePaths.admin.path}>
-                            <>
-                                <Symbol IconComponent={GrUserAdmin} />
-                                {isMenuOpen && pagePaths.admin.name}
-                            </>
-                        </NavLink>
-                    </NavItem>
-                )}
-                {!currentUser ? (
-                    <>
-                        <NavItem className="flex items-center gap-4 hover:text-base-content hover:cursor-pointer mt-auto">
-                            <NavLink path={pagePaths.login.path}>
-                                <>
-                                    <Symbol IconComponent={FiLogIn} />
-                                    {isMenuOpen && pagePaths.login.name}
-                                </>
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink path={pagePaths.register.path}>
-                                <>
-                                    <Symbol IconComponent={PiNotePencil} />
-                                    {isMenuOpen && pagePaths.register.name}
-                                </>
-                            </NavLink>
-                        </NavItem>
-                    </>
-                ) : (
-                    <div className="ms-auto md:mt-auto">
-                        <UserMenu isMenuOpen={isMenuOpen} />
-                    </div>
-                )}
-            </ul>
-            <Button
-                variant="ghost"
-                size="small"
-                className={`absolute top-4 ${isMenuOpen ? "right-4" : ""}`}
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-                {isMenuOpen ? (
-                    <Symbol IconComponent={IoClose} />
-                ) : (
-                    <Symbol IconComponent={HiMenu} />
-                )}
-            </Button>
-        </nav>
-    );
+  return (
+    <nav
+      className={`flex-none flex flex-col items-center h-full gap-8 ${
+        isMenuOpen ? "w-64" : "w-auto"
+      } pb-8 relative container mx-auto text-base-content/60 px-4`}
+    >
+      <div
+        className={`flex-none flex flex-col items-center text-center mt-20 gap-4`}
+      >
+        <Anchor href={pagePaths.home.path} className={"flex-none"}>
+          <Logo />
+        </Anchor>
+        <p className="text-start text-xl font-semibold ">
+          {isMenuOpen ? "Chania B.V." : "C.B.V"}
+        </p>
+      </div>
+      <hr className="border-t border-white/8 border-1 w-3/4 mx-auto" />
+      <ul
+        className={`grow flex flex-col ${
+          isMenuOpen ? "items-start" : "items-center"
+        } gap-6`}
+      >
+        <NavItem>
+          <NavLink path={pagePaths.home.path}>
+            <>
+              <Symbol IconComponent={IoHomeOutline} />
+              {isMenuOpen && pagePaths.home.name}
+            </>
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink path={pagePaths.schedule.path}>
+            <>
+              <Symbol IconComponent={PiCalendarDotsBold} />
+              {isMenuOpen && pagePaths.schedule.name}
+            </>
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink path={pagePaths.users.path}>
+            <>
+              <Symbol IconComponent={PiUsersBold} />
+              {isMenuOpen && pagePaths.users.name}
+            </>
+          </NavLink>
+        </NavItem>
+        {currentUser && currentUser.role == "admin" && (
+          <NavItem className="flex items-start gap-4 hover:text-base-content hover:cursor-pointer">
+            <NavLink path={pagePaths.admin.path}>
+              <>
+                <Symbol IconComponent={GrUserAdmin} />
+                {isMenuOpen && pagePaths.admin.name}
+              </>
+            </NavLink>
+          </NavItem>
+        )}
+        {!currentUser ? (
+          <>
+            <NavItem className="flex items-center gap-4 hover:text-base-content hover:cursor-pointer mt-auto">
+              <NavLink path={pagePaths.login.path}>
+                <>
+                  <Symbol IconComponent={FiLogIn} />
+                  {isMenuOpen && pagePaths.login.name}
+                </>
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink path={pagePaths.register.path}>
+                <>
+                  <Symbol IconComponent={PiNotePencil} />
+                  {isMenuOpen && pagePaths.register.name}
+                </>
+              </NavLink>
+            </NavItem>
+          </>
+        ) : (
+          <div className="ms-auto md:mt-auto">
+            <UserMenu isMenuOpen={isMenuOpen} />
+          </div>
+        )}
+      </ul>
+      <Button
+        variant="ghost"
+        size="small"
+        className={`absolute top-4 ${isMenuOpen ? "right-4" : ""}`}
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+      >
+        {isMenuOpen ? (
+          <Symbol IconComponent={IoClose} />
+        ) : (
+          <Symbol IconComponent={HiMenu} />
+        )}
+      </Button>
+    </nav>
+  );
 }

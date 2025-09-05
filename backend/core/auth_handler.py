@@ -2,12 +2,11 @@ import re
 from datetime import datetime, timedelta, timezone
 
 import jwt
+from dependencies import get_settings
+from models.db_models import User, UserLogin
 from passlib.context import CryptContext
 from sqlmodel import Session
-
-from models.db_models import User, UserLogin, UserRegister
 from utils.db_operations import get_user_by_email
-from dependencies import get_settings
 
 settings = get_settings()
 
@@ -30,7 +29,6 @@ class AuthHandler:
         ):
             return None
         return existing_user  # no need to reconstruct
-
 
     @staticmethod
     def create_access_token(

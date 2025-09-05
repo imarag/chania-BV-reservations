@@ -19,7 +19,8 @@ ignore = [
     # Ignore less important warnings that are often noisy
     "S104",      # e.g., use of assert in production code
     "PLR6201",   # pylint-style warnings
-    "S101"       # assert statements in code
+    "S101",       # assert statements in code
+    "B904"
 ]
 
 [tool.ruff.format]

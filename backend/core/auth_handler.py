@@ -31,9 +31,7 @@ class AuthHandler:
         return existing_user  # no need to reconstruct
 
     @staticmethod
-    def create_access_token(
-        data: dict = {}, expires_delta: timedelta | None = None
-    ) -> str:
+    def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
         to_encode.update({"exp": expire})
@@ -67,7 +65,10 @@ class AuthHandler:
     @staticmethod
     def validate_full_name(full_name: str) -> str | None:
         if not re.match(r"^[A-Za-z\s]{2,100}$", full_name):
-            return "Invalid full name format. It must be 2-100 characters long and contain only letters and spaces."
+            return (
+                "Invalid full name format. "
+                "It must be 2-100 characters long and contain only letters and spaces."
+            )
         return None
 
     @staticmethod

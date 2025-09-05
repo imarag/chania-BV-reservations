@@ -14,7 +14,7 @@ export default function ProtectedPage({ children }) {
     if (!currentUser) {
       showNotification("Please log in to access this page.", "error");
       navigate(pagePaths.login.path, { replace: true });
-    } else if (!currentUser?.can_create_reservation) {
+    } else if (currentUser.can_create_reservation === false) {
       showNotification(
         "You cannot book another court because you already have a reservation.",
         "error"

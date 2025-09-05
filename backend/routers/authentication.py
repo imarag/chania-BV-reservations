@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from core.auth_handler import AuthHandler
 from dependencies import CurrentUserDep, SessionDep, SettingsDep
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from models.api_models import LoginResponse, RegisterResponse
 from models.db_models import User, UserLogin, UserPublic, UserRegister
 from utils.db_operations import add_user, get_user_by_email
@@ -61,6 +61,20 @@ async def login(
 @router.get("/get-current-user", response_model=UserPublic)
 async def read_current_user(current_user: CurrentUserDep) -> UserPublic:
     return current_user
+
+
+@router.get("/is-user-admin")
+async def is_user_admin_api(current_user: CurrentUserDep, settings: SettingsDep):
+    if current_user.email not in settings.admins:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have access to this resource",
+        )
+    return {
+        "is_admin": True,
+        "message": "User has admin access",
+        "user_email": current_user.email,
+    }
 
 
 # @app.patch("/heroes/{hero_id}", response_model=HeroPublic)

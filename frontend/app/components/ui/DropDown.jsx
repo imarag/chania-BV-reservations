@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-
+import Symbol from "./Symbol";
 /*
 the structure of menu links contains two version:
 1. if path points to a real page (page: true) or
@@ -56,18 +56,27 @@ export default function DropDown({
         {menuLinks?.map((linkItem, index) => (
           <li key={linkItem.label}>
             {linkItem.page ? (
-              <Link to={linkItem.path} className={linkItem.className}>
+              <Link
+                to={linkItem.path}
+                className={`flex items-center gap-2 ${linkItem.className}`}
+              >
+                {linkItem.icon && (
+                  <Symbol IconComponent={linkItem.icon} size="small" />
+                )}
                 {linkItem.label || "My link"}
               </Link>
             ) : (
               <a
-                className={linkItem.className}
+                className={`flex items-center gap-2 ${linkItem.className}`}
                 href="#" // optional, prevents default navigation
                 onClick={(e) => {
                   e.preventDefault(); // stop browser from following the link
                   linkItem.onClick?.(); // call the onClick function if it exists
                 }}
               >
+                {linkItem.icon && (
+                  <Symbol IconComponent={linkItem.icon} size="small" />
+                )}
                 {linkItem.label || "My link"}
               </a>
             )}

@@ -70,4 +70,5 @@ export const apiEndpoints = {
   UPDATE_USER_INFO: `${baseDBUrl}/update-user-info?user_id=:id`,
   DELETE_USER: `${baseDBUrl}/delete-user?user_id=:id`,
   CREATE_RESERVATION: `${baseDBUrl}/create-reservation`,
+  IS_USER_ADMIN: `${baseAuthUrl}/is-user-admin`,
 };

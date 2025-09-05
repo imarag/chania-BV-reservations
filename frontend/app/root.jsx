@@ -27,7 +27,7 @@ export const links = () => [
 
 export function Layout({ children }) {
   return (
-    <html lang="en" data-theme="dark">
+    <html lang="en" data-theme="dracula">
       <head>
         <link
           rel="stylesheet"

@@ -12,7 +12,6 @@ import DropDown from "../ui/DropDown";
 import { PiUserCircleLight } from "react-icons/pi";
 import Symbol from "../ui/Symbol";
 import Button from "../ui/Button";
-import { RiMenu3Line } from "react-icons/ri";
 import { IoHomeOutline } from "react-icons/io5";
 import { PiCalendarDotsBold } from "react-icons/pi";
 import { PiUsersBold } from "react-icons/pi";
@@ -21,6 +20,8 @@ import { PiNotePencil } from "react-icons/pi";
 import { IoClose } from "react-icons/io5";
 import { HiMenu } from "react-icons/hi";
 import { GrUserAdmin } from "react-icons/gr";
+import { CgLogOut } from "react-icons/cg";
+import { IoPersonOutline } from "react-icons/io5";
 
 function UserMenu({ isMenuOpen }) {
   function handleLogout() {
@@ -32,18 +33,21 @@ function UserMenu({ isMenuOpen }) {
     {
       label: pagePaths.account.name,
       path: pagePaths.account.path,
+      icon: IoPersonOutline,
       page: true,
       className: "",
     },
     {
       label: pagePaths.schedule.name,
       path: pagePaths.schedule.path,
+      icon: PiCalendarDotsBold,
       page: true,
       className: "",
     },
     {
       label: pagePaths.logout.name,
       path: "",
+      icon: CgLogOut,
       page: false,
       onClick: handleLogout,
       className: "text-error",

@@ -52,6 +52,12 @@ export const pagePaths = {
     isHome: false,
     isPage: true,
   },
+  rules: {
+    name: "Rules",
+    path: `/rules`,
+    isHome: false,
+    isPage: true,
+  },
 };
 
 const serverUrl = "http://localhost:8000";

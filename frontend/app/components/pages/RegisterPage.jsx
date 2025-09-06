@@ -48,7 +48,10 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <FormContainer title="Register" handleFormSubmit={handleSubmit}>
+      <FormContainer
+        title="Create Your Account"
+        handleFormSubmit={handleSubmit}
+      >
         <div className="flex flex-col gap-2">
           <Label htmlFor="full_name">full_name</Label>
           <Input

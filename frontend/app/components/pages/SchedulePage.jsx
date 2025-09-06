@@ -18,15 +18,13 @@ export default function schedule() {
   }, []);
   return (
     <div>
-      <div>
-        {data && (
-          <ScheduleTable
-            courts={data.courts}
-            timeslots={data.timeslots}
-            bookings={data.bookings}
-          />
-        )}
-      </div>
+      {data && (
+        <ScheduleTable
+          courts={data.courts}
+          timeslots={data.timeslots}
+          bookings={data.bookings}
+        />
+      )}
     </div>
   );
 }

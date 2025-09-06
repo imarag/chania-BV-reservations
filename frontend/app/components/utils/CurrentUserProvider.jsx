@@ -12,14 +12,12 @@ export default function currentUserProvider({ children }) {
         url: apiEndpoints.GET_CURRENT_USER,
         method: "get",
       });
-      console.log("user", user, "&&");
       setCurrentUser(user);
     }
     fetchCurrentUser();
   }, []);
-
   return (
-    <currentUserContext.Provider value={{ currentUser }}>
+    <currentUserContext.Provider value={currentUser}>
       {children}
     </currentUserContext.Provider>
   );

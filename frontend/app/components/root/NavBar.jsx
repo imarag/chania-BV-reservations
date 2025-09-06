@@ -22,10 +22,10 @@ import { HiMenu } from "react-icons/hi";
 import { GrUserAdmin } from "react-icons/gr";
 import { CgLogOut } from "react-icons/cg";
 import { IoPersonOutline } from "react-icons/io5";
+import { MdOutlineLibraryBooks } from "react-icons/md";
 
 function UserMenu({ isMenuOpen }) {
   function handleLogout() {
-    console.log("lkjlkjlkjk");
     removeToken();
     window.location.replace(pagePaths.home.path);
   }
@@ -127,6 +127,14 @@ export default function NavBar() {
             <>
               <Symbol IconComponent={PiUsersBold} />
               {isMenuOpen && pagePaths.users.name}
+            </>
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink path={pagePaths.rules.path}>
+            <>
+              <Symbol IconComponent={MdOutlineLibraryBooks} />
+              {isMenuOpen && pagePaths.rules.name}
             </>
           </NavLink>
         </NavItem>

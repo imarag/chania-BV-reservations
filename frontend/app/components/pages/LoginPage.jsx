@@ -46,7 +46,10 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <FormContainer title="Login" handleFormSubmit={handleSubmit}>
+      <FormContainer
+        title="Sign In to Your Account"
+        handleFormSubmit={handleSubmit}
+      >
         <div className="flex flex-col gap-2">
           <Label htmlFor="email">email</Label>
           <Input

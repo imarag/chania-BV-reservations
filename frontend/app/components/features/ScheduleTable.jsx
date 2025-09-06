@@ -68,13 +68,11 @@ function BookedContent({ booking }) {
 
 function NotBookedContent({ courtId, timeslotId, currentUser, label }) {
   const navigate = useNavigate();
-
   function handleNavigate() {
     const path = pagePaths.reserve.path
       .replace(":court_id", courtId)
       .replace(":timeslot_id", timeslotId)
       .replace(":user_id", currentUser?.id);
-
     navigate(path);
   }
 
@@ -120,7 +118,7 @@ export default function ScheduleTable({ courts, timeslots, bookings }) {
 
   return (
     <div className="text-center">
-      <div className="h-screen relative inline-block mx-auto">
+      <div className="h-screen relative mx-auto">
         <img
           src="/bv-courts.png"
           className="size-full object-cover brightness-40"

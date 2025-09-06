@@ -6,7 +6,8 @@ import Collapse from "../ui/Collapse";
 import Title from "../ui/Title";
 import SubTitle from "../ui/SubTitle";
 import Symbol from "../ui/Symbol";
-
+import Loading from "../ui/Loading";
+import { LuUserRound } from "react-icons/lu";
 import { LuIdCard } from "react-icons/lu";
 import { MdAlternateEmail } from "react-icons/md";
 import { MdOutlineLocalPhone } from "react-icons/md";
@@ -22,18 +23,31 @@ function UserInfoItem({ label, value, IconComponent }) {
       <Symbol IconComponent={IconComponent} className="mb-2" />
       <div>
         <p className="font-semibold">{label}:</p>
-        <p className="text-base-content/70">{value || "-"}</p>
+        <p className="text-base-content/50">{value || "-"}</p>
       </div>
     </div>
   );
 }
 
+function UserInfoLabel({ user }) {
+  return (
+    <p className="flex items-center gap-2">
+      <Symbol IconComponent={LuUserRound} size="small" />
+      <span className="ms-4">{user.full_name}</span>
+      <span className="text-base-content/50">{user.email}</span>
+    </p>
+  );
+}
+
 function UsersList({ usersData }) {
   return (
-    <ul className="space-y-2">
+    <ul className="space-y-2 bg-base-300 p-8">
       {usersData.map((user) => (
         <li key={user.id}>
-          <Collapse className={"bg-base-200"} label={user.full_name}>
+          <Collapse
+            className={"bg-base-100"}
+            label={<UserInfoLabel user={user} />}
+          >
             <UserInfoItem
               IconComponent={LuIdCard}
               label="Full Name"
@@ -84,8 +98,11 @@ function SearchUserInput({ searchTerm, setSearchTerm }) {
       </label>
       <Input
         type="search"
+        placeholder="search users by any detail..."
         id="search"
-        className={"border-0 outline-0 hover:outline-0 focus:outline-0"}
+        className={
+          "border-0 outline-0 hover:outline-0 focus:outline-0 bg-base-300"
+        }
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -93,19 +110,41 @@ function SearchUserInput({ searchTerm, setSearchTerm }) {
   );
 }
 
+function NoUsersFound() {
+  return (
+    <div className="size-full text-center">
+      <p>No users found...</p>
+    </div>
+  );
+}
+
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     async function fetch_all_users() {
+      setLoading(true);
       const { resData, errorMessage } = await apiRequest({
         url: apiEndpoints.GET_ALL_USERS,
         method: "get",
       });
+
+      if (errorMessage) {
+        setError(errorMessage);
+        setLoading(false);
+        return;
+      }
       setUsers(resData);
+      setLoading(false);
     }
     fetch_all_users();
   }, []);
+
+  if (loading) {
+    return <Loading />;
+  }
 
   const filteredUsers = users.filter((user) => {
     const termLower = searchTerm.toLowerCase();
@@ -127,7 +166,7 @@ export default function UsersPage() {
       {filteredUsers.length > 0 ? (
         <UsersList usersData={filteredUsers} />
       ) : (
-        <p>No players found...</p>
+        <NoUsersFound />
       )}
     </div>
   );

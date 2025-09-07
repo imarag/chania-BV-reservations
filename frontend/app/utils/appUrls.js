@@ -1,80 +1,59 @@
 export const pagePaths = {
-  home: {
-    name: "Home",
-    path: "/",
-    isHome: true,
-    isPage: true,
-  },
-  schedule: {
-    name: "Schedule",
-    path: "/schedule",
-    isHome: false,
-    isPage: true,
-  },
-  login: {
-    name: "Login",
-    path: "/auth/login",
-    isHome: false,
-    isPage: true,
-  },
-  register: {
-    name: "Register",
-    path: "/auth/register",
-    isHome: false,
-    isPage: true,
-  },
-  logout: {
-    name: "Logout",
-    isHome: false,
-    isPage: false,
-  },
+  home: { name: "Home", route: "home", path: "/" },
+  schedule: { name: "Schedule", route: "schedule", path: "/schedule" },
+  login: { name: "Login", route: "login", path: "/auth/login" },
+  register: { name: "Register", route: "register", path: "/auth/register" },
+  logout: { name: "Logout", route: null, path: null },
   users: {
     name: "Players",
+    route: "users",
     path: "/users",
-    isHome: false,
-    isPage: true,
   },
   account: {
     name: "Account",
-    path: "/acount",
-    isHome: false,
-    isPage: true,
+    route: "account",
+    path: "/account",
+    requiresAuth: true,
   },
   admin: {
     name: "Admin",
+    route: "admin",
     path: "/admin",
-    isHome: false,
-    isPage: true,
+    requiresAuth: true,
   },
   reserve: {
     name: "Reserve",
-    path: `/reserve?court_id=:court_id&timeslot_id=:timeslot_id&user_id=:user_id`,
-    isHome: false,
-    isPage: true,
+    route: "reserve",
+    path: "/reserve",
+    requiresAuth: true,
   },
-  rules: {
-    name: "Rules",
-    path: `/rules`,
-    isHome: false,
-    isPage: true,
-  },
+  rules: { name: "Rules", route: "rules", path: "/rules" },
 };
 
-const serverUrl = "http://localhost:8000";
-const baseApiUrl = `${serverUrl}/api`;
-const baseAuthUrl = `${baseApiUrl}/auth`;
-const baseDBUrl = `${baseApiUrl}/db`;
+const DEFAULT_API_URL = "http://localhost:8000";
+export const SERVER_URL =
+  (typeof window !== "undefined" && window.__APP_API_URL__) ||
+  import.meta.env?.VITE_API_URL ||
+  DEFAULT_API_URL;
+
+const API = new URL("/api/", SERVER_URL);
+const AUTH = new URL("auth/", API);
+const DB = new URL("db/", API);
+
+const u = (base, path) => new URL(path, base).href;
 
 export const apiEndpoints = {
-  LOGIN_USER: `${baseAuthUrl}/login`,
-  REGISTER_USER: `${baseAuthUrl}/register`,
-  LOGOUT_USER: `${baseAuthUrl}/logout`,
-  GET_SCHEDULE: `${baseApiUrl}/schedule`,
-  GET_BOOKING_CELLS: `${baseDBUrl}/get-booking-cells`,
-  GET_ALL_USERS: `${baseDBUrl}/users`,
-  GET_CURRENT_USER: `${baseAuthUrl}/get-current-user`,
-  UPDATE_USER_INFO: `${baseDBUrl}/update-user-info?user_id=:id`,
-  DELETE_USER: `${baseDBUrl}/delete-user?user_id=:id`,
-  CREATE_RESERVATION: `${baseDBUrl}/create-reservation`,
-  IS_USER_ADMIN: `${baseAuthUrl}/is-user-admin`,
+  LOGIN_USER: u(AUTH, "login"),
+  REGISTER_USER: u(AUTH, "register"),
+  LOGOUT_USER: u(AUTH, "logout"),
+  GET_CURRENT_USER: u(AUTH, "get-current-user"),
+  IS_USER_ADMIN: u(AUTH, "is-user-admin"),
+
+  GET_SCHEDULE: u(API, "schedule"),
+  GET_BOOKING_CELLS: u(DB, "get-booking-cells"),
+  GET_ALL_USERS: u(DB, "users"),
+  UPDATE_USER_INFO: (id) =>
+    u(DB, `update-user-info?user_id=${encodeURIComponent(id)}`),
+  DELETE_USER: (id) => u(DB, `delete-user?user_id=${encodeURIComponent(id)}`),
+  CREATE_RESERVATION: u(DB, "create-reservation"),
 };

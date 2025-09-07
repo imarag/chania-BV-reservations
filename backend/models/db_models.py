@@ -211,6 +211,7 @@ class UserUpdate(SQLModel):
 class UserLogin(SQLModel):
     email: EmailStr
     password: str
+    stay_logged_in: bool = Field(default=True)
 
     @field_validator("password")
     @classmethod

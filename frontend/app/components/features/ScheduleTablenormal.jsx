@@ -5,10 +5,11 @@ import { GiTennisCourt } from "react-icons/gi";
 import { IoMdTime } from "react-icons/io";
 import Collapse from "../ui/Collapse";
 import { useContext } from "react";
-import { currentUserContext } from "../../context/currentUserContext.js";
+import { CurrentUserContext } from "../../context/CurrentUserContext.js";
 import { useState } from "react";
 import { apiRequest } from "../../utils/apiRequest";
 import { apiEndpoints, pagePaths } from "../../utils/appUrls";
+import { pathTo } from "../../utils/path-tools.js";
 
 function ScheduleColumn({ courts }) {
   const headerClass = "font-bold bg-base-300 border border-base-100";
@@ -60,11 +61,6 @@ function NotBookedContent({ courtId, timeslotId, currentUser }) {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    console.log({
-      court_id: courtId,
-      timeslot_id: timeslotId,
-      user_id: currentUser.id,
-    });
     return;
     const { resData, errorMessage } = await apiRequest({
       url: apiEndpoints.CREATE_RESERVATION,
@@ -90,10 +86,15 @@ function NotBookedContent({ courtId, timeslotId, currentUser }) {
         type="button"
         variant="ghost"
         className="font-bold"
-        href={pagePaths.reserve.path
-          .replace(":court_id", courtId)
-          .replace(":timeslot_id", timeslotId)
-          .replace(":user_id", currentUser.id)}
+        href={pathTo(
+          pagePaths.reserve.path,
+          {},
+          {
+            court_id: courtId,
+            timeslot_id: timeslotId,
+            user_id: currentUser.id,
+          }
+        )}
       >
         Reserve
       </Anchor>
@@ -172,7 +173,7 @@ function ScheduleBody({ timeslots, courts, bookings, currentUser }) {
 }
 
 export default function ScheduleTable({ courts, timeslots, bookings }) {
-  const currentUser = useContext(currentUserContext);
+  const currentUser = useContext(CurrentUserContext);
   const tableClass = "table text-base-content/80";
   return (
     <table className={tableClass}>

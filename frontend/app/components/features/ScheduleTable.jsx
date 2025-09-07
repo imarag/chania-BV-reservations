@@ -1,14 +1,6 @@
-import Button from "../ui/Button";
-import Anchor from "../ui/Anchor";
-import Symbol from "../ui/Symbol";
-import { GiTennisCourt } from "react-icons/gi";
-import { IoMdTime } from "react-icons/io";
-import Collapse from "../ui/Collapse";
 import { useContext, Fragment, useState } from "react";
-import { currentUserContext } from "../../context/currentUserContext.js";
-import { apiRequest } from "../../utils/apiRequest";
-import { apiEndpoints, pagePaths } from "../../utils/appUrls";
-import { IoInformationCircleOutline } from "react-icons/io5";
+import { CurrentUserContext } from "../../context/CurrentUserContext.js";
+import { pagePaths } from "../../utils/appUrls";
 import { useNavigate } from "react-router";
 
 function ReserveButton({ children, booked = false, ...rest }) {
@@ -114,7 +106,7 @@ function CourtRectangle({ timeslots, courtId, currentUser, bookings, title }) {
 }
 
 export default function ScheduleTable({ courts, timeslots, bookings }) {
-  const currentUser = useContext(currentUserContext);
+  const currentUser = useContext(CurrentUserContext);
 
   return (
     <div className="text-center">

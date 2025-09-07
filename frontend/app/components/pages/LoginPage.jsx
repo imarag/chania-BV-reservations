@@ -11,13 +11,20 @@ import { saveToken } from "../../utils/authentication";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [formInfo, setFormInfo] = useState({ email: "", password: "" });
+  const [formInfo, setFormInfo] = useState({
+    email: "",
+    password: "",
+    stay_logged_in: true,
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   function handleChange(e) {
-    const { name, value } = e.target;
-    setFormInfo((prev) => ({ ...prev, [name]: value }));
+    const { name, type, value, checked } = e.target;
+    setFormInfo((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   }
 
   async function handleSubmit(e) {
@@ -39,7 +46,10 @@ export default function LoginPage() {
     }
 
     if (resData.token) {
-      saveToken(resData.token.access_token);
+      saveToken(
+        resData.token.access_token,
+        formInfo.stay_logged_in ? "local" : "session"
+      );
     }
     window.location.replace(pagePaths.home.path);
   }
@@ -59,6 +69,7 @@ export default function LoginPage() {
             value={formInfo.email}
             onChange={handleChange}
             disabled={loading}
+            className="w-full"
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -70,7 +81,19 @@ export default function LoginPage() {
             value={formInfo.password}
             onChange={handleChange}
             disabled={loading}
+            className="w-full"
           />
+        </div>
+        <div className="flex items-center gap-2">
+          <Input
+            size="small"
+            type="checkbox"
+            id="stay_logged_in"
+            name="stay_logged_in"
+            checked={formInfo.stay_logged_in}
+            onChange={handleChange}
+          />
+          <Label htmlFor="stay_logged_in">stay logged in</Label>
         </div>
         {error && <Message type="error" message={error} />}
         <p className="text-center text-sm flex flex-col md:flex-row items-center justify-center gap-2">

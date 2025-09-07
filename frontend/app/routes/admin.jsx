@@ -4,10 +4,10 @@ import { apiRequest } from "../utils/apiRequest";
 import { useEffect, useContext } from "react";
 import { useNavigate } from "react-router";
 import { pagePaths } from "../utils/appUrls";
-import { notificationContext } from "../context/notificationContext";
+import { NotificationContext } from "../context/NotificationContext";
 
 export default function Admin() {
-  const { showNotification } = useContext(notificationContext);
+  const { showNotification } = useContext(NotificationContext);
   const navigate = useNavigate();
   useEffect(() => {
     async function checkAdminUser() {

@@ -53,7 +53,7 @@ export default function RegisterPage() {
         handleFormSubmit={handleSubmit}
       >
         <div className="flex flex-col gap-2">
-          <Label htmlFor="full_name">full_name</Label>
+          <Label htmlFor="full_name">full name</Label>
           <Input
             id="full_name"
             type="text"
@@ -61,6 +61,7 @@ export default function RegisterPage() {
             value={formInfo.full_name}
             onChange={handleChange}
             disabled={loading}
+            className="w-full"
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -72,6 +73,7 @@ export default function RegisterPage() {
             value={formInfo.email}
             onChange={handleChange}
             disabled={loading}
+            className="w-full"
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -83,6 +85,7 @@ export default function RegisterPage() {
             value={formInfo.password}
             onChange={handleChange}
             disabled={loading}
+            className="w-full"
           />
         </div>
         <div className="flex flex-col gap-2">
@@ -94,6 +97,7 @@ export default function RegisterPage() {
             value={formInfo["password_confirm"]}
             onChange={handleChange}
             disabled={loading}
+            className="w-full"
           />
         </div>
         {error && <Message message={error} />}

@@ -1,5 +1,5 @@
 import AccountPage from "../components/pages/AccountPage";
-import ProtectedPage from "../components/utils/ProtectedPage";
+
 export function meta() {
   return [
     { title: "New React Router App" },
@@ -8,9 +8,5 @@ export function meta() {
 }
 
 export default function Account() {
-  return (
-    <ProtectedPage>
-      <AccountPage />
-    </ProtectedPage>
-  );
+  return <AccountPage />;
 }

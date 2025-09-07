@@ -56,9 +56,9 @@ export default function Input({
     search: sizeMappingInput,
     date: sizeMappingInput,
   };
-  const baseClass = `${typeMapping[type] || "input"} w-full inline-block`;
+  const baseClass = `${typeMapping[type] || "input"} inline-block`;
   const globalClass = `${baseClass} ${sizeMappingElement[type][size] || ""}  ${
     className || ""
   }`;
-  return <input className={globalClass} {...rest} />;
+  return <input className={globalClass} type={type} {...rest} />;
 }

@@ -1,6 +1,8 @@
 import Tabs from "../ui/Tabs";
 import AccountSettings from "../features/AccountSettings";
 import PersonalInfoSettings from "../features/PersonalInfoSettings";
+import Title from "../ui/Title";
+import SubTitle from "../ui/SubTitle";
 
 export default function AccountPage() {
   const tabsItems = [
@@ -14,8 +16,11 @@ export default function AccountPage() {
     },
   ];
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-4">Account Page</h1>
+    <div className="p-8 space-y-4">
+      <Title className="mb-4">Account Page</Title>
+      <SubTitle className="mb-12">
+        Configure your account and personal settings
+      </SubTitle>
       <Tabs tabsItems={tabsItems} />
     </div>
   );

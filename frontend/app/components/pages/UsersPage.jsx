@@ -159,7 +159,7 @@ export default function UsersPage() {
   return (
     <div>
       <Title className="text-center mb-4">Users Information</Title>
-      <SubTitle className="text-center mb-8" variant="page">
+      <SubTitle className="text-center mb-12" variant="page">
         Search across all registered users by any of their details
       </SubTitle>
       <SearchUserInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} />

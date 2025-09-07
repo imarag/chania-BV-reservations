@@ -5,7 +5,14 @@ import { useEffect, useContext } from "react";
 import { useNavigate } from "react-router";
 import { pagePaths } from "../utils/appUrls";
 import { NotificationContext } from "../context/NotificationContext";
+import { createPageMeta } from "../utils/page-info";
 
+export function meta() {
+  const title = "Log into your acount | Chania BV";
+  const description =
+    "Register to book courts, manage reservations, and update your profile.";
+  return createPageMeta(title, description);
+}
 export default function Admin() {
   const { showNotification } = useContext(NotificationContext);
   const navigate = useNavigate();

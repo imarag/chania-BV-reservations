@@ -1,10 +1,11 @@
 import AccountPage from "../components/pages/AccountPage";
+import { createPageMeta } from "../utils/page-info";
 
 export function meta() {
-  return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
-  ];
+  const title = "Log into your acount | Chania BV";
+  const description =
+    "Register to book courts, manage reservations, and update your profile.";
+  return createPageMeta(title, description);
 }
 
 export default function Account() {

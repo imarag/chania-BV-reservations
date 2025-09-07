@@ -4,13 +4,15 @@ import { pagePaths } from "./utils/appUrls";
 // filter pages that do not exist (e.g. logout page) and the home page (specidal index below)
 // and transform into a list of page objects
 const pages = Object.keys(pagePaths)
-  .filter((pageKey) => pagePaths[pageKey]?.path || pagePaths[pageKey] === "/")
+  .filter(
+    (pageKey) => pagePaths[pageKey]?.path && pagePaths[pageKey]?.path !== "/"
+  )
   .map((pageKey) => pagePaths[pageKey]);
 
 // get the home page
-const homePage = Object.keys(pagePaths).find(
-  (pageKey) => pagePaths[pageKey]?.path === "/"
-);
+const homePage = Object.keys(pagePaths)
+  .map((pageKey) => pagePaths[pageKey])
+  .find((page) => page.path === "/");
 
 // public vs protected
 const publicPages = pages.filter((page) => !page.requiresAuth);

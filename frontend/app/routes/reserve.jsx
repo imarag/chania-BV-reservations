@@ -5,16 +5,13 @@ import { NotificationContext } from "../context/NotificationContext";
 import { CurrentUserContext } from "../context/CurrentUserContext";
 import { useNavigate } from "react-router";
 import { pagePaths } from "../utils/appUrls";
+import { createPageMeta } from "../utils/page-info";
 
 export function meta() {
-  return [
-    { title: "Register - React Router App" },
-    {
-      name: "description",
-      content:
-        "Create an account to access your data and manage your preferences.",
-    },
-  ];
+  const title = "Log into your acount | Chania BV";
+  const description =
+    "Register to book courts, manage reservations, and update your profile.";
+  return createPageMeta(title, description);
 }
 
 export default function Reserve() {

@@ -4,7 +4,7 @@ import Symbol from "../ui/Symbol";
 import { GiTennisCourt } from "react-icons/gi";
 import { IoMdTime } from "react-icons/io";
 import Collapse from "../ui/Collapse";
-import { useContext } from "react";
+import { useCurrentUser } from "../../context/CurrentUserContext.js";
 import { CurrentUserContext } from "../../context/CurrentUserContext.js";
 import { useState } from "react";
 import { apiRequest } from "../../utils/apiRequest";
@@ -62,7 +62,7 @@ function NotBookedContent({ courtId, timeslotId, currentUser }) {
     setError(null);
     setLoading(true);
     return;
-    const { resData, errorMessage } = await apiRequest({
+    const { resData, resError } = await apiRequest({
       url: apiEndpoints.CREATE_RESERVATION,
       method: "post",
       requestData: {
@@ -74,8 +74,8 @@ function NotBookedContent({ courtId, timeslotId, currentUser }) {
 
     setLoading(false);
 
-    if (errorMessage) {
-      setError(errorMessage);
+    if (resError) {
+      setError(resError);
       return;
     }
   }
@@ -173,7 +173,7 @@ function ScheduleBody({ timeslots, courts, bookings, currentUser }) {
 }
 
 export default function ScheduleTable({ courts, timeslots, bookings }) {
-  const currentUser = useContext(CurrentUserContext);
+  const { currentUser } = useCurrentUser();
   const tableClass = "table text-base-content/80";
   return (
     <table className={tableClass}>

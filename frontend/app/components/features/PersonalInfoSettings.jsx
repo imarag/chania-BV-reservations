@@ -13,7 +13,7 @@ export default function PersonalInfoSettings() {
   const [userInfo, setUserInfo] = useState(null);
   useEffect(() => {
     async function fetch_user_info() {
-      const { resData, errorMessage } = await apiRequest({
+      const { resData, resError } = await apiRequest({
         url: apiEndpoints.GET_CURRENT_USER,
         method: "get",
       });
@@ -32,7 +32,7 @@ export default function PersonalInfoSettings() {
     setError(null);
     setLoading(true);
 
-    const { resData, errorMessage } = await apiRequest({
+    const { resData, resError } = await apiRequest({
       url: apiEndpoints.UPDATE_USER_INFO.replace(":id", userInfo.id),
       method: "post",
       requestData: userInfo,
@@ -40,9 +40,9 @@ export default function PersonalInfoSettings() {
 
     setLoading(false);
 
-    if (errorMessage) {
+    if (resError) {
       setSuccess(null);
-      setError(errorMessage);
+      setError(resError);
       return;
     }
 

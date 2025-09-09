@@ -1,21 +1,22 @@
-import { useEffect, useState } from "react";
-import { apiRequest } from "../../utils/apiRequest";
+import { useState, useEffect } from "react";
 import { apiEndpoints } from "../../utils/appUrls";
+import { apiRequest } from "../../utils/apiRequest";
 import Input from "../ui/Input";
 import Collapse from "../ui/Collapse";
 import Title from "../ui/Title";
 import SubTitle from "../ui/SubTitle";
 import Symbol from "../ui/Symbol";
 import Loading from "../ui/Loading";
-import { LuUserRound } from "react-icons/lu";
+import { LuUserRound, LuUser, LuSearch } from "react-icons/lu";
 import { LuIdCard } from "react-icons/lu";
-import { MdAlternateEmail } from "react-icons/md";
-import { MdOutlineLocalPhone } from "react-icons/md";
-import { LuUser } from "react-icons/lu";
-import { LuSearch } from "react-icons/lu";
-import { LiaBirthdayCakeSolid } from "react-icons/lia";
-import { MdOutlineBusinessCenter } from "react-icons/md";
+import {
+  MdAlternateEmail,
+  MdOutlineLocalPhone,
+  MdOutlineBusinessCenter,
+} from "react-icons/md";
 import { BiHome } from "react-icons/bi";
+import { LiaBirthdayCakeSolid } from "react-icons/lia";
+import { useNotification } from "../../context/NotificationContext";
 
 function UserInfoItem({ label, value, IconComponent }) {
   return (
@@ -45,7 +46,7 @@ function UsersList({ usersData }) {
       {usersData.map((user) => (
         <li key={user.id}>
           <Collapse
-            className={"bg-base-100"}
+            className="bg-base-100"
             label={<UserInfoLabel user={user} />}
           >
             <UserInfoItem
@@ -100,9 +101,7 @@ function SearchUserInput({ searchTerm, setSearchTerm }) {
         type="search"
         placeholder="search users by any detail..."
         id="search"
-        className={
-          "border-0 outline-0 hover:outline-0 focus:outline-0 bg-base-300"
-        }
+        className="border-0 outline-0 hover:outline-0 focus:outline-0 bg-base-300"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
@@ -119,37 +118,44 @@ function NoUsersFound() {
 }
 
 export default function UsersPage() {
+  const { showNotification } = useNotification();
+  const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    async function fetch_all_users() {
-      setLoading(true);
-      const { resData, errorMessage } = await apiRequest({
+    const controller = new AbortController();
+
+    setLoading(true);
+
+    async function fetchData() {
+      const { resData, resError, canceled } = await apiRequest({
         url: apiEndpoints.GET_ALL_USERS,
-        method: "get",
+        signal: controller.signal,
       });
 
-      if (errorMessage) {
-        setError(errorMessage);
+      if (canceled) {
         setLoading(false);
         return;
       }
-      setUsers(resData);
+      if (resError) {
+        setLoading(false);
+        showNotification(resError, "error");
+        return;
+      }
+
       setLoading(false);
+      setUsers(resData);
     }
-    fetch_all_users();
+
+    fetchData();
+    return () => controller.abort();
   }, []);
 
-  if (loading) {
-    return <Loading />;
-  }
+  if (loading) return <Loading />;
 
   const filteredUsers = users.filter((user) => {
     const termLower = searchTerm.toLowerCase();
-
-    // Check every key/value in the user object
     return Object.values(user).some((value) => {
       if (value === null || value === undefined) return false;
       return value.toString().toLowerCase().includes(termLower);

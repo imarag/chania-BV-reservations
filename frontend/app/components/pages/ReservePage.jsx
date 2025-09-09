@@ -137,7 +137,7 @@ function PlayersPanel({ courtId, timeslotId, userId }) {
 
   useEffect(() => {
     async function fetch_all_users() {
-      const { resData, errorMessage } = await apiRequest({
+      const { resData, resError } = await apiRequest({
         url: apiEndpoints.GET_ALL_USERS,
         method: "get",
       });
@@ -167,7 +167,7 @@ function PlayersPanel({ courtId, timeslotId, userId }) {
         .map((user) => user.id),
     };
 
-    const { resData, errorMessage } = await apiRequest({
+    const { resData, resError } = await apiRequest({
       url: apiEndpoints.CREATE_RESERVATION,
       method: "post",
       requestData: requestData,
@@ -175,8 +175,8 @@ function PlayersPanel({ courtId, timeslotId, userId }) {
 
     setLoading(false);
 
-    if (errorMessage) {
-      setError(errorMessage);
+    if (resError) {
+      setError(resError);
       return;
     }
 

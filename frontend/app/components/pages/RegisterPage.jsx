@@ -30,7 +30,7 @@ export default function RegisterPage() {
 
     setLoading(true);
 
-    const { resData, errorMessage } = await apiRequest({
+    const { resData, resError } = await apiRequest({
       url: apiEndpoints.REGISTER_USER,
       method: "post",
       requestData: formInfo,
@@ -38,8 +38,8 @@ export default function RegisterPage() {
 
     setLoading(false);
 
-    if (errorMessage) {
-      setError(errorMessage);
+    if (resError) {
+      setError(resError);
       return;
     }
 

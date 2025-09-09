@@ -2,9 +2,9 @@ import LoginPage from "../components/pages/LoginPage";
 import { createPageMeta } from "../utils/page-info";
 
 export function meta() {
-  const title = "Log into your acount | Chania BV";
+  const title = "Login";
   const description =
-    "Register to book courts, manage reservations, and update your profile.";
+    "Log in to book volleyball courts, manage your reservations, and update your profile.";
   return createPageMeta(title, description);
 }
 

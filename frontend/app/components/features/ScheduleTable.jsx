@@ -1,5 +1,5 @@
-import { useContext, Fragment, useState } from "react";
-import { CurrentUserContext } from "../../context/CurrentUserContext.js";
+import { Fragment, useState } from "react";
+import { useCurrentUser } from "../../context/CurrentUserContext";
 import { pagePaths } from "../../utils/appUrls";
 import { useNavigate } from "react-router";
 
@@ -106,7 +106,7 @@ function CourtRectangle({ timeslots, courtId, currentUser, bookings, title }) {
 }
 
 export default function ScheduleTable({ courts, timeslots, bookings }) {
-  const currentUser = useContext(CurrentUserContext);
+  const { currentUser } = useCurrentUser();
 
   return (
     <div className="text-center">

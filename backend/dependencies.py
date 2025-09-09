@@ -35,7 +35,7 @@ async def get_current_user(
 ) -> UserPublic:
     credentials_exception = HTTPException(
         status_code=401,
-        detail="Could not validate credentials",
+        detail="Please log in to continue",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:

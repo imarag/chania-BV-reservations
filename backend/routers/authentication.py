@@ -49,17 +49,6 @@ async def login(
     access_token = auth_handler.create_access_token(
         data={"user_id": user.id}, expires_delta=access_token_expires
     )
-    print(
-        {
-            "message": "Login successful",
-            "stay_logged_in": form_data.stay_logged_in,
-            "token": {
-                "access_token": access_token,
-                "token_type": "bearer",  # noqa: S106
-            },
-        },
-        "*****",
-    )
     return {
         "message": "Login successful",
         "stay_logged_in": form_data.stay_logged_in,
@@ -70,8 +59,8 @@ async def login(
     }
 
 
-@router.get("/get-current-user", response_model=UserPublic)
-async def read_current_user(current_user: CurrentUserDep) -> UserPublic:
+@router.get("/get-current-user")
+async def read_current_user(current_user: CurrentUserDep) -> UserPublic | None:
     return current_user
 
 

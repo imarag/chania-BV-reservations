@@ -8,7 +8,7 @@ export default function schedule() {
 
   useEffect(() => {
     async function fetch_courts_timeslots() {
-      const { resData, errorMessage } = await apiRequest({
+      const { resData, resError } = await apiRequest({
         url: apiEndpoints.GET_BOOKING_CELLS,
         method: "get",
       });

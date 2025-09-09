@@ -1,21 +1,15 @@
-import { useContext, useEffect } from "react";
-import { NotificationContext } from "../../context/NotificationContext";
-import { CurrentUserContext } from "../../context/CurrentUserContext";
+import { useEffect } from "react";
+import { useNotification } from "../../context/NotificationContext";
+import { useCurrentUser } from "../../context/CurrentUserContext";
 import { useNavigate } from "react-router";
 import { pagePaths } from "../../utils/appUrls";
 import { Outlet } from "react-router";
 
-export default function ProtectedPage({ children }) {
+export default function ProtectedPage() {
   const navigate = useNavigate();
 
-  const currentUser = useContext(CurrentUserContext);
-  const { showNotification } = useContext(NotificationContext);
-  console.log(
-    currentUser,
-    "&&&&",
-    currentUser?.can_make_reservation === false,
-    currentUser?.can_make_reservation
-  );
+  const { currentUser } = useCurrentUser();
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     if (!currentUser) {

@@ -2,12 +2,12 @@ import RulesPage from "../components/pages/RulesPage";
 import { createPageMeta } from "../utils/page-info";
 
 export function meta() {
-  const title = "Rules of BV | Chania BV";
+  const title = "Rules";
   const description =
-    "Register to book courts, manage reservations, and update your profile.";
+    "Read the rules and guidelines for playing and booking volleyball courts at Chania BV.";
   return createPageMeta(title, description);
 }
 
-export default function Login() {
+export default function Rules() {
   return <RulesPage />;
 }

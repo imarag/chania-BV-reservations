@@ -3,8 +3,8 @@ import NotificationProvider from "./NotificationProvider";
 
 export default function AppProviders({ children }) {
   return (
-    <CurrentUserProvider>
-      <NotificationProvider>{children}</NotificationProvider>
-    </CurrentUserProvider>
+    <NotificationProvider>
+      <CurrentUserProvider>{children}</CurrentUserProvider>
+    </NotificationProvider>
   );
 }

@@ -23,10 +23,13 @@ import { GrUserAdmin } from "react-icons/gr";
 import { CgLogOut } from "react-icons/cg";
 import { IoPersonOutline } from "react-icons/io5";
 import { MdOutlineLibraryBooks } from "react-icons/md";
+import { useCurrentUser } from "../../context/CurrentUserContext";
 
 function UserMenu({ isMenuOpen }) {
+  const { refreshUser } = useCurrentUser();
   function handleLogout() {
     removeToken();
+    refreshUser();
     window.location.replace(pagePaths.home.path);
   }
   const dropDownMenuLinks = [
@@ -71,12 +74,12 @@ export default function NavBar() {
   const [currentUser, setCurrentUser] = useState(null);
   useEffect(() => {
     async function fetch_current_user() {
-      const { resData, errorMessage } = await apiRequest({
+      const { resData, resError } = await apiRequest({
         url: apiEndpoints.GET_CURRENT_USER,
         method: "get",
       });
 
-      if (errorMessage) {
+      if (resError) {
         setCurrentUser(null);
       }
       setCurrentUser(resData);

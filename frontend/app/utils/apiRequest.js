@@ -1,66 +1,78 @@
-// utils/apiRequest.js
 import axios from "axios";
 import { getToken } from "./authentication";
 
 export async function apiRequest({
   url,
   method = "get",
-  requestData = {},
+  requestData = null,
   customHeaders = {},
-  signal, // ✅ accept AbortController signal
+  timeoutMs = 30000, // milliseconds
+  signal = undefined,
+  responseType = "json",
 }) {
   try {
+    const methodLower = method.toLowerCase();
+
     const isFormData = requestData instanceof FormData;
+    const hasBody = methodLower !== "get" && requestData != null;
 
     const headers = { ...customHeaders };
-    if (typeof requestData === "object" && !isFormData) {
+
+    // Only set JSON content-type when sending a body and not FormData
+    if (hasBody && !isFormData) {
       headers["Content-Type"] = "application/json";
     }
 
+    // Add JWT unless caller already provided Authorization
     const token = getToken();
-    if (token) headers["Authorization"] = `Bearer ${token}`;
+    if (token && !headers.Authorization) {
+      headers.Authorization = `Bearer ${token}`;
+    }
 
-    const response = await axios({
+    const res = await axios({
       url,
-      method,
-      data: requestData,
-      responseType: "json",
+      method: methodLower,
+      params: methodLower === "get" ? requestData ?? undefined : undefined, // query string for GET
+      data: methodLower !== "get" ? requestData ?? undefined : undefined, // request body for non-GET
       headers,
-      signal, // ✅ pass the signal to axios (v1 supports this)
+      responseType, // always a string (e.g., "json", "blob", "arraybuffer")
+      signal, // enables AbortController cancellation
+      timeout: timeoutMs, // ms
     });
 
     return {
-      resData: response.data,
-      errorMessage: null,
+      resData: res.data,
+      resError: null,
       canceled: false,
-      status: response.status,
+      resStatus: res.status,
     };
   } catch (error) {
-    // ✅ Axios cancellation check (works with AbortController)
+    // Aborted via AbortController
     if (
-      axios.isCancel?.(error) ||
       error?.name === "CanceledError" ||
+      error?.name === "AbortError" ||
       error?.code === "ERR_CANCELED"
     ) {
       return {
         resData: null,
-        errorMessage: null,
+        resError: null,
         canceled: true,
-        status: null,
+        resStatus: null,
       };
     }
 
-    const globalErrorMessage =
-      error?.response?.data?.error_message ||
-      error?.response?.data?.detail ||
-      error?.message ||
+    const msg =
+      error?.response?.data?.error_message ??
+      error?.response?.data?.detail ??
+      error?.response?.data?.message ??
+      error?.message ??
       "An unexpected error occurred. Please try again later.";
 
     return {
       resData: null,
-      errorMessage: globalErrorMessage,
+      resError: msg,
       canceled: false,
-      status: error?.response?.status ?? null,
+      resStatus: error?.response?.status ?? null,
     };
   }
 }

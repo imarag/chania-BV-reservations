@@ -13,11 +13,11 @@ export default function AdminUsers() {
   // Fetch users function
   async function fetchUsers() {
     setLoading(true);
-    const { resData, errorMessage } = await apiRequest({
+    const { resData, resError } = await apiRequest({
       url: apiEndpoints.GET_ALL_USERS,
       method: "get",
     });
-    if (errorMessage) setError(errorMessage);
+    if (resError) setError(resError);
     else setData(resData);
     setLoading(false);
   }
@@ -28,12 +28,12 @@ export default function AdminUsers() {
   }, []); // empty dependency array → run only once on mount
 
   async function handleRemoveUser(user_id) {
-    const { resData, errorMessage } = await apiRequest({
+    const { resData, resError } = await apiRequest({
       url: apiEndpoints.DELETE_USER.replace(":id", user_id),
       method: "get",
     });
 
-    if (!errorMessage) {
+    if (!resError) {
       // Refresh the data after deletion
       fetchUsers();
     }

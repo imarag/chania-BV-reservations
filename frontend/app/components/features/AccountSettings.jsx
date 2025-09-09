@@ -11,7 +11,7 @@ export default function AccountSettings() {
   const [userInfo, setUserInfo] = useState(null);
   useEffect(() => {
     async function fetch_user_info() {
-      const { resData, errorMessage } = await apiRequest({
+      const { resData, resError } = await apiRequest({
         url: apiEndpoints.GET_CURRENT_USER,
         method: "get",
       });

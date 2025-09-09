@@ -1,24 +1,24 @@
 import ReservePage from "../components/pages/ReservePage";
-import { useSearchParams } from "react-router";
-import { useContext, useEffect } from "react";
-import { NotificationContext } from "../context/NotificationContext";
-import { CurrentUserContext } from "../context/CurrentUserContext";
-import { useNavigate } from "react-router";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { pagePaths } from "../utils/appUrls";
 import { createPageMeta } from "../utils/page-info";
+import { useNotification } from "../context/NotificationContext";
+import { useCurrentUser } from "../context/CurrentUserContext";
 
 export function meta() {
-  const title = "Log into your acount | Chania BV";
+  const title = "Reserve a Court";
   const description =
-    "Register to book courts, manage reservations, and update your profile.";
+    "Book a volleyball court and manage your reservations with Chania BV.";
   return createPageMeta(title, description);
 }
 
 export default function Reserve() {
   const [reserveParams] = useSearchParams();
   const navigate = useNavigate();
-  const { showNotification } = useContext(NotificationContext);
-  const currentUser = useContext(CurrentUserContext);
+  const { showNotification } = useNotification();
+  const { currentUser } = useCurrentUser();
+
   useEffect(() => {
     if (currentUser && currentUser.can_make_reservation === false) {
       showNotification(
@@ -27,7 +27,7 @@ export default function Reserve() {
       );
       navigate(pagePaths.home.path, { replace: true });
     }
-  }, []);
+  }, [currentUser, showNotification, navigate]);
 
   return (
     <ReservePage

@@ -8,8 +8,10 @@ import { apiRequest } from "../../utils/apiRequest";
 import Message from "../utils/Message";
 import { useNavigate } from "react-router";
 import { saveToken } from "../../utils/authentication";
+import { useCurrentUser } from "../../context/CurrentUserContext";
 
 export default function LoginPage() {
+  const { refreshUser } = useCurrentUser();
   const navigate = useNavigate();
   const [formInfo, setFormInfo] = useState({
     email: "",
@@ -32,7 +34,7 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    const { resData, errorMessage } = await apiRequest({
+    const { resData, resError } = await apiRequest({
       url: apiEndpoints.LOGIN_USER,
       method: "post",
       requestData: formInfo,
@@ -40,8 +42,8 @@ export default function LoginPage() {
 
     setLoading(false);
 
-    if (errorMessage) {
-      setError(errorMessage);
+    if (resError) {
+      setError(resError);
       return;
     }
 
@@ -51,6 +53,7 @@ export default function LoginPage() {
         formInfo.stay_logged_in ? "local" : "session"
       );
     }
+    refreshUser();
     window.location.replace(pagePaths.home.path);
   }
 

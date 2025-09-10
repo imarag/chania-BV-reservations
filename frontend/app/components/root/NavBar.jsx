@@ -7,7 +7,6 @@ import NavLink from "../utils/NavLink";
 import { apiEndpoints } from "../../utils/appUrls";
 import { apiRequest } from "../../utils/apiRequest";
 import { useNavigate } from "react-router";
-import { removeToken } from "../../utils/authentication";
 import DropDown from "../ui/DropDown";
 import { PiUserCircleLight } from "react-icons/pi";
 import Symbol from "../ui/Symbol";
@@ -24,12 +23,24 @@ import { CgLogOut } from "react-icons/cg";
 import { IoPersonOutline } from "react-icons/io5";
 import { MdOutlineLibraryBooks } from "react-icons/md";
 import { useCurrentUser } from "../../context/CurrentUserContext";
+import { clearAccessToken } from "../../utils/authentication";
+import { useNotification } from "../../context/NotificationContext";
 
 function UserMenu({ isMenuOpen }) {
-  const { refreshUser } = useCurrentUser();
-  function handleLogout() {
-    removeToken();
-    refreshUser();
+  const { setCurrentUser } = useCurrentUser();
+  const { showNotification } = useNotification();
+  async function handleLogout() {
+    const { resData, resError } = await apiRequest({
+      url: apiEndpoints.LOGOUT_USER,
+      method: "POST",
+    });
+
+    if (resError) {
+      showNotification("Logout failed!");
+      return;
+    }
+    clearAccessToken();
+    setCurrentUser(null);
     window.location.replace(pagePaths.home.path);
   }
   const dropDownMenuLinks = [

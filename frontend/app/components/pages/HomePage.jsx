@@ -1,8 +1,11 @@
 import Title from "../ui/Title";
 import SubTitle from "../ui/SubTitle";
 import Anchor from "../ui/Anchor";
-
+import { getAccessToken } from "../../utils/authentication";
 export default function HomePage() {
+  function handleClick() {
+    console.log(getAccessToken(), "***");
+  }
   return (
     <section className="max-w-5xl mx-auto p-6 space-y-8">
       {/* Hero Section */}
@@ -22,6 +25,7 @@ export default function HomePage() {
         >
           Book a Court
         </Anchor>
+        <button onClick={handleClick}>click</button>
       </div>
 
       {/* How It Works Section */}

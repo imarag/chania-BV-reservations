@@ -10,5 +10,6 @@ class RegisterResponse(BaseModel):
 
 class LoginResponse(BaseModel):
     message: str
+    user: UserPublic
     stay_logged_in: bool
     token: Token

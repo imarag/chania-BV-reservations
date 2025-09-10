@@ -2,7 +2,7 @@ import AdminPage from "../components/pages/AdminPage";
 import { apiEndpoints, pagePaths } from "../utils/appUrls";
 import { apiRequest } from "../utils/apiRequest";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useNotification } from "../context/NotificationContext";
 import { createPageMeta } from "../utils/page-info";
 import Loading from "../components/ui/Loading";

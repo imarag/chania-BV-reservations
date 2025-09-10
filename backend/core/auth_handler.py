@@ -1,9 +1,10 @@
+from fastapi import HTTPException
 import re
 from datetime import datetime, timedelta, timezone
 
 import jwt
 from dependencies import get_settings
-from models.db_models import User, UserLogin
+from models.db_models import User
 from passlib.context import CryptContext
 from sqlmodel import Session
 from utils.db_operations import get_user_by_email
@@ -20,22 +21,41 @@ class AuthHandler:
     def generate_password_hash(self, plain_password: str) -> str:
         return self.pwd_context.hash(plain_password)
 
-    def authenticate_user(self, user: UserLogin, session: Session) -> User | None:
-        existing_user = get_user_by_email(session, user.email)
+    def authenticate_user(
+        self, email: str, password: str, session: Session
+    ) -> User | None:
+        existing_user = get_user_by_email(session, email)
         if not existing_user:
             return None
-        if not self.validate_password_hash(
-            user.password, existing_user.hashed_password
-        ):
+        if not self.validate_password_hash(password, existing_user.hashed_password):
             return None
         return existing_user  # no need to reconstruct
 
     @staticmethod
-    def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+    def create_token(
+        data: dict,
+        expires_delta: timedelta | None = None,
+        token_type: str = "",
+    ) -> str:
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
-        to_encode.update({"exp": expire})
+        to_encode.update(
+            {
+                "exp": expire,
+                "type": token_type,  # <-- add token type
+            }
+        )
         return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+    def create_access_token(
+        self, data: dict, expires_delta: timedelta | None = None
+    ) -> str:
+        return self.create_token(data, expires_delta, "access")
+
+    def create_refresh_token(
+        self, data: dict, expires_delta: timedelta | None = None
+    ) -> str:
+        return self.create_token(data, expires_delta, "refresh")
 
     @staticmethod
     def decode_access_token(token: str) -> dict:
@@ -74,3 +94,17 @@ class AuthHandler:
     @staticmethod
     def validate_phone_number(phone_number: str) -> str | None:
         return None
+
+    @staticmethod
+    def decode_jwt_token(token: str) -> dict:
+        try:
+            token = jwt.decode(
+                token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            )
+        except Exception:
+            raise HTTPException(
+                status_code=401,
+                detail="Token has expired",
+            )
+
+        return token

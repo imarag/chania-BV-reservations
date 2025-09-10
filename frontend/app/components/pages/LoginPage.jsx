@@ -7,11 +7,11 @@ import { apiEndpoints, pagePaths } from "../../utils/appUrls";
 import { apiRequest } from "../../utils/apiRequest";
 import Message from "../utils/Message";
 import { useNavigate } from "react-router";
-import { saveToken } from "../../utils/authentication";
+import { setAccessToken } from "../../utils/authentication";
 import { useCurrentUser } from "../../context/CurrentUserContext";
 
 export default function LoginPage() {
-  const { refreshUser } = useCurrentUser();
+  const { setCurrentUser } = useCurrentUser();
   const navigate = useNavigate();
   const [formInfo, setFormInfo] = useState({
     email: "",
@@ -48,12 +48,9 @@ export default function LoginPage() {
     }
 
     if (resData.token) {
-      saveToken(
-        resData.token.access_token,
-        formInfo.stay_logged_in ? "local" : "session"
-      );
+      setAccessToken(resData.token.access_token);
     }
-    refreshUser();
+    setCurrentUser(resData.user);
     window.location.replace(pagePaths.home.path);
   }
 

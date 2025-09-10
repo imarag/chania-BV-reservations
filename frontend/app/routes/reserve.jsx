@@ -1,5 +1,5 @@
 import ReservePage from "../components/pages/ReservePage";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router";
 import { useEffect } from "react";
 import { pagePaths } from "../utils/appUrls";
 import { createPageMeta } from "../utils/page-info";

@@ -1,49 +1,56 @@
-const KEY = "app:jwt_access_token";
-const storages = ["session", "local"];
+import { apiRequest } from "./apiRequest";
+import { apiEndpoints } from "./appUrls";
+import axios from "axios";
+let ACCESS_TOKEN = null;
 
-function getStorage(persist = "session") {
-  if (typeof window === "undefined") return null;
-  if (!storages.includes(persist)) persist = "session";
-  return persist === "session" ? window.sessionStorage : window.localStorage;
+export function setAccessToken(token) {
+  ACCESS_TOKEN = token || null;
 }
 
-export function saveToken(token, persist = "session") {
-  if (!token || typeof window === "undefined") return false;
-  const store = getStorage(persist);
-  if (!store) return false;
+export function getAccessToken() {
+  return ACCESS_TOKEN;
+}
+
+export function clearAccessToken() {
+  ACCESS_TOKEN = null;
+}
+
+/**
+ * Try to mint an access token using the refresh cookie.
+ * Call this once on app startup (new tab / reload).
+ * Returns true if logged in, false otherwise.
+ */
+export async function initAccessToken() {
   try {
-    store.setItem(KEY, token);
+    const { resData, resError } = await apiRequest({
+      url: apiEndpoints.REFRESH_TOKEN,
+      status: "POST",
+    });
+
+    if (resError) {
+      return false;
+    }
+
+    setAccessToken(resData.access_token);
     return true;
   } catch {
+    clearAccessToken();
     return false;
   }
 }
 
-export function getToken() {
-  if (typeof window === "undefined") return null;
+export async function refreshAccessToken() {
   try {
-    return (
-      window.sessionStorage.getItem(KEY) || window.localStorage.getItem(KEY)
+    const res = await axios.post(
+      apiEndpoints.REFRESH_TOKEN,
+      {},
+      { withCredentials: true }
     );
+    const token = res?.data?.access_token;
+    if (token) setAccessToken(token);
+    return token ?? null;
   } catch {
+    clearAccessToken();
     return null;
   }
-}
-
-export function removeToken() {
-  if (typeof window === "undefined") return false;
-  let removedToken = false;
-  try {
-    window.sessionStorage.removeItem(KEY);
-    removedToken = true;
-  } catch {
-    console.error("cannot remove token");
-  }
-  try {
-    window.localStorage.removeItem(KEY);
-    removedToken = true;
-  } catch {
-    console.error("cannot remove token");
-  }
-  return removedToken;
 }

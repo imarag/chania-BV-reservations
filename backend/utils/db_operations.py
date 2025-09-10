@@ -24,7 +24,7 @@ def add_user(session: Session, user: User) -> User:
 
 
 def get_user_by_email(session: Session, email: str) -> User | None:
-    return session.exec(select(User).where(User.email == email)).first()
+    return session.exec(select(User).where(User.email == email.strip().lower())).first()
 
 
 def get_user_by_id(session: Session, user_id: int) -> User | None:

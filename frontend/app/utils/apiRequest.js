@@ -1,45 +1,55 @@
+// apiRequest.js (simple)
 import axios from "axios";
-import { getToken } from "./authentication";
+import { getAccessToken } from "./authentication";
+import { apiEndpoints } from "./appUrls";
+import { refreshAccessToken } from "./authentication";
 
 export async function apiRequest({
   url,
   method = "get",
   requestData = null,
   customHeaders = {},
-  timeoutMs = 30000, // milliseconds
-  signal = undefined,
+  timeoutMs = 30000,
+  signal,
   responseType = "json",
-}) {
-  try {
-    const methodLower = method.toLowerCase();
+} = {}) {
+  const methodLower = method.toLowerCase();
+  const isFormData = requestData instanceof FormData;
+  const hasBody = methodLower !== "get" && requestData != null;
 
-    const isFormData = requestData instanceof FormData;
-    const hasBody = methodLower !== "get" && requestData != null;
+  // headers
+  const headers = { ...customHeaders };
+  if (hasBody && !isFormData && !headers["Content-Type"]) {
+    headers["Content-Type"] = "application/json";
+  }
 
-    const headers = { ...customHeaders };
+  // If we don't have an access token yet (new tab), try to obtain one
+  let token = getAccessToken();
 
-    // Only set JSON content-type when sending a body and not FormData
-    if (hasBody && !isFormData) {
-      headers["Content-Type"] = "application/json";
-    }
+  if (!token && url !== apiEndpoints.REFRESH_TOKEN) {
+    token = await refreshAccessToken();
+  }
+  if (token && !headers.Authorization) {
+    headers.Authorization = `Bearer ${token}`;
+  }
 
-    // Add JWT unless caller already provided Authorization
-    const token = getToken();
-    if (token && !headers.Authorization) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-
-    const res = await axios({
+  // one small function to perform the request
+  async function doRequest(hdrs = headers) {
+    return axios({
       url,
       method: methodLower,
-      params: methodLower === "get" ? requestData ?? undefined : undefined, // query string for GET
-      data: methodLower !== "get" ? requestData ?? undefined : undefined, // request body for non-GET
-      headers,
-      responseType, // always a string (e.g., "json", "blob", "arraybuffer")
-      signal, // enables AbortController cancellation
-      timeout: timeoutMs, // ms
+      params: methodLower === "get" ? requestData ?? undefined : undefined,
+      data: methodLower !== "get" ? requestData ?? undefined : undefined,
+      headers: hdrs,
+      responseType,
+      signal,
+      timeout: timeoutMs,
+      withCredentials: true, // so cookies (refresh) are sent when needed
     });
+  }
 
+  try {
+    const res = await doRequest();
     return {
       resData: res.data,
       resError: null,
@@ -47,7 +57,7 @@ export async function apiRequest({
       resStatus: res.status,
     };
   } catch (error) {
-    // Aborted via AbortController
+    // aborted?
     if (
       error?.name === "CanceledError" ||
       error?.name === "AbortError" ||
@@ -61,6 +71,31 @@ export async function apiRequest({
       };
     }
 
+    const status = error?.response?.status ?? null;
+
+    // If unauthorized (likely expired access token), try refresh once and retry
+    if (status === 401 && url !== apiEndpoints.REFRESH_TOKEN) {
+      const newToken = await refreshAccessToken();
+      if (newToken) {
+        const retryHeaders = {
+          ...headers,
+          Authorization: `Bearer ${newToken}`,
+        };
+        try {
+          const res = await doRequest(retryHeaders);
+          return {
+            resData: res.data,
+            resError: null,
+            canceled: false,
+            resStatus: res.status,
+          };
+        } catch (error) {
+          console.error(error);
+          // fall through to error formatting
+        }
+      }
+    }
+
     const msg =
       error?.response?.data?.error_message ??
       error?.response?.data?.detail ??
@@ -72,7 +107,7 @@ export async function apiRequest({
       resData: null,
       resError: msg,
       canceled: false,
-      resStatus: error?.response?.status ?? null,
+      resStatus: status,
     };
   }
 }

@@ -9,57 +9,43 @@ export default function CurrentUserProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch the logged-in user's profile (requires a valid access token)
-  const refreshUser = useCallback(async () => {
-    const { resData, resError } = await apiRequest({
-      url: apiEndpoints.GET_CURRENT_USER,
-    });
-
-    if (resError) {
-      setCurrentUser(null);
-      return;
-    }
-
-    setCurrentUser(resData);
-  }, []);
-
-  // On mount: try to mint an access token using the refresh cookie, then load user
   useEffect(() => {
     let mounted = true;
 
-    (async () => {
-      // Ask backend to use refresh cookie and mint a new access token
+    async function updateAccessFromRefreshToken() {
+      setLoading(true);
+      // get a new access token
       const { resData, resError } = await apiRequest({
         url: apiEndpoints.REFRESH_TOKEN,
         method: "POST",
       });
 
+      clearAccessToken();
+
+      if (!mounted) {
+        return;
+      }
+
       if (resError || !resData?.access_token) {
-        clearAccessToken();
-        if (mounted) {
-          setCurrentUser(null);
-          setLoading(false);
-        }
+        console.error(`Cannot update access token: ${resError}`);
+        setLoading(false);
         return;
       }
       console.warn("saving access token", resData);
-      // Save the short-lived access token (in memory / where your util stores it)
-      setAccessToken(resData.access_token);
 
-      // Reuse refreshUser to populate the context
-      if (mounted) {
-        await refreshUser();
-        setLoading(false);
-      }
-    })();
+      setAccessToken(resData.access_token);
+      setLoading(false);
+    }
+    updateAccessFromRefreshToken();
 
     return () => {
       mounted = false;
     };
-  }, [refreshUser]);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
+    setLoading(true);
     async function fetchCurrentUser() {
       const { resData, resError } = await apiRequest({
         url: apiEndpoints.GET_CURRENT_USER,
@@ -70,11 +56,14 @@ export default function CurrentUserProvider({ children }) {
       }
 
       if (resError) {
+        console.error(`Cannot get the current user: ${resError}`);
         setCurrentUser(null);
+        setLoading(false);
         return;
       }
-
+      console.warn("setting current user");
       setCurrentUser(resData);
+      setLoading(false);
     }
     fetchCurrentUser();
     return () => {

@@ -120,35 +120,35 @@ function NoUsersFound() {
 export default function UsersPage() {
   const { showNotification } = useNotification();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
-
     setLoading(true);
 
-    async function fetchData() {
-      const { resData, resError, canceled } = await apiRequest({
-        url: apiEndpoints.GET_ALL_USERS,
-        signal: controller.signal,
-      });
+    async function fetchAllUsers() {
+      try {
+        const { resData, resError, canceled } = await apiRequest({
+          url: apiEndpoints.GET_ALL_USERS,
+          signal: controller.signal,
+        });
 
-      if (canceled) {
-        setLoading(false);
-        return;
-      }
-      if (resError) {
-        setLoading(false);
-        showNotification(resError, "error");
-        return;
-      }
+        if (canceled) return;
 
-      setLoading(false);
-      setUsers(resData);
+        if (resError) {
+          showNotification(resError, "error");
+          return;
+        }
+
+        setUsers(resData);
+      } finally {
+        setLoading(false);
+      }
     }
 
-    fetchData();
+    fetchAllUsers();
     return () => controller.abort();
   }, []);
 

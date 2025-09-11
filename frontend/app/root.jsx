@@ -7,6 +7,7 @@ import {
   ScrollRestoration,
 } from "react-router";
 import NavBar from "./components/root/NavBar";
+import DevelopmentConsole from "./components/root/DevelopmentConsole";
 import AppProviders from "./components/context_providers/AppProviders";
 import "./app.css";
 
@@ -53,6 +54,7 @@ export function Layout({ children }) {
             <main className="grow bg-base-300 px-2 overflow-y-scroll">
               {children}
             </main>
+            <DevelopmentConsole />
           </div>
         </AppProviders>
         <ScrollRestoration />

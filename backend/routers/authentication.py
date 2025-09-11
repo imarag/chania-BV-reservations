@@ -150,11 +150,16 @@ async def refresh(
     )
 
     return {
-        "user": current_user,
         "access_token": new_access,
         "token_type": "bearer",
         "expires_in": int(access_expires.total_seconds()),
     }
+
+
+@router.get("/get-refresh-token")
+async def read_refresh_token(request: Request, settings: SettingsDep) -> str | None:
+    refresh_token = request.cookies.get(settings.REFRESH_COOKIE_NAME)
+    return refresh_token
 
 
 @router.get("/get-current-user")

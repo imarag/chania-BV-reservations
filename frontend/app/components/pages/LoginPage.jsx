@@ -40,17 +40,20 @@ export default function LoginPage() {
       requestData: formInfo,
     });
 
-    setLoading(false);
-
     if (resError) {
+      console.error(`Cannot log the user in: ${resError}`);
       setError(resError);
+      setLoading(false);
       return;
     }
 
     if (resData.token) {
+      console.warn("user logged in, setting access token");
       setAccessToken(resData.token.access_token);
     }
+    console.warn("user logged in, setting current user");
     setCurrentUser(resData.user);
+    setLoading(false);
     window.location.replace(pagePaths.home.path);
   }
 

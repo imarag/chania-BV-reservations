@@ -29,6 +29,7 @@ import { useNotification } from "../../context/NotificationContext";
 function UserMenu({ isMenuOpen }) {
   const { setCurrentUser } = useCurrentUser();
   const { showNotification } = useNotification();
+
   async function handleLogout() {
     const { resData, resError } = await apiRequest({
       url: apiEndpoints.LOGOUT_USER,
@@ -36,9 +37,14 @@ function UserMenu({ isMenuOpen }) {
     });
 
     if (resError) {
+      console.error(`Cannot log the user out: ${resError}`);
       showNotification("Logout failed!");
       return;
     }
+
+    console.warn("User succesfully, logged out");
+    console.warn("Clearing access token");
+    console.warn("Setting current user to NULL");
     clearAccessToken();
     setCurrentUser(null);
     window.location.replace(pagePaths.home.path);

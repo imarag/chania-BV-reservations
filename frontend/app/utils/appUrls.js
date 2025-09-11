@@ -49,6 +49,7 @@ export const apiEndpoints = {
   GET_CURRENT_USER: u(AUTH, "get-current-user"),
   IS_USER_ADMIN: u(AUTH, "is-user-admin"),
   REFRESH_TOKEN: u(AUTH, "refresh"),
+  GET_REFRESH_TOKEN: u(AUTH, "get-refresh-token"),
 
   GET_SCHEDULE: u(API, "schedule"),
   GET_BOOKING_CELLS: u(DB, "get-booking-cells"),

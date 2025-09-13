@@ -6,7 +6,6 @@ from core.app_paths import AppPaths
 from core.config import Settings, get_settings
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError
 from models.db_models import UserPublic
 from models.token import TokenData
 from sqlmodel import Session
@@ -46,8 +45,8 @@ async def get_current_user(
         user_id = token_data.user_id
         if user_id is None:
             raise credentials_exception
-    except InvalidTokenError:
-        raise credentials_exception  # noqa: B904
+    except Exception as e:
+        raise e  # noqa: B904
     user = get_user_by_id(session, user_id)
     if user is None:
         raise credentials_exception

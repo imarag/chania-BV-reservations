@@ -1,57 +1,50 @@
 import { useEffect, useState } from "react";
-import { apiRequest } from "../utils/apiRequest";
 
 export default function useFetch({
-  url,
-  method = "get",
-  requestData = null,
-  headers = {},
-  successMessage = null,
+  makeRequest,
+  deps = [],
   initialData = null,
-  showNotification = () => {},
+  successMessage = null,
 }) {
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // string | null
-  const [success, setSuccess] = useState(null); // string | null
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [data, setData] = useState(initialData);
 
   useEffect(() => {
-    if (!url) return;
     const controller = new AbortController();
 
     async function fetchData() {
       setLoading(true);
       setError(null);
       setSuccess(null);
-      const { resData, resError, canceled } = await apiRequest({
-        url,
-        method,
-        requestData,
-        customHeaders: headers,
-        responseType: "json",
-        signal: controller.signal,
-      });
-      // If request was aborted (deps changed or unmounted), do nothing.
-      if (canceled) return;
 
-      if (resError) {
-        setError(resError);
-        setSuccess(null);
+      try {
+        const { resData, resError, canceled } = await makeRequest(
+          controller.signal
+        );
+
+        if (resError) {
+          setError(resError);
+          setSuccess(null);
+          return;
+        }
+
+        setData(resData);
+        if (successMessage) setSuccess(successMessage);
+      } catch (err) {
+        setError(msg);
+      } finally {
         setLoading(false);
-        showNotification(resError, "error");
-        return;
       }
-
-      setData(resData);
-      setSuccess(successMessage || "Request successful");
-      setLoading(false);
     }
 
     fetchData();
+
     return () => {
       controller.abort();
     };
-  }, [url, method, requestData, JSON.stringify(headers), successMessage]);
+  }, [makeRequest, ...deps]);
 
   return { data, setData, loading, error, success };
 }

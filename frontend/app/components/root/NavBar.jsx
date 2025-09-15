@@ -23,7 +23,6 @@ import { CgLogOut } from "react-icons/cg";
 import { IoPersonOutline } from "react-icons/io5";
 import { MdOutlineLibraryBooks } from "react-icons/md";
 import { useCurrentUser } from "../../context/CurrentUserContext";
-import { clearAccessToken } from "../../utils/authentication";
 import { useNotification } from "../../context/NotificationContext";
 
 function UserMenu({ isMenuOpen }) {
@@ -37,15 +36,10 @@ function UserMenu({ isMenuOpen }) {
     });
 
     if (resError) {
-      console.error(`Cannot log the user out: ${resError}`);
       showNotification("Logout failed!");
       return;
     }
 
-    console.warn("User succesfully, logged out");
-    console.warn("Clearing access token");
-    console.warn("Setting current user to NULL");
-    clearAccessToken();
     setCurrentUser(null);
     window.location.replace(pagePaths.home.path);
   }

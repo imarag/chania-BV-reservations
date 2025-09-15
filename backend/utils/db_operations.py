@@ -1,10 +1,11 @@
 from fastapi import HTTPException
+from typing import Sequence
+from models.auth_models import UserSession
 from models.db_models import (
     Court,
     Reservation,
     ReservationCreate,
     ReservationUser,
-    ReservationUserCreate,
     ReservationUserPublic,
     TimeSlot,
     User,
@@ -12,7 +13,24 @@ from models.db_models import (
 from sqlmodel import Session, select
 
 
-def get_users(session: Session) -> list[User]:
+def get_user_session_by_id(session: Session, user_session_id: str) -> UserSession | None:
+    return session.get(UserSession, user_session_id)
+
+def create_session(session: Session, user_session: UserSession) -> UserSession:
+    session.add(user_session)
+    session.commit()
+    session.refresh(user_session)
+    return user_session
+
+def delete_session(session: Session, user_session_id: str) -> UserSession | None:
+    if not user_session_id:
+        raise HTTPException(status_code=404, detail="Session id not found")
+    user_session = session.get(UserSession, user_session_id)
+    session.delete(user_session)
+    session.commit()
+    return user_session
+
+def get_users(session: Session) -> Sequence[User]:
     return session.exec(select(User)).all()
 
 
@@ -54,19 +72,19 @@ def delete_user(session: Session, user_id: int) -> User:
     return user
 
 
-def get_courts(session: Session) -> list[Court]:
+def get_courts(session: Session) -> Sequence[Court]:
     return session.exec(select(Court)).all()
 
 
-def get_time_slots(session: Session) -> list[TimeSlot]:
+def get_time_slots(session: Session) -> Sequence[TimeSlot]:
     return session.exec(select(TimeSlot)).all()
 
 
-def get_reservations(session: Session) -> list[Reservation]:
+def get_reservations(session: Session) -> Sequence[Reservation]:
     return session.exec(select(Reservation)).all()
 
 
-def get_reservation_players(session: Session) -> list[ReservationUser]:
+def get_reservation_players(session: Session) -> Sequence[ReservationUser]:
     return session.exec(select(ReservationUser)).all()
 
 
@@ -104,7 +122,7 @@ def add_reservation(session: Session, reservation: ReservationCreate) -> Reserva
 
 def add_reservation_users(
     session: Session, reservation_id: int, reservation_user_ids: list[int]
-) -> list[ReservationUserCreate]:
+) -> list[ReservationUserPublic]:
     reservation_users = [
         ReservationUser(reservation_id=reservation_id, user_id=u_id)
         for u_id in reservation_user_ids
@@ -157,7 +175,7 @@ def update_time_slot(
     return existing_time_slot
 
 
-def get_user_reservations(session: Session, user_id: int) -> list[Reservation]:
+def get_user_reservations(session: Session, user_id: int) -> Sequence[Reservation]:
     reservations = session.exec(
         select(Reservation).where(Reservation.user_id == user_id)
     ).all()

@@ -7,11 +7,10 @@ import { apiEndpoints, pagePaths } from "../../utils/appUrls";
 import { apiRequest } from "../../utils/apiRequest";
 import Message from "../utils/Message";
 import { useNavigate } from "react-router";
-import { setAccessToken } from "../../utils/authentication";
 import { useCurrentUser } from "../../context/CurrentUserContext";
 
 export default function LoginPage() {
-  const { setCurrentUser } = useCurrentUser();
+  const { currentUser, setCurrentUser } = useCurrentUser();
   const navigate = useNavigate();
   const [formInfo, setFormInfo] = useState({
     email: "",
@@ -47,10 +46,6 @@ export default function LoginPage() {
       return;
     }
 
-    if (resData.token) {
-      console.warn("user logged in, setting access token");
-      setAccessToken(resData.token.access_token);
-    }
     console.warn("user logged in, setting current user");
     setCurrentUser(resData.user);
     setLoading(false);

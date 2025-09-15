@@ -1,8 +1,3 @@
-import {
-  getAccessToken,
-  clearAccessToken,
-  setAccessToken,
-} from "../../utils/authentication";
 import { useCurrentUser } from "../../context/CurrentUserContext";
 import { apiRequest } from "../../utils/apiRequest";
 import { apiEndpoints } from "../../utils/appUrls";
@@ -22,36 +17,12 @@ export default function DevelopmentConsole() {
     }
   }
 
-  function getAccessTokenValue() {
-    const token = getAccessToken();
-    if (token) {
-      alert(token);
-    } else {
-      alert("THERE IS NO ACCESS TOKEN");
-    }
-  }
-
-  function clearAccessTokenValue() {
-    clearAccessToken();
-    alert("Succesfully cleared the access token");
-  }
-
-  async function createAccessToken() {
+  async function clearAccessToken() {
     const { resData, resError } = await apiRequest({
-      url: apiEndpoints.REFRESH_TOKEN,
+      url: apiEndpoints.LOGOUT_USER,
       method: "POST",
     });
-
-    if (resError) {
-      alert(`CANNOT CREATE ACCESS TOKEN: ${resError}`);
-    } else {
-      setAccessToken(resData.access_token);
-      let accessTokenString = "";
-      Object.keys(resData).forEach((key) => {
-        accessTokenString += `${key}: ${resData[key]}\n`;
-      });
-      alert(`Access token created succesfully!:\n${accessTokenString}`);
-    }
+    alert("Succesfully cleared the access token");
   }
 
   function clearCurrentUser() {
@@ -59,9 +30,9 @@ export default function DevelopmentConsole() {
     alert("Current user cleared succesfully!");
   }
 
-  async function getRefreshToken() {
+  async function getAccessToken() {
     const { resData, resError } = await apiRequest({
-      url: apiEndpoints.GET_REFRESH_TOKEN,
+      url: apiEndpoints.GET_ACCESS_TOKEN,
     });
     if (resData) {
       alert(resData);
@@ -86,27 +57,15 @@ export default function DevelopmentConsole() {
       </button>
       <button
         className="btn btn-primary btn-outline btn-xs"
-        onClick={getAccessTokenValue}
+        onClick={getAccessToken}
       >
         get access token
       </button>
       <button
         className="btn btn-error btn-outline btn-xs"
-        onClick={clearAccessTokenValue}
+        onClick={clearAccessToken}
       >
         clear access token
-      </button>
-      <button
-        className="btn btn-secondary btn-outline btn-xs"
-        onClick={createAccessToken}
-      >
-        create access token
-      </button>
-      <button
-        className="btn btn-primary btn-outline btn-xs"
-        onClick={getRefreshToken}
-      >
-        get refresh token
       </button>
     </div>
   );

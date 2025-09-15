@@ -8,21 +8,13 @@ import SubTitle from "../ui/SubTitle";
 import Symbol from "../ui/Symbol";
 import Loading from "../ui/Loading";
 import { LuUserRound, LuUser, LuSearch } from "react-icons/lu";
-import { LuIdCard } from "react-icons/lu";
-import { waitSec } from "../../utils/fetch-tools";
-import {
-  MdAlternateEmail,
-  MdOutlineLocalPhone,
-  MdOutlineBusinessCenter,
-} from "react-icons/md";
-import { BiHome } from "react-icons/bi";
-import { LiaBirthdayCakeSolid } from "react-icons/lia";
 import FetchErrorMessage from "../utils/FetchErrorMessage";
+import { getIcon } from "../../utils/iconMap";
 
 function UserInfoItem({ label, value, IconComponent }) {
   return (
     <div className="p-4 flex items-center gap-4">
-      <Symbol IconComponent={IconComponent} className="mb-2" />
+      <Symbol IconComponent={IconComponent} />
       <div>
         <p className="font-semibold">{label}:</p>
         <p className="text-base-content/50">{value || "-"}</p>
@@ -46,9 +38,12 @@ function UsersList({ users }) {
     return <NoUsersFound />;
   }
 
+  // items to exclude showing in the UI
+  const userInfoItemsExclude = ["id", "active", "role", "can_make_reservation"];
+
   return (
     <div className="p-8 space-y-4">
-      <p className="text-end">{`${users.length} user${users.length > 1 ? "s" : ""} found`}</p>
+      <p className="text-end text-sm">{`${users.length} user${users.length > 1 ? "s" : ""} found`}</p>
       <ul className="space-y-2 bg-base-300">
         {users.map((user) => (
           <li key={user.id}>
@@ -56,41 +51,15 @@ function UsersList({ users }) {
               className="bg-base-100"
               label={<UserInfoLabel user={user} />}
             >
-              <UserInfoItem
-                IconComponent={LuIdCard}
-                label="Full Name"
-                value={user.full_name}
-              />
-              <UserInfoItem
-                IconComponent={MdAlternateEmail}
-                label="Email"
-                value={user.email}
-              />
-              <UserInfoItem
-                IconComponent={MdOutlineLocalPhone}
-                label="Phone Number"
-                value={user.phone_number}
-              />
-              <UserInfoItem
-                IconComponent={LuUser}
-                label="User Role"
-                value={user.role}
-              />
-              <UserInfoItem
-                IconComponent={BiHome}
-                label="Home Address"
-                value={user.address}
-              />
-              <UserInfoItem
-                IconComponent={MdOutlineBusinessCenter}
-                label="Profession"
-                value={user.profession}
-              />
-              <UserInfoItem
-                IconComponent={LiaBirthdayCakeSolid}
-                label="Birth Date"
-                value={user.date_of_birth}
-              />
+              {Object.keys(user)
+                .filter((key) => !userInfoItemsExclude.includes(key))
+                .map((key) => (
+                  <UserInfoItem
+                    IconComponent={getIcon(key)}
+                    label={key}
+                    value={String(user[key])}
+                  />
+                ))}
             </Collapse>
           </li>
         ))}
@@ -129,48 +98,37 @@ function NoUsersFound() {
 function MainBody() {
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState([]);
+  // for fetching the users
   const [loading, setLoading] = useState(true);
+  // for server error
   const [error, setError] = useState(null);
-
-  async function fetchUsers(mounted) {
-    await waitSec(3);
-
-    setLoading(true);
-
-    const { resData, resError, canceled } = await apiRequest({
-      url: apiEndpoints.GET_ALL_USERS,
-    });
-
-    if (!mounted) return;
-
-    setLoading(false);
-
-    if (resError) {
-      setError(resError);
-      setUsers([]);
-      return;
-    }
-
-    setError(null);
-    setUsers(Array.isArray(resData) ? resData : []);
-  }
 
   useEffect(() => {
     let mounted = true;
-    fetchUsers(mounted);
+    async function fetchUsers() {
+      setLoading(true);
+
+      const { resData, resError } = await apiRequest({
+        url: apiEndpoints.GET_ALL_USERS,
+      });
+
+      if (!mounted) return;
+
+      setLoading(false);
+
+      if (resError) {
+        setError(resError);
+        setUsers([]);
+        return;
+      }
+
+      setError(null);
+      setUsers(Array.isArray(resData) ? resData : []);
+    }
+
+    fetchUsers();
     return () => (mounted = false);
   }, []);
-
-  const filteredUsers = useMemo(() => {
-    if (!users?.length) return [];
-    const term = searchTerm.trim().toLowerCase();
-    if (!term) return users;
-    return users.filter((user) =>
-      Object.values(user).some(
-        (v) => v != null && v.toString().toLowerCase().includes(term)
-      )
-    );
-  }, [users, searchTerm]);
 
   function handleRetry() {
     return apiRequest({
@@ -189,6 +147,20 @@ function MainBody() {
     );
   }
 
+  const termEdited = searchTerm.trim().toLowerCase();
+  // any user object value contains the search term
+  const filteredUsers =
+    !Array.isArray(users) || users.length === 0
+      ? []
+      : termEdited === ""
+        ? users
+        : users.filter((user) =>
+            Object.values(user).some(
+              (v) =>
+                v != null && String(v).toLowerCase().trim().includes(termEdited)
+            )
+          );
+
   return (
     <>
       <SearchUserInput
@@ -203,12 +175,12 @@ function MainBody() {
 
 export default function UsersPage() {
   return (
-    <div>
-      <Title className="text-center mb-4">Users Information</Title>
+    <>
+      <Title className="text-center mb-4 mt-12">Users Information</Title>
       <SubTitle className="text-center mb-12" variant="page">
         Search across all registered users by any of their details
       </SubTitle>
       <MainBody />
-    </div>
+    </>
   );
 }

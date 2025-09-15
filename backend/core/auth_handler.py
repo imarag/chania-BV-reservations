@@ -1,8 +1,5 @@
-from fastapi import HTTPException
 import re
-from datetime import datetime, timedelta, timezone
 
-import jwt
 from dependencies import get_settings
 from models.db_models import User
 from passlib.context import CryptContext
@@ -11,10 +8,9 @@ from utils.db_operations import get_user_by_email
 
 settings = get_settings()
 
-
 class AuthHandler:
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+    
     def validate_password_hash(self, plain_password: str, hashed_password: str) -> bool:
         return self.pwd_context.verify(plain_password, hashed_password)
 
@@ -29,82 +25,49 @@ class AuthHandler:
             return None
         if not self.validate_password_hash(password, existing_user.hashed_password):
             return None
-        return existing_user  # no need to reconstruct
+        return existing_user
 
     @staticmethod
-    def create_token(
-        data: dict,
-        expires_delta: timedelta | None = None,
-        token_type: str = "",
-    ) -> str:
-        to_encode = data.copy()
-        expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
-        to_encode.update(
-            {
-                "exp": expire,
-                "type": token_type,  # <-- add token type
-            }
-        )
-        return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-
-    def create_access_token(
-        self, data: dict, expires_delta: timedelta | None = None
-    ) -> str:
-        return self.create_token(data, expires_delta, "access")
-
-    def create_refresh_token(
-        self, data: dict, expires_delta: timedelta | None = None
-    ) -> str:
-        return self.create_token(data, expires_delta, "refresh")
-
-    @staticmethod
-    def decode_access_token(token: str) -> dict:
-        try:
-            return jwt.decode(
-                token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-            )
-        except jwt.ExpiredSignatureError:
-            raise ValueError("Token expired")
-        except jwt.PyJWTError:
-            raise ValueError("Invalid token")
-
-    @staticmethod
-    def validate_password(password: str) -> str | None:
-        if len(password) < 8:
-            return "Password must be at least 8 characters long"
-        if not re.search(r"[A-Za-z]", password) or not re.search(r"\d", password):
+    def validate_password(password: str | None) -> str | None:
+        if password is None:
+            return "Password is required"
+        passw_min_len = 8
+        passw_max_len = 64
+        if len(password) < passw_min_len or len(password) > passw_max_len:
+            return f"Password must be at least {passw_min_len} and at most {passw_max_len} characters long"
+        if not any(c.isalpha() for c in password) or not any(c.isdigit() for c in password):
             return "Password must contain both letters and numbers"
         return None
 
     @staticmethod
-    def validate_email(email: str) -> str | None:
-        if not re.match(r"^[\w\.-]+@[\w\.-]+\.[a-zA-Z]{2,}$", email):
+    def validate_email(email: str | None) -> str | None:
+        if not email:
+            return "Email is required"
+        e = str(email).strip()
+        # Simple sanity regex; prefer Pydantic EmailStr if possible
+        if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$", e):
             return "Invalid email format"
         return None
 
     @staticmethod
-    def validate_full_name(full_name: str) -> str | None:
-        if not re.match(r"^[A-Za-z\s]{2,100}$", full_name):
-            return (
-                "Invalid full name format. "
-                "It must be 2-100 characters long and contain only letters and spaces."
-            )
+    def validate_full_name(full_name: str | None) -> str | None:
+        if full_name is None:
+            return None # OK
+        full_name = str(full_name).strip()
+        min_len = 2
+        max_len = 100
+        if not (min_len <= len(full_name) <= max_len):
+            return f"Full name must be {min_len}-{max_len} characters long"
         return None
 
     @staticmethod
-    def validate_phone_number(phone_number: str) -> str | None:
+    def validate_phone_number(phone_number: str | None) -> str | None:
+        if not phone_number:
+            return None  # OK
+        phone_number = str(phone_number).strip()
+        cleaned = phone_number.replace(" ", "").replace("-", "").replace("(", "").replace(")", "").replace(".", "")
+        if cleaned.startswith("+"):
+            cleaned = cleaned[1:]
+        if not re.fullmatch(rf"\d{10}", cleaned):
+            return "Phone number must be exactly 10 digits and contain only digits"
         return None
-
-    @staticmethod
-    def decode_jwt_token(token: str) -> dict:
-        try:
-            token = jwt.decode(
-                token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-            )
-        except Exception:
-            raise HTTPException(
-                status_code=401,
-                detail="Token has expired",
-            )
-
-        return token

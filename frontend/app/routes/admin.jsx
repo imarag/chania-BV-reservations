@@ -24,7 +24,7 @@ export default function Admin() {
 
     async function checkAdminUser() {
       const { resData, resError, canceled, resStatus } = await apiRequest({
-        url: apiEndpoints.IS_USER_ADMIN,
+        url: apiEndpoints.VALIDATE_USER_ADMIN,
       });
       if (!mounted || canceled) return;
 

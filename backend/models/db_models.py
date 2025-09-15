@@ -78,7 +78,7 @@ class CourtBase(SQLModel):
 
 
 class Court(CourtBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    id: int = Field(default=None, primary_key=True)
 
 
 class CourtPublic(CourtBase):
@@ -111,7 +111,7 @@ class TimeSlotBase(SQLModel):
 
 
 class TimeSlot(TimeSlotBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    id: int = Field(default=None, primary_key=True)
 
 
 class TimeSlotPublic(TimeSlotBase):
@@ -152,7 +152,7 @@ class UserBase(SQLModel):
 
 
 class User(UserBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    id: int = Field(default=None, primary_key=True)
     hashed_password: str
 
 
@@ -253,7 +253,7 @@ class ReservationBase(SQLModel):
 
 
 class Reservation(ReservationBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    id: int = Field(default=None, primary_key=True)
 
     __table_args__ = (
         UniqueConstraint(

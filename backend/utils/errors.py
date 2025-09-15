@@ -45,9 +45,10 @@ def raise_app_error(
 ) -> NoReturn:
     info = err.value
     body = {
-        "detail": detail or info.detail,
+        "error_message": detail or info.detail,
         "code": info.code,
         "code_number": info.code_number,
+        "status_code": info.http_status
     }
     if extra:
         body.update(extra)

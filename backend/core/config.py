@@ -6,8 +6,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    host: str = "127.0.0.1"
-    port: str = "8000"
     ACCESS_COOKIE_TTL_SEC: int = 30 * 24 * 3600
     SESSION_COOKIE_NAME: str = "access_token"
     SESSION_SHORT_HOURS: int = 15

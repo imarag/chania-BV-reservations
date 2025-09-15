@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from core.app_paths import AppPaths
-from core.auth_handler import AuthHandler
 from models.db_models import Reservation  # noqa: F403
 from models.db_models import Court, TimeSlot, User
 from sqlmodel import Session, SQLModel, create_engine
@@ -20,7 +19,7 @@ class DBHandler:
         SQLModel.metadata.create_all(self.engine)
 
     def populate_initial_data(self) -> None:
-
+        from core.auth_handler import AuthHandler
         auth_handler = AuthHandler()
 
         with Session(self.engine) as session:

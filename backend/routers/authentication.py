@@ -2,11 +2,13 @@ from datetime import datetime, timedelta, timezone
 
 from core.auth_handler import AuthHandler
 from dependencies import CurrentUserDep, SessionDep, SettingsDep
-from fastapi import APIRouter, HTTPException, Response, Request, status
+from fastapi import APIRouter, Response, Request, status
 from models.api_models import LoginResponse, RegisterResponse
 from models.db_models import User, UserLogin, UserPublic, UserRegister
 from models.auth_models import UserSession
 from utils.db_operations import add_user, get_user_by_email, create_session, delete_session
+from utils.errors import AppError, raise_app_error
+
 
 router = APIRouter()
 
@@ -23,7 +25,7 @@ async def register(form_data: UserRegister, session: SessionDep) -> RegisterResp
 
     existing_user = get_user_by_email(session, user_email)
     if existing_user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+        raise_app_error(AppError.EMAIL_ALREADY_REGISTERED)
 
     # Create new user
     new_user = User(
@@ -61,18 +63,21 @@ async def login(
 
     email = form_data.email.strip().lower()
     user = auth_handler.authenticate_user(email, form_data.password, session)
+    
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect email or password")
+        raise_app_error(AppError.INVALID_CREDENTIALS)
+
     user = user.model_copy() # keep this: for some reason sqlmodel deletes user after session commit
 
     ttl_hours = settings.SESSION_LONG_HOURS if form_data.stay_logged_in else settings.SESSION_SHORT_HOURS
     ttl = timedelta(hours=ttl_hours)
     now = datetime.now(timezone.utc)
     expires_at = now + ttl
+    
     user_session = UserSession(user_id=user.id, created_at=now, expires_at=expires_at)
-    # Create DB session row
+    
     new_session = create_session(session, user_session)
-    # Set cookie
+
     cookie_kwargs = dict(
         key=settings.SESSION_COOKIE_NAME,
         value=new_session.id,
@@ -109,10 +114,7 @@ async def read_current_user(current_user: CurrentUserDep) -> UserPublic | None:
 @router.get("/validate-user-admin")
 async def validate_user_admin(current_user: CurrentUserDep, settings: SettingsDep):
     if current_user.email not in settings.admins:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have access to this resource",
-        )
+        raise_app_error(AppError.NOT_AUTHORIZED)
     return {
         "is_admin": True,
         "message": "User has admin access",

@@ -1,42 +1,61 @@
-import re
 from datetime import date, datetime, time
 from enum import Enum
-
+import re
 from pydantic import EmailStr, computed_field, field_validator, model_validator
 from sqlalchemy import UniqueConstraint
 from sqlmodel import Field, SQLModel
-
-# ----- Validators -----
-
-
-def validate_fullname(v: str | None) -> None:
-    if v is None:
-        return
-    if not re.fullmatch(r"^[A-Za-z ]+$", v):
-        raise ValueError("Full name must contain only letters and spaces")
-    if len(v.split()) < 2:
-        raise ValueError("Full name must include at least first and last name")
+from utils.errors import raise_app_error, AppError
 
 
-def validate_phone_number(v: str | None) -> None:
-    if v is None:
-        return
-    if not re.fullmatch(r"^\d{10}$", v):
-        raise ValueError("Phone number must be exactly 10 digits")
+def validate_password(password: str | None) -> str | None:
+    if password is None:
+        return "Password is required"
+    passw_min_len = 8
+    passw_max_len = 64
+    if len(password) < passw_min_len or len(password) > passw_max_len:
+        return f"Password must be at least {passw_min_len} and at most {passw_max_len} characters long"
+    if not any(c.isalpha() for c in password) or not any(c.isdigit() for c in password):
+        return "Password must contain both letters and numbers"
+    return None
 
 
-def validate_password(v: str | None) -> None:
-    if v is None:
-        return
-    if not 6 <= len(v) <= 15:
-        raise ValueError("Password must be between 6 and 15 characters long")
+def validate_email(email: str | None) -> str | None:
+    if not email:
+        return "Email is required"
+    email = str(email).strip()
+
+    return None
 
 
-def validate_description(v: str | None) -> None:
-    if v is None:
-        return
-    if len(v) > 255:
-        raise ValueError("Description must not exceed 255 characters")
+def validate_full_name(full_name: str | None) -> str | None:
+    if full_name is None:
+        return None # OK
+    full_name = str(full_name).strip()
+    min_len = 2
+    max_len = 100
+    if not (min_len <= len(full_name) <= max_len):
+        return f"Full name must be {min_len}-{max_len} characters long"
+    return None
+
+
+def validate_phone_number(phone_number: str | None) -> str | None:
+    if not phone_number:
+        return None  # OK
+    phone_number = str(phone_number).strip()
+    cleaned = phone_number.replace(" ", "").replace("-", "").replace("(", "").replace(")", "").replace(".", "")
+    if cleaned.startswith("+"):
+        cleaned = cleaned[1:]
+    if not re.fullmatch(r"[0-9]{10}", cleaned):
+        return "Phone number must be exactly 10 digits and contain only digits"
+    return None
+
+
+def validate_birth_date(birth_date: date | None) -> str | None:
+    if not birth_date:
+        return None # OK
+
+    if birth_date is not None and birth_date > date.today():
+        return "Date of birth cannot be in the future"
 
 
 # ----- Enums -----
@@ -70,13 +89,6 @@ class CourtBase(SQLModel):
     professional: bool = Field(default=False)
     description: str | None = None
 
-    @field_validator("description")
-    @classmethod
-    def validate_description_field(cls, v: str | None) -> str | None:
-        validate_description(v)
-        return v
-
-
 class Court(CourtBase, table=True):
     id: int = Field(default=None, primary_key=True)
 
@@ -96,12 +108,6 @@ class TimeSlotBase(SQLModel):
     @property
     def name(self) -> str:
         return f"{self.start_time.strftime('%H:%M')}-{self.end_time.strftime('%H:%M')}"
-
-    @field_validator("description")
-    @classmethod
-    def validate_description_field(cls, v: str | None) -> str | None:
-        validate_description(v)
-        return v
 
     @model_validator(mode="after")
     def validate_time_order(self):
@@ -134,20 +140,25 @@ class UserBase(SQLModel):
     @field_validator("full_name")
     @classmethod
     def validate_fullname_field(cls, v: str | None) -> str | None:
-        validate_fullname(v)
+        error = validate_email(v)
+        if error:
+            raise_app_error(AppError.VALIDATION_ERROR, detail=error)
         return v
 
     @field_validator("phone_number")
     @classmethod
     def validate_phone_field(cls, v: str | None) -> str | None:
-        validate_phone_number(v)
+        error = validate_phone_number(v)
+        if error:
+            raise_app_error(AppError.VALIDATION_ERROR, detail=error)
         return v
 
     @field_validator("date_of_birth")
     @classmethod
     def validate_dob(cls, v: date | None) -> date | None:
-        if v and v > date.today():
-            raise ValueError("Date of birth cannot be in the future")
+        error = validate_birth_date(v)
+        if error:
+            raise_app_error(AppError.VALIDATION_ERROR, detail=error)
         return v
 
 
@@ -166,7 +177,9 @@ class UserCreate(UserBase):
     @field_validator("password")
     @classmethod
     def validate_password_field(cls, v: str | None) -> str | None:
-        validate_password(v)
+        error = validate_password(v)
+        if error:
+            raise_app_error(AppError.VALIDATION_ERROR, detail=error)
         return v
 
 
@@ -182,19 +195,25 @@ class UserUpdate(SQLModel):
     @field_validator("full_name")
     @classmethod
     def validate_fullname_field(cls, v: str | None) -> str | None:
-        validate_fullname(v)
+        error = validate_full_name(v)
+        if error:
+            raise_app_error(AppError.VALIDATION_ERROR, detail=error)
         return v
 
     @field_validator("phone_number")
     @classmethod
     def validate_phone_field(cls, v: str | None) -> str | None:
-        validate_phone_number(v)
+        error = validate_phone_number(v)
+        if error:
+            raise_app_error(AppError.VALIDATION_ERROR, detail=error)
         return v
 
     @field_validator("password")
     @classmethod
     def validate_password_field(cls, v: str | None) -> str | None:
-        validate_password(v)
+        error = validate_password(v)
+        if error:
+            raise_app_error(AppError.VALIDATION_ERROR, detail=error)
         return v
 
     @model_validator(mode="after")
@@ -216,7 +235,9 @@ class UserLogin(SQLModel):
     @field_validator("password")
     @classmethod
     def validate_password_field(cls, v: str | None) -> str | None:
-        validate_password(v)
+        error = validate_password(v)
+        if error:
+            raise_app_error(AppError.VALIDATION_ERROR, detail=error)
         return v
 
 
@@ -227,13 +248,17 @@ class UserRegister(UserBase):
     @field_validator("full_name")
     @classmethod
     def validate_fullname_field(cls, v: str | None) -> str | None:
-        validate_fullname(v)
+        error = validate_full_name(v)
+        if error:
+            raise_app_error(AppError.VALIDATION_ERROR, detail=error)
         return v
 
     @field_validator("password")
     @classmethod
     def validate_password_field(cls, v: str | None) -> str | None:
-        validate_password(v)
+        error = validate_password(v)
+        if error:
+            raise_app_error(AppError.VALIDATION_ERROR, detail=error)
         return v
 
     @model_validator(mode="after")

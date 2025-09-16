@@ -1,5 +1,5 @@
 from typing import Annotated
-
+from dependencies import CurrentUserDep
 from core.auth_handler import AuthHandler
 from dependencies import SessionDep
 from fastapi import APIRouter, Body
@@ -21,7 +21,12 @@ from utils.db_operations import (
     get_time_slots,
     get_users,
     update_user,
+    get_reservation_by_id,
+    delete_reservation,
+    delete_reservation_users
 )
+from utils.errors import AppError, raise_app_error
+
 
 router = APIRouter()
 
@@ -112,18 +117,33 @@ async def delete_user_route(user_id: int, session: SessionDep) -> UserPublic:
     return delete_user(session, user_id)
 
 
+@router.get("/reservations")
+async def reservations_api(session: SessionDep, current_user: CurrentUserDep) -> list[ReservationPublic]:
+    return get_reservations(session)
+    
+
 @router.post("/create-reservation", response_model=ReservationPublic)
 async def create_reservation_api(
     reservation: ReservationCreate,
-    reservation_users: Annotated[list, Body()],
+    reservation_users: Annotated[list[int], Body()],
     session: SessionDep,
 ) -> ReservationPublic:
     new_reservation = add_reservation(session, reservation)
-
     add_reservation_users(session, new_reservation.id, reservation_users)
     return new_reservation
 
+@router.post("/delete-reservation", response_model=ReservationPublic)
+async def delete_reservation_api(
+    reservation_id: ReservationCreate,
+    session: SessionDep,
+    current_user: CurrentUserDep
+) -> ReservationPublic:
+    resevation = get_reservation_by_id(session, reservation_id)
+    user_id = reservation.user_id
 
-@router.get("/reservations")
-async def reservations_api(session: SessionDep) -> list[ReservationPublic]:
-    return get_reservations(session)
+    if user_id != currentUser.id:
+        raise_app_error(AppError.NOT_AUTHORIZED)
+    
+    delete_reservation(session, reservation_id)
+    delete_reservation_users(session, reservation_id)
+    return resevation

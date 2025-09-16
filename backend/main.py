@@ -4,7 +4,7 @@ from pydantic import ValidationError
 from core.app_paths import AppPaths
 from core.db_handler import DBHandler
 from dependencies import get_settings
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse

@@ -1,7 +1,7 @@
 from typing import Sequence, List
 
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlmodel import Session, select
+from sqlmodel import Session, select, delete
 
 from models.auth_models import UserSession
 from models.db_models import (
@@ -222,28 +222,19 @@ def add_reservation_users(session: Session, reservation_id: int, reservation_use
         raise_app_error(AppError.SERVER_ERROR)
 
 
-def delete_reservation(session: Session, reservation: Reservation) -> Reservation:
+def delete_reservation(session: Session, reservation_id: int):
     try:
-        session.delete(reservation)
+        session.exec(delete(Reservation).where(Reservation.id == reservation_id))
         session.commit()
-        return reservation
     except SQLAlchemyError:
         session.rollback()
         raise_app_error(AppError.SERVER_ERROR)
 
 
-def update_reservation(session: Session, reservation: Reservation, update_field: str) -> Reservation:
-    existing = session.get(Reservation, reservation.id)
-    if not existing:
-        raise_app_error(AppError.NOT_FOUND)
-    setattr(existing, update_field, getattr(reservation, update_field))
+def delete_reservation_users(session: Session, reservation_id: int):
     try:
+        session.exec(delete(ReservationUser).where(ReservationUser.reservation_id == reservation_id))
         session.commit()
-        session.refresh(existing)
-        return existing
-    except IntegrityError:
-        session.rollback()
-        raise_app_error(AppError.CONFLICT)
     except SQLAlchemyError:
         session.rollback()
         raise_app_error(AppError.SERVER_ERROR)

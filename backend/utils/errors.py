@@ -43,7 +43,7 @@ class AppError(Enum):
 def create_error_body(
     err: AppError | ErrorInfo,
     detail: str | None = None,
-    **extra_fields: dict | None = None,
+    **extra_fields: dict | None,
 ) -> dict:
     info = err.value if isinstance(err, AppError) else err
     body = asdict(info)
@@ -63,7 +63,7 @@ def create_error_body(
 def raise_app_error(
     err: AppError,
     detail: str | None = None,   # overwrite error message
-    **extra_fields: dict | None = None, # add extra fields
+    **extra_fields: dict | None, # add extra fields
 ) -> NoReturn:
     info = err.value
     body = create_error_body(info, detail=detail, **extra_fields)

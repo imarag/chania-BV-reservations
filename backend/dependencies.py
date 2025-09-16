@@ -1,6 +1,7 @@
 from collections.abc import Generator
 from typing import Annotated
 from datetime import datetime, timezone
+from core.auth_handler import AuthHandler, get_auth_handler
 from core.config import Settings, get_settings
 from fastapi import Depends, Request
 from models.db_models import UserPublic
@@ -8,6 +9,7 @@ from sqlmodel import Session
 from utils.db_operations import get_reservation_by_user_id, get_user_by_id, get_user_session_by_id
 from utils.errors import AppError, raise_app_error
 
+AuthHandlerDep = Annotated[AuthHandler, Depends(get_auth_handler)]
 
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 

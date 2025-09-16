@@ -1,6 +1,6 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-
+from pydantic import ValidationError
 from core.app_paths import AppPaths
 from core.db_handler import DBHandler
 from dependencies import get_settings
@@ -10,7 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from routers import authentication, database_queries
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from utils.errors import AppError
+from utils.errors import AppError, create_error_body, ErrorInfo
+
 
 settings = get_settings()
 
@@ -31,37 +32,63 @@ app.include_router(
 )
 
 
-# this is for raising httpexception errors
+# --- HTTPExceptions you raise (or Starlette raises like 404) ---
 @app.exception_handler(StarletteHTTPException)
-async def http_exception_handler(request, exc):
-    # If detail already contains our structured body, pass it through
-    if isinstance(exc.detail, dict) and {"error_message", "code", "code_number", "status_code"} <= set(exc.detail):
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    if isinstance(exc.detail, dict):
         body = exc.detail
     else:
-        # Normalize any other HTTPException to our schema
-        body = {
-            "error_message": str(exc.detail),
-            "code": "HTTP_ERROR",
-            "code_number": exc.status_code,   # simple fallback
-            "status_code": exc.status_code,
-        }
+        # Build a generic error envelope for arbitrary HTTP errors
+        temp_info = ErrorInfo(
+            http_status=exc.status_code,
+            code_number=exc.status_code,
+            code="HTTP_ERROR",
+            detail=str(exc.detail),
+        )
+        body = create_error_body(temp_info)
     return JSONResponse(status_code=exc.status_code, content=body)
 
 
-# this is for errors related to validations of pydantic
-# return the errors are comma separated strings
+# --- FastAPI request validation (client sent invalid data) ---
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc):
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """
+    Return a 422 with a joined message (human-friendly) and keep the structured
+    Pydantic errors in the body for the UI to show field-level messages if needed.
+    """
     info = AppError.VALIDATION_ERROR.value
-    # You can either join messages or return structured errors (or both)
     joined = ", ".join(err.get("msg", "Invalid value") for err in exc.errors())
-    body = {
-        "error_message": joined or info.detail,
-        "code": info.code,
-        "code_number": info.code_number,
-        "status_code": info.http_status,
-        "errors": exc.errors(),  # optional: keep detailed field errors
-    }
+    body = create_error_body(
+        info,
+        detail=joined,
+        errors=exc.errors(),   # extra field with structured errors
+        body=exc.body,         # may be None; useful for debugging/UX
+    )
+    return JSONResponse(status_code=info.http_status, content=body)
+
+
+# --- Pydantic validation inside your code/response models (server-side bug) ---
+@app.exception_handler(ValidationError)
+async def pydantic_validation_handler(request: Request, exc: ValidationError):
+    info = AppError.SERVER_ERROR.value
+    body = create_error_body(
+        info,
+        detail="Internal validation error",
+        errors=exc.errors(),
+        exception="ValidationError",
+    )
+    return JSONResponse(status_code=info.http_status, content=body)
+
+
+# --- Any other uncaught exception (catch-all 500) ---
+@app.exception_handler(Exception)
+async def generic_handler(request: Request, exc: Exception):
+    info = AppError.SERVER_ERROR.value
+    body = create_error_body(
+        info,
+        detail="Something went wrong",
+        exception=type(exc).__name__,
+    )
     return JSONResponse(status_code=info.http_status, content=body)
 
 

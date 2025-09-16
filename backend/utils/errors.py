@@ -1,7 +1,9 @@
 from dataclasses import dataclass, asdict
 from enum import Enum
 from fastapi import HTTPException
-from typing import NoReturn, Any
+from typing import Any, NoReturn
+
+# ---------- Core definitions ----------
 
 @dataclass(frozen=True)
 class ErrorInfo:
@@ -9,6 +11,7 @@ class ErrorInfo:
     code_number: int
     code: str          # machine-readable string (e.g., "NOT_FOUND")
     detail: str        # default human-readable message
+
 
 class AppError(Enum):
     # 422 — request/body validation failed (Pydantic or your own checks)
@@ -35,22 +38,33 @@ class AppError(Enum):
     SERVER_ERROR             = ErrorInfo(500, 5000, "SERVER_ERROR", "Internal server error")
 
 
-def raise_app_error(
-    err: AppError,
-    *,
-    detail: str | None = None,            # override human message
-    extra: dict | None = None,   # extra payload (namespaced to avoid collisions)
-) -> NoReturn:
-    info = err.value
+# ---------- Reusable builder ----------
+
+def create_error_body(
+    err: AppError | ErrorInfo,
+    detail: str | None = None,
+    **extra_fields: dict | None = None,
+) -> dict:
+    info = err.value if isinstance(err, AppError) else err
     body = asdict(info)
 
     if detail is not None:
         body["detail"] = detail
 
-    # duplicate HTTP status in body for clients that don’t inspect headers
+    # duplicate http_status in body for convenience
     body["status"] = info.http_status
 
-    if extra:
-        body["extra"] = extra
+    # merge any extra fields
+    body.update(extra_fields)
 
+    return body
+
+
+def raise_app_error(
+    err: AppError,
+    detail: str | None = None,   # overwrite error message
+    **extra_fields: dict | None = None, # add extra fields
+) -> NoReturn:
+    info = err.value
+    body = create_error_body(info, detail=detail, **extra_fields)
     raise HTTPException(status_code=info.http_status, detail=body)

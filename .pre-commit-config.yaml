@@ -23,7 +23,7 @@ repos:
         language_version: python3.12
         files: ^backend/
 
-  # Ruff: lint + auto-fix many Python issues (including import sorting)
+  # Ruff: lint + auto-fix many issues (including import sorting)
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.12.12
     hooks:

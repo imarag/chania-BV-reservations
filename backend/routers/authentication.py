@@ -5,7 +5,12 @@ from fastapi import APIRouter, Response, Request, status
 from models.api_models import LoginResponse, RegisterResponse
 from models.db_models import User, UserLogin, UserPublic, UserRegister
 from models.auth_models import UserSession
-from utils.db_operations import add_user, get_user_by_email, create_session, delete_session
+from utils.db_operations import (
+    add_user,
+    get_user_by_email,
+    create_session,
+    delete_session,
+)
 from utils.errors import AppError, raise_app_error
 
 
@@ -13,9 +18,13 @@ router = APIRouter()
 
 
 @router.post(
-    "/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED,
+    "/register",
+    response_model=RegisterResponse,
+    status_code=status.HTTP_201_CREATED,
 )
-async def register(user_register_info: UserRegister, session: SessionDep, auth_handler: AuthHandlerDep) -> RegisterResponse:
+async def register(
+    user_register_info: UserRegister, session: SessionDep, auth_handler: AuthHandlerDep
+) -> RegisterResponse:
     user_email = user_register_info.email.strip().lower()
     user_password = user_register_info.password
 
@@ -32,21 +41,22 @@ async def register(user_register_info: UserRegister, session: SessionDep, auth_h
     add_user(session, new_user)
 
     return RegisterResponse(
-        message = "User registered succesfully",
-        user = UserPublic(**new_user.model_dump())
+        message="User registered succesfully", user=UserPublic(**new_user.model_dump())
     )
 
 
 @router.post("/logout")
-def logout(response: Response, settings: SettingsDep, session: SessionDep, request: Request):
+def logout(
+    response: Response, settings: SettingsDep, session: SessionDep, request: Request
+):
     user_session_id = request.cookies.get(settings.SESSION_COOKIE_NAME)
     response.delete_cookie(
         settings.SESSION_COOKIE_NAME,
     )
-    
+
     if user_session_id is not None:
         delete_session(session, user_session_id)
-        
+
     return {"message": "Logged out"}
 
 
@@ -56,22 +66,30 @@ async def login(
     settings: SettingsDep,
     response: Response,
     session: SessionDep,
-    auth_handler: AuthHandlerDep
+    auth_handler: AuthHandlerDep,
 ) -> LoginResponse:
 
-    user = auth_handler.authenticate_user(user_login_info.email, user_login_info.password, session)
-    
+    user = auth_handler.authenticate_user(
+        user_login_info.email, user_login_info.password, session
+    )
+
     if not user:
         raise_app_error(AppError.INVALID_CREDENTIALS)
 
-    user = user.model_copy() # keep this: for some reason sqlmodel deletes user after session commit
+    user = (
+        user.model_copy()
+    )  # keep this: for some reason sqlmodel deletes user after session commit
 
     # create expire date of the session cookie
-    ttl_hours = settings.SESSION_LONG_HOURS if user_login_info.stay_logged_in else settings.SESSION_SHORT_HOURS
+    ttl_hours = (
+        settings.SESSION_LONG_HOURS
+        if user_login_info.stay_logged_in
+        else settings.SESSION_SHORT_HOURS
+    )
     ttl_delta = timedelta(hours=ttl_hours)
     now = datetime.now(timezone.utc)
     expires_at = now + ttl_delta
-    
+
     user_session = UserSession(user_id=user.id, created_at=now, expires_at=expires_at)
     new_session = create_session(session, user_session)
 
@@ -84,18 +102,17 @@ async def login(
         samesite=settings.COOKIE_SAMESITE,
         path="/",
     )
-   
+
     if user_login_info.stay_logged_in:
-        cookie_kwargs["expires"] = expires_at # type: ignore
+        cookie_kwargs["expires"] = expires_at  # type: ignore
 
-    response.set_cookie(**cookie_kwargs) # type: ignore
-    
+    response.set_cookie(**cookie_kwargs)  # type: ignore
+
     return LoginResponse(
-        message = "Login succesful",
-        user = UserPublic(**user.model_dump()),
-        stay_logged_in=user_login_info.stay_logged_in
+        message="Login succesful",
+        user=UserPublic(**user.model_dump()),
+        stay_logged_in=user_login_info.stay_logged_in,
     )
-
 
 
 @router.get("/get-access-token")
@@ -110,7 +127,9 @@ async def get_current_user(current_user: CurrentUserDep) -> UserPublic | None:
 
 
 @router.get("/validate-user-admin")
-async def validate_user_admin(current_user: CurrentUserDep, settings: SettingsDep) -> dict:
+async def validate_user_admin(
+    current_user: CurrentUserDep, settings: SettingsDep
+) -> dict:
     if current_user.email not in settings.admins:
         raise_app_error(AppError.NOT_AUTHORIZED)
     return {

@@ -18,7 +18,10 @@ from utils.errors import AppError, raise_app_error
 
 # ---------- Sessions ----------
 
-def get_user_session_by_id(session: Session, user_session_id: str) -> UserSession | None:
+
+def get_user_session_by_id(
+    session: Session, user_session_id: str
+) -> UserSession | None:
     return session.get(UserSession, user_session_id)
 
 
@@ -52,6 +55,7 @@ def delete_session(session: Session, user_session_id: str) -> UserSession | None
 
 
 # ---------- Users ----------
+
 
 def get_users(session: Session) -> Sequence[User]:
     return session.exec(select(User)).all()
@@ -119,6 +123,7 @@ def delete_user(session: Session, user_id: int) -> User:
 
 # ---------- Courts & Time Slots ----------
 
+
 def get_courts(session: Session) -> Sequence[Court]:
     return session.exec(select(Court)).all()
 
@@ -149,7 +154,9 @@ def update_court(session: Session, court: Court, update_field: str) -> Court:
         raise_app_error(AppError.SERVER_ERROR)
 
 
-def update_time_slot(session: Session, time_slot: TimeSlot, update_field: str) -> TimeSlot:
+def update_time_slot(
+    session: Session, time_slot: TimeSlot, update_field: str
+) -> TimeSlot:
     existing = session.get(TimeSlot, time_slot.id)
     if not existing:
         raise_app_error(AppError.NOT_FOUND)
@@ -165,6 +172,7 @@ def update_time_slot(session: Session, time_slot: TimeSlot, update_field: str) -
 
 # ---------- Reservations ----------
 
+
 def get_reservations(session: Session) -> Sequence[Reservation]:
     return session.exec(select(Reservation)).all()
 
@@ -177,12 +185,16 @@ def get_reservation_by_id(session: Session, reservation_id: int) -> Reservation 
     return session.get(Reservation, reservation_id)
 
 
-def get_reservation_player_by_id(session: Session, reservation_player_id: int) -> ReservationUser | None:
+def get_reservation_player_by_id(
+    session: Session, reservation_player_id: int
+) -> ReservationUser | None:
     return session.get(ReservationUser, reservation_player_id)
 
 
 def get_reservation_by_user_id(session: Session, user_id: int) -> Reservation | None:
-    return session.exec(select(Reservation).where(Reservation.user_id == user_id)).first()
+    return session.exec(
+        select(Reservation).where(Reservation.user_id == user_id)
+    ).first()
 
 
 def get_user_reservations(session: Session, user_id: int) -> Sequence[Reservation]:
@@ -205,9 +217,14 @@ def add_reservation(session: Session, reservation: ReservationCreate) -> Reserva
         raise_app_error(AppError.SERVER_ERROR)
 
 
-def add_reservation_users(session: Session, reservation_id: int, reservation_user_ids: List[int]) -> list[ReservationUserPublic]:
+def add_reservation_users(
+    session: Session, reservation_id: int, reservation_user_ids: List[int]
+) -> list[ReservationUserPublic]:
     # Deduplicate to avoid accidental duplicates
-    rows = [ReservationUser(reservation_id=reservation_id, user_id=uid) for uid in dict.fromkeys(reservation_user_ids)]
+    rows = [
+        ReservationUser(reservation_id=reservation_id, user_id=uid)
+        for uid in dict.fromkeys(reservation_user_ids)
+    ]
     try:
         session.add_all(rows)
         session.commit()
@@ -233,7 +250,11 @@ def delete_reservation(session: Session, reservation_id: int):
 
 def delete_reservation_users(session: Session, reservation_id: int):
     try:
-        session.exec(delete(ReservationUser).where(ReservationUser.reservation_id == reservation_id))
+        session.exec(
+            delete(ReservationUser).where(
+                ReservationUser.reservation_id == reservation_id
+            )
+        )
         session.commit()
     except SQLAlchemyError:
         session.rollback()

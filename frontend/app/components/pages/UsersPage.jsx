@@ -43,7 +43,9 @@ function UsersList({ users }) {
 
   return (
     <div className="p-8 space-y-4">
-      <p className="text-end text-sm">{`${users.length} user${users.length > 1 ? "s" : ""} found`}</p>
+      <p className="text-end text-sm">{`${users.length} user${
+        users.length > 1 ? "s" : ""
+      } found`}</p>
       <ul className="space-y-2 bg-base-300">
         {users.map((user) => (
           <li key={user.id}>
@@ -153,13 +155,13 @@ function MainBody() {
     !Array.isArray(users) || users.length === 0
       ? []
       : termEdited === ""
-        ? users
-        : users.filter((user) =>
-            Object.values(user).some(
-              (v) =>
-                v != null && String(v).toLowerCase().trim().includes(termEdited)
-            )
-          );
+      ? users
+      : users.filter((user) =>
+          Object.values(user).some(
+            (v) =>
+              v != null && String(v).toLowerCase().trim().includes(termEdited)
+          )
+        );
 
   return (
     <>

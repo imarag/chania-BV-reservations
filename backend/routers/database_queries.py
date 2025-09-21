@@ -22,7 +22,7 @@ from utils.db_operations import (
     update_user,
     get_reservation_by_id,
     delete_reservation,
-    delete_reservation_users
+    delete_reservation_users,
 )
 from utils.errors import AppError, raise_app_error
 
@@ -99,30 +99,39 @@ async def get_users_route(session: SessionDep) -> list[UserPublic]:
 
 
 @router.get("/delete-user", response_model=UserPublic)
-async def delete_user_route(user_id: int, session: SessionDep, current_user: CurrentUserDep, auth_handler: AuthHandlerDep) -> UserPublic:
+async def delete_user_route(
+    user_id: int,
+    session: SessionDep,
+    current_user: CurrentUserDep,
+    auth_handler: AuthHandlerDep,
+) -> UserPublic:
     if not auth_handler.check_admin_user(current_user.email):
         raise_app_error(AppError.NOT_AUTHORIZED)
-        
+
     deleted_user = delete_user(session, user_id)
     return UserPublic(**deleted_user.model_dump())
 
 
 @router.post("/update-user-info", response_model=UserPublic)
 async def update_user_info(
-    user_id: int, user: UserUpdate, session: SessionDep, current_user: CurrentUserDep, auth_handler: AuthHandlerDep
+    user_id: int,
+    user: UserUpdate,
+    session: SessionDep,
+    current_user: CurrentUserDep,
+    auth_handler: AuthHandlerDep,
 ) -> UserPublic:
-    
+
     if current_user.id != user_id:
         raise_app_error(AppError.NOT_AUTHORIZED)
-        
+
     updated_data = user.model_dump(exclude_unset=True)
-    
+
     if "password" in updated_data:
         updated_data["hashed_password"] = auth_handler.generate_password_hash(
             updated_data["password"]
         )
         del updated_data["password"]
-    
+
     updated_user = update_user(session, user_id, updated_data)
     return UserPublic(**updated_user.model_dump())
 
@@ -131,7 +140,7 @@ async def update_user_info(
 async def reservations_api(session: SessionDep) -> list[ReservationPublic]:
     reservations = get_reservations(session)
     return [ReservationPublic(**res.model_dump()) for res in reservations]
-    
+
 
 @router.post("/create-reservation", response_model=ReservationPublic)
 async def create_reservation_api(
@@ -146,21 +155,19 @@ async def create_reservation_api(
 
 @router.post("/delete-reservation", response_model=ReservationPublic)
 async def delete_reservation_api(
-    reservation_id: int,
-    session: SessionDep,
-    current_user: CurrentUserDep
+    reservation_id: int, session: SessionDep, current_user: CurrentUserDep
 ) -> ReservationPublic:
     reservation = get_reservation_by_id(session, reservation_id)
-    
+
     if reservation is None:
         raise_app_error(AppError.NOT_FOUND, detail="Reservation not found")
-        
+
     # check if the current user is the same as the one did the reservation
     # only the user that did the reservation can delete it
     if current_user.id != reservation.user_id:
         raise_app_error(AppError.NOT_AUTHORIZED)
-    
+
     delete_reservation(session, reservation_id)
     delete_reservation_users(session, reservation_id)
-    
+
     return ReservationPublic(**reservation.model_dump())

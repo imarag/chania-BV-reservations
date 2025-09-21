@@ -29,7 +29,7 @@ def validate_email(email: str | None) -> str | None:
 
 def validate_full_name(full_name: str | None) -> str | None:
     if full_name is None:
-        return None # OK
+        return None  # OK
     full_name = str(full_name).strip()
     min_len = 2
     max_len = 100
@@ -42,7 +42,13 @@ def validate_phone_number(phone_number: str | None) -> str | None:
     if not phone_number:
         return None  # OK
     phone_number = str(phone_number).strip()
-    cleaned = phone_number.replace(" ", "").replace("-", "").replace("(", "").replace(")", "").replace(".", "")
+    cleaned = (
+        phone_number.replace(" ", "")
+        .replace("-", "")
+        .replace("(", "")
+        .replace(")", "")
+        .replace(".", "")
+    )
     if cleaned.startswith("+"):
         cleaned = cleaned[1:]
     if not re.fullmatch(r"[0-9]{10}", cleaned):
@@ -52,7 +58,7 @@ def validate_phone_number(phone_number: str | None) -> str | None:
 
 def validate_birth_date(birth_date: date | None) -> str | None:
     if not birth_date:
-        return None # OK
+        return None  # OK
 
     if birth_date is not None and birth_date > date.today():
         return "Date of birth cannot be in the future"
@@ -88,6 +94,7 @@ class CourtBase(SQLModel):
     status: CourtStatus = Field(default=CourtStatus.available)
     professional: bool = Field(default=False)
     description: str | None = None
+
 
 class Court(CourtBase, table=True):
     id: int = Field(default=None, primary_key=True)

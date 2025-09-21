@@ -25,8 +25,8 @@ export async function apiRequest({
     const res = await axios({
       url,
       method: methodLower,
-      params: methodLower === "get" ? (requestData ?? undefined) : undefined,
-      data: methodLower !== "get" ? (requestData ?? undefined) : undefined,
+      params: methodLower === "get" ? requestData ?? undefined : undefined,
+      data: methodLower !== "get" ? requestData ?? undefined : undefined,
       headers,
       responseType,
       signal,

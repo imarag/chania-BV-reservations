@@ -20,6 +20,7 @@ class DBHandler:
 
     def populate_initial_data(self) -> None:
         from core.auth_handler import AuthHandler
+
         auth_handler = AuthHandler()
 
         with Session(self.engine) as session:

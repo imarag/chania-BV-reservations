@@ -61,8 +61,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     body = create_error_body(
         info,
         detail=joined,
-        errors=exc.errors(),   # extra field with structured errors
-        body=exc.body,         # may be None; useful for debugging/UX
+        errors=exc.errors(),  # extra field with structured errors
+        body=exc.body,  # may be None; useful for debugging/UX
     )
     return JSONResponse(status_code=info.http_status, content=body)
 

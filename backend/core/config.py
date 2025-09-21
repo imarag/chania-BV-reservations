@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     ACCESS_COOKIE_TTL_SEC: int = 30 * 24 * 3600
     SESSION_COOKIE_NAME: str = "access_token"
     SESSION_SHORT_HOURS: int = 15
-    SESSION_LONG_HOURS: int = 24 * 15 # hours * days
+    SESSION_LONG_HOURS: int = 24 * 15  # hours * days
     COOKIE_SECURE: bool = True
     COOKIE_SAMESITE: str = "none"  # "lax" for same-site; "none" for cross-site
     admins: list[str] = []

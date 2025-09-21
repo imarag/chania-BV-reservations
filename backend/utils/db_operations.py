@@ -1,8 +1,8 @@
 from typing import Sequence, List
 
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlmodel import Session, select, delete
-
+from sqlmodel import Session, select, delete, and_
+from datetime import date
 from models.auth_models import UserSession
 from models.db_models import (
     Court,
@@ -194,6 +194,19 @@ def get_reservation_player_by_id(
 def get_reservation_by_user_id(session: Session, user_id: int) -> Reservation | None:
     return session.exec(
         select(Reservation).where(Reservation.user_id == user_id)
+    ).first()
+
+
+def get_reservation_by_user_id_date(
+    session: Session, user_id: int, reservation_date: date
+) -> Reservation | None:
+    return session.exec(
+        select(Reservation).where(
+            and_(
+                Reservation.user_id == user_id,
+                Reservation.reservation_date == reservation_date,
+            )
+        )
     ).first()
 
 

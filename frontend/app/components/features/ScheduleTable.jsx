@@ -61,11 +61,8 @@ function BookedContent({ booking }) {
 function NotBookedContent({ courtId, timeslotId, currentUser, label }) {
   const navigate = useNavigate();
   function handleNavigate() {
-    const path = pagePaths.reserve.path
-      .replace(":court_id", courtId)
-      .replace(":timeslot_id", timeslotId)
-      .replace(":user_id", currentUser?.id);
-    navigate(path);
+    const queryPath = `court_id=${courtId}&timeslot_id=${timeslotId}&user_id=${currentUser?.id}`;
+    navigate(`${pagePaths.reserve.path}?${queryPath}`);
   }
 
   return (

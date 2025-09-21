@@ -1,10 +1,12 @@
 import ReservePage from "../components/pages/ReservePage";
 import { useSearchParams, useNavigate } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { pagePaths } from "../utils/appUrls";
 import { createPageMeta } from "../utils/page-info";
 import { useNotification } from "../context/NotificationContext";
-import { useCurrentUser } from "../context/CurrentUserContext";
+import { apiRequest } from "../utils/apiRequest";
+import { apiEndpoints } from "../utils/appUrls";
+import { useGlobalLoading } from "../context/GlobalLoadingContext";
 
 export function meta() {
   const title = "Reserve a Court";
@@ -17,17 +19,40 @@ export default function Reserve() {
   const [reserveParams] = useSearchParams();
   const navigate = useNavigate();
   const { showNotification } = useNotification();
-  const { currentUser } = useCurrentUser();
+  const { globalLoading, setGlobalLoading } = useGlobalLoading();
 
   useEffect(() => {
-    if (currentUser && currentUser.can_make_reservation === false) {
-      showNotification(
-        "You cannot book another court because you already have a reservation.",
-        "error"
-      );
-      navigate(pagePaths.home.path, { replace: true });
+    let mounted = true;
+
+    async function checkUserCanMakeReservation() {
+      setGlobalLoading(true);
+      const { resData, resError } = await apiRequest({
+        url: apiEndpoints.VALIDATE_USER_CREATE_RESERVATION,
+      });
+
+      await new Promise((r) => setTimeout(r, 3000)); // to avoid flickering
+
+      setGlobalLoading(false);
+
+      if (!mounted) return;
+
+      if (resError) {
+        showNotification(resError, "error");
+        navigate(pagePaths.home.path, { replace: true });
+        return;
+      }
     }
-  }, [currentUser, showNotification, navigate]);
+
+    checkUserCanMakeReservation();
+
+    return () => {
+      mounted = false;
+    };
+  }, [navigate, showNotification]);
+
+  if (globalLoading) {
+    return null;
+  }
 
   return (
     <ReservePage

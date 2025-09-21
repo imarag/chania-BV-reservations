@@ -49,8 +49,8 @@ export const apiEndpoints = {
   GET_CURRENT_USER: u(AUTH, "get-current-user"),
   VALIDATE_USER_ADMIN: u(AUTH, "validate-user-admin"),
   GET_ACCESS_TOKEN: u(AUTH, "get-access-token"),
+  VALIDATE_USER_CREATE_RESERVATION: u(AUTH, "validate-user-create-reservation"),
 
-  GET_SCHEDULE: u(API, "schedule"),
   GET_BOOKING_CELLS: u(DB, "get-booking-cells"),
   GET_ALL_USERS: u(DB, "users"),
   UPDATE_USER_INFO: (id) =>

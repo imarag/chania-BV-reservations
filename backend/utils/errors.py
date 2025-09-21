@@ -34,6 +34,12 @@ class AppError(Enum):
 
     # 403 — authenticated but not allowed
     NOT_AUTHORIZED = ErrorInfo(403, 2002, "NOT_AUTHORIZED", "You do not have access")
+    RESERVATION_NOT_ALLOWED = ErrorInfo(
+        403,
+        2003,
+        "RESERVATION_NOT_ALLOWED",
+        "User is not allowed to make a reservation",
+    )
 
     # 404 — resource doesn’t exist
     NOT_FOUND = ErrorInfo(404, 4004, "NOT_FOUND", "Resource not found")

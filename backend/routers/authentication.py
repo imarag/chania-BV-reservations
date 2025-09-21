@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
 from dependencies import AuthHandlerDep, CurrentUserDep, SessionDep, SettingsDep
 from fastapi import APIRouter, Response, Request, status
@@ -10,9 +10,12 @@ from utils.db_operations import (
     get_user_by_email,
     create_session,
     delete_session,
+    get_reservation_by_user_id_date,
+    get_user_by_id,
+    get_user_session_by_id,
 )
 from utils.errors import AppError, raise_app_error
-
+from utils.util_functions import get_naive_utc_date_now, get_naive_utc_datetime_now
 
 router = APIRouter()
 
@@ -87,10 +90,11 @@ async def login(
         else settings.SESSION_SHORT_HOURS
     )
     ttl_delta = timedelta(hours=ttl_hours)
-    now = datetime.now(timezone.utc)
-    expires_at = now + ttl_delta
-
-    user_session = UserSession(user_id=user.id, created_at=now, expires_at=expires_at)
+    datetime_now = get_naive_utc_datetime_now()
+    expires_at = datetime_now + ttl_delta
+    user_session = UserSession(
+        user_id=user.id, created_at=datetime_now, expires_at=expires_at
+    )
     new_session = create_session(session, user_session)
 
     # set the session cookie
@@ -136,4 +140,45 @@ async def validate_user_admin(
         "is_admin": True,
         "message": "User has admin access",
         "user_email": current_user.email,
+    }
+
+
+@router.get("/validate-user-create-reservation")
+def validate_user_create_reservation(
+    current_user: CurrentUserDep,
+    settings: SettingsDep,
+    session: SessionDep,
+    request: Request,
+):
+    user_session_id = request.cookies.get(settings.SESSION_COOKIE_NAME)
+
+    if not user_session_id:
+        raise_app_error(AppError.MISSING_SESSION)
+
+    user_session = get_user_session_by_id(session, user_session_id)
+    if not user_session:
+        raise_app_error(AppError.NOT_AUTHORIZED)
+
+    user = get_user_by_id(session, user_session.user_id)
+
+    if not user:
+        raise_app_error(AppError.NOT_AUTHORIZED)
+
+    date_now = get_naive_utc_date_now()
+    existing_reservation = get_reservation_by_user_id_date(session, user.id, date_now)
+
+    # if user has already made a reservation
+    if existing_reservation:
+        raise_app_error(
+            AppError.RESERVATION_NOT_ALLOWED,
+            detail="User has already made a reservation",
+        )
+
+    # if user is not active
+    if not user.active:
+        raise_app_error(AppError.RESERVATION_NOT_ALLOWED, detail="User is not active")
+
+    return {
+        "user": UserPublic(**user.model_dump()),
+        "message": "User can make a reservation",
     }

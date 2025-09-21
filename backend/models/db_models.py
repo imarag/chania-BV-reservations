@@ -5,6 +5,7 @@ from pydantic import EmailStr, computed_field, field_validator, model_validator
 from sqlalchemy import UniqueConstraint
 from sqlmodel import Field, SQLModel
 from utils.errors import raise_app_error, AppError
+from utils.util_functions import get_naive_utc_datetime_now, get_naive_utc_date_now
 
 
 def validate_password(password: str | None) -> str | None:
@@ -142,7 +143,7 @@ class UserBase(SQLModel):
     address: str | None = Field(default=None, max_length=255)
     date_of_birth: date | None = None
     profession: str | None = Field(default=None, max_length=100)
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=lambda: get_naive_utc_datetime_now())
 
     @field_validator("full_name")
     @classmethod
@@ -280,7 +281,7 @@ class ReservationBase(SQLModel):
     user_id: int = Field(foreign_key="user.id")
     court_id: int = Field(foreign_key="court.id")
     timeslot_id: int = Field(foreign_key="timeslot.id")
-    reservation_date: date = Field(default_factory=date.today)
+    reservation_date: date = Field(default_factory=lambda: get_naive_utc_date_now())
     status: ReservationStatus = Field(default=ReservationStatus.pending)
 
 
@@ -290,6 +291,8 @@ class Reservation(ReservationBase, table=True):
     __table_args__ = (
         UniqueConstraint(
             "user_id",
+            "court_id",
+            "timeslot_id",
             "reservation_date",
             name="unique_reservation",
         ),

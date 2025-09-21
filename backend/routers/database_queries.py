@@ -148,7 +148,7 @@ async def create_reservation_api(
     reservation_users: Annotated[list[int], Body()],
     session: SessionDep,
 ) -> ReservationPublic:
-    new_reservation = add_reservation(session, reservation)
+    new_reservation = add_reservation(session, reservation).model_copy()
     add_reservation_users(session, new_reservation.id, reservation_users)
     return ReservationPublic(**new_reservation.model_dump())
 

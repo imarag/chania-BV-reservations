@@ -25,7 +25,7 @@ export const pagePaths = {
     name: "Reserve",
     route: "reserve",
     path: "/reserve",
-    requiresAuth: true,
+    requiresAuth: false,
   },
   rules: { name: "Rules", route: "rules", path: "/rules" },
 };

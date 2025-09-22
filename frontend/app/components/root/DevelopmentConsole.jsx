@@ -42,7 +42,7 @@ export default function DevelopmentConsole() {
   }
 
   return (
-    <div className="fixed left-0 bottom-10 right-0 flex items-center justify-center gap-4">
+    <div className="z-50 fixed left-0 bottom-10 right-0 flex items-center justify-center gap-4">
       <button
         className="btn btn-primary btn-outline btn-xs"
         onClick={getCurrentUser}

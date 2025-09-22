@@ -1,7 +1,11 @@
 import { Fragment, useState } from "react";
-import { useCurrentUser } from "../../context/CurrentUserContext";
 import { pagePaths } from "../../utils/appUrls";
 import { useNavigate } from "react-router";
+import { useNotification } from "../../context/NotificationContext";
+import { apiRequest } from "../../utils/apiRequest";
+import { apiEndpoints } from "../../utils/appUrls";
+import { useGlobalLoading } from "../../context/GlobalLoadingContext";
+import { useCurrentUser } from "../../context/CurrentUserContext";
 
 function ReserveButton({ children, booked = false, ...rest }) {
   const baseClass = `
@@ -58,16 +62,35 @@ function BookedContent({ booking }) {
   );
 }
 
-function NotBookedContent({ courtId, timeslotId, currentUser, label }) {
+function NotBookedContent({ courtId, timeslotId, label }) {
   const navigate = useNavigate();
-  function handleNavigate() {
+  const { showNotification } = useNotification();
+  const { globalLoading, setGlobalLoading } = useGlobalLoading();
+  const { currentUser, setCurrentUser } = useCurrentUser();
+
+  async function handleNavigate() {
+    setGlobalLoading(true);
+    const { resData, resError } = await apiRequest({
+      url: apiEndpoints.VALIDATE_USER_CREATE_RESERVATION,
+    });
+
+    await new Promise((r) => setTimeout(r, 3000)); // to avoid flickering
+
+    setGlobalLoading(false);
+
+    if (resError) {
+      showNotification(resError, "error");
+      return;
+    }
+    setCurrentUser((prevUser) => ({ ...prevUser, can_make_reservation: true }));
+
     const queryPath = `court_id=${courtId}&timeslot_id=${timeslotId}&user_id=${currentUser?.id}`;
     navigate(`${pagePaths.reserve.path}?${queryPath}`);
   }
 
   return (
     <div className="text-sm">
-      <ReserveButton onClick={handleNavigate}>{label}</ReserveButton>
+      <ReserveButton onClick={handleNavigate}>{label + "sdfsdf"}</ReserveButton>
     </div>
   );
 }
@@ -90,7 +113,6 @@ function CourtRectangle({ timeslots, courtId, currentUser, bookings, title }) {
                 <NotBookedContent
                   courtId={courtId}
                   timeslotId={timeslot.id}
-                  currentUser={currentUser}
                   label={timeslot.name}
                 />
               )}

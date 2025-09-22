@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, UTC
 
 from dependencies import AuthHandlerDep, CurrentUserDep, SessionDep, SettingsDep
 from fastapi import APIRouter, Response, Request, status
@@ -108,7 +108,7 @@ async def login(
     )
 
     if user_login_info.stay_logged_in:
-        cookie_kwargs["expires"] = expires_at  # type: ignore
+        cookie_kwargs["expires"] = expires_at.replace(tzinfo=UTC)  # type: ignore
 
     response.set_cookie(**cookie_kwargs)  # type: ignore
 
@@ -150,6 +150,7 @@ def validate_user_create_reservation(
     session: SessionDep,
     request: Request,
 ):
+
     user_session_id = request.cookies.get(settings.SESSION_COOKIE_NAME)
 
     if not user_session_id:

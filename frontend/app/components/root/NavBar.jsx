@@ -182,7 +182,7 @@ export default function NavBar() {
             </NavItem>
           </>
         ) : (
-          <div className="ms-auto md:mt-auto">
+          <div className="mt-auto">
             <UserMenu isMenuOpen={isMenuOpen} />
           </div>
         )}

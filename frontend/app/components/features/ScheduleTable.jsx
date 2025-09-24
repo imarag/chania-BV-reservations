@@ -1,13 +1,18 @@
-import { Fragment, useState } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { pagePaths } from "../../utils/appUrls";
 import { useNavigate } from "react-router";
 import { useNotification } from "../../context/NotificationContext";
 import { apiRequest } from "../../utils/apiRequest";
 import { apiEndpoints } from "../../utils/appUrls";
-import { useGlobalLoading } from "../../context/GlobalLoadingContext";
 import { useCurrentUser } from "../../context/CurrentUserContext";
+import Collapse from "../ui/Collapse";
 
-function ReserveButton({ children, booked = false, ...rest }) {
+function ReserveButton({
+  children,
+  booked = false,
+  disabled = false,
+  ...rest
+}) {
   const baseClass = `
     w-40
     rounded-md
@@ -15,6 +20,8 @@ function ReserveButton({ children, booked = false, ...rest }) {
     font-bold
     text-white
     transition
+    disabled:opacity-60
+    disabled:cursor-not-allowed
   `;
 
   const bookedClass = `
@@ -30,7 +37,7 @@ function ReserveButton({ children, booked = false, ...rest }) {
 
   return (
     <button
-      disabled={booked}
+      disabled={booked || disabled}
       className={`${baseClass} ${booked ? bookedClass : availableClass}`}
       {...rest}
     >
@@ -62,27 +69,23 @@ function BookedContent({ booking }) {
   );
 }
 
-function NotBookedContent({ courtId, timeslotId, label }) {
+function NotBookedContent({ courtId, timeslotId, label, loading, setLoading }) {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
-  const { globalLoading, setGlobalLoading } = useGlobalLoading();
   const { currentUser, setCurrentUser } = useCurrentUser();
 
   async function handleNavigate() {
-    setGlobalLoading(true);
+    setLoading(true);
+    console.log("what");
     const { resData, resError } = await apiRequest({
       url: apiEndpoints.VALIDATE_USER_CREATE_RESERVATION,
     });
-
-    await new Promise((r) => setTimeout(r, 3000)); // to avoid flickering
-
-    setGlobalLoading(false);
+    setLoading(false);
 
     if (resError) {
       showNotification(resError, "error");
       return;
     }
-    setCurrentUser((prevUser) => ({ ...prevUser, can_make_reservation: true }));
 
     const queryPath = `court_id=${courtId}&timeslot_id=${timeslotId}&user_id=${currentUser?.id}`;
     navigate(`${pagePaths.reserve.path}?${queryPath}`);
@@ -90,91 +93,131 @@ function NotBookedContent({ courtId, timeslotId, label }) {
 
   return (
     <div className="text-sm">
-      <ReserveButton onClick={handleNavigate}>{label + "sdfsdf"}</ReserveButton>
+      <ReserveButton onClick={handleNavigate} disabled={loading}>
+        {label}
+      </ReserveButton>
     </div>
   );
 }
 
-function CourtRectangle({ timeslots, courtId, currentUser, bookings, title }) {
+function TimeSlotList({ timeslots, courtId, bookings, loading, setLoading }) {
   return (
-    <div className="p-8 z-50  bg-white/5 border-4 border-white/40 rounded-md flex flex-col">
-      <h2 className="flex-none text-xl uppercase text-center font-bold text-base-content mb-8">
+    <ul className="flex flex-col justify-center items-center gap-2 mt-4">
+      {timeslots.map((timeslot) => {
+        const bookingKey = `${courtId}-${timeslot.id}`;
+        const booking = bookings[bookingKey];
+        return (
+          <li key={timeslot.id}>
+            {booking.booked ? (
+              <BookedContent booking={booking} />
+            ) : (
+              <NotBookedContent
+                courtId={courtId}
+                timeslotId={timeslot.id}
+                label={timeslot.name}
+                loading={loading}
+                setLoading={setLoading}
+              />
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function CourtRectangle({
+  timeslots,
+  courtId,
+  bookings,
+  title,
+  loading,
+  setLoading,
+}) {
+  return (
+    <div className="p-4 lg:p-8 z-50 bg-white/8 border-4 border-white/50 rounded-md">
+      <h2 className="flex-none text-base lg:text-xl uppercase text-center font-bold text-base-content mb-4 lg:mb-8">
         {title}
       </h2>
-      <div className="flex-grow-1 flex flex-col justify-center items-center gap-2">
-        {timeslots.map((timeslot) => {
-          const bookingKey = `${courtId}-${timeslot.id}`;
-          const booking = bookings[bookingKey];
-          return (
-            <Fragment key={timeslot.id}>
-              {booking.booked ? (
-                <BookedContent booking={booking} />
-              ) : (
-                <NotBookedContent
-                  courtId={courtId}
-                  timeslotId={timeslot.id}
-                  label={timeslot.name}
-                />
-              )}
-            </Fragment>
-          );
-        })}
+      <div className="flex lg:hidden">
+        <Collapse
+          label={"Show Timeslots"}
+          className={"bg-base-100/0 border-white/20 border-2"}
+        >
+          <TimeSlotList
+            timeslots={timeslots}
+            courtId={courtId}
+            bookings={bookings}
+            loading={loading}
+            setLoading={setLoading}
+          />
+        </Collapse>
+      </div>
+      <div className="hidden lg:flex lg:items-center lg:justify-center">
+        <TimeSlotList
+          timeslots={timeslots}
+          courtId={courtId}
+          bookings={bookings}
+          loading={loading}
+          setLoading={setLoading}
+        />
       </div>
     </div>
   );
 }
-
+{
+}
 export default function ScheduleTable({ courts, timeslots, bookings }) {
-  const { currentUser } = useCurrentUser();
-
+  const [loading, setLoading] = useState(false);
   return (
-    <div className="text-center">
-      <div className="h-screen relative mx-auto">
-        <img
-          src="/bv-courts.png"
-          className="size-full object-cover brightness-40"
+    <div className="h-screen flex flex-col items-stretch gap-2 lg:gap-8 relative">
+      <img
+        src="/bv-courts.png"
+        className="absolute size-full object-cover brightness-35"
+      />
+      <div className="flex-grow-1 grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-8">
+        <CourtRectangle
+          timeslots={timeslots}
+          courtId={courts.find((court) => court.name === "Court 4").id}
+          bookings={bookings}
+          title="Court 4"
+          loading={loading}
+          setLoading={setLoading}
         />
-        <div className="absolute inset-0 flex flex-col gap-8 p-8">
-          <div className="flex-grow-1 grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <CourtRectangle
-              timeslots={timeslots}
-              courtId={courts.find((court) => court.name === "Court 4").id}
-              currentUser={currentUser}
-              bookings={bookings}
-              title="Court 4"
-            />
-            <CourtRectangle
-              timeslots={timeslots}
-              courtId={courts.find((court) => court.name === "Court 5").id}
-              currentUser={currentUser}
-              bookings={bookings}
-              title="Court 5"
-            />
-          </div>
-          <div className="flex-grow-1 grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <CourtRectangle
-              timeslots={timeslots}
-              courtId={courts.find((court) => court.name === "Court 3").id}
-              currentUser={currentUser}
-              bookings={bookings}
-              title="Court 3"
-            />
-            <CourtRectangle
-              timeslots={timeslots}
-              courtId={courts.find((court) => court.name === "Court 2").id}
-              currentUser={currentUser}
-              bookings={bookings}
-              title="Court 2"
-            />
-            <CourtRectangle
-              timeslots={timeslots}
-              courtId={courts.find((court) => court.name === "Court 1").id}
-              currentUser={currentUser}
-              bookings={bookings}
-              title="Court 1"
-            />
-          </div>
-        </div>
+        <CourtRectangle
+          timeslots={timeslots}
+          courtId={courts.find((court) => court.name === "Court 5").id}
+          bookings={bookings}
+          title="Court 5"
+          loading={loading}
+          setLoading={setLoading}
+        />
+      </div>
+      <div className="flex-grow-1 grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-8">
+        <CourtRectangle
+          timeslots={timeslots}
+          courtId={courts.find((court) => court.name === "Court 3").id}
+          bookings={bookings}
+          title="Court 3"
+          loading={loading}
+          setLoading={setLoading}
+        />
+        <CourtRectangle
+          timeslots={timeslots}
+          courtId={courts.find((court) => court.name === "Court 2").id}
+          bookings={bookings}
+          title="Court 2"
+          loading={loading}
+          setLoading={setLoading}
+        />
+        <CourtRectangle
+          timeslots={timeslots}
+          courtId={courts.find((court) => court.name === "Court 1").id}
+          bookings={bookings}
+          title="Court 1"
+          loading={loading}
+          setLoading={setLoading}
+        />
       </div>
     </div>
   );

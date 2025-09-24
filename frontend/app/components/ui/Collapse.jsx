@@ -4,7 +4,7 @@ export default function Collapse({
   className,
   children,
 }) {
-  const baseClass = "collapse border-base-300 border rounded-sm";
+  const baseClass = "collapse border rounded-sm";
   const contentClass = `collapse-content text-sm`;
   const labelClass = "collapse-title text-start font-semibold text-sm";
   const globalClass = `${baseClass} ${

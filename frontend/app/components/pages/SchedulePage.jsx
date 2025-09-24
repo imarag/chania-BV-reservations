@@ -1,7 +1,7 @@
-import { apiEndpoints } from "../../utils/appUrls";
-import { apiRequest } from "../../utils/apiRequest";
-import { useEffect, useState } from "react";
 import ScheduleTable from "../features/ScheduleTable";
+import { useEffect, useState } from "react";
+import { apiRequest } from "../../utils/apiRequest";
+import { apiEndpoints } from "../../utils/appUrls";
 
 export default function schedule() {
   const [data, setData] = useState(null);
@@ -16,6 +16,7 @@ export default function schedule() {
     }
     fetch_courts_timeslots();
   }, []);
+
   return (
     <div>
       {data && (

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import Button from "../ui/Button";
 import { waitSec } from "../../utils/fetch-tools";
-export default function FetchErrorMessage({
+
+export default function DataFetchRetry({
   errorMessage,
-  fetchFunc,
+  retryFetchDataFunc,
   setData,
   setError,
 }) {
@@ -11,22 +12,26 @@ export default function FetchErrorMessage({
 
   async function handleFetch() {
     setLoading(true);
+
     await waitSec(2);
-    const { resData, resError, canceled } = await fetchFunc();
+
+    const { resData, resError } = await retryFetchDataFunc();
+
     setLoading(false);
 
-    if (canceled) return;
-
     if (resError) {
+      setError(resError);
+      setData([]);
       return;
     }
+
     setError(null);
     setData(resData);
   }
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <p className="text-red-500">{errorMessage}</p>
+      <p className="text-error">{errorMessage}</p>
       <Button onClick={handleFetch} disabled={loading}>
         {loading ? "Retrying..." : "Try again"}
       </Button>

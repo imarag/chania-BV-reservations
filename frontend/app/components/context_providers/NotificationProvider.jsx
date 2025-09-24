@@ -3,52 +3,30 @@ import Notification from "../utils/Notification";
 import { NotificationContext } from "../../context/NotificationContext";
 
 export default function NotificationProvider({ children }) {
-  // { message: string, type: "info" | "success" | "error" }
+  // { message: string, type: string, show: boolean }
   const [notification, setNotification] = useState(null);
-  const timerRef = useRef(null);
 
-  const hideNotification = useCallback(() => {
-    setNotification(null);
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-  }, []);
+  const showNotification = (message, type = "info") => {
+    setNotification({ message, type, show: true });
+  };
 
-  const showNotification = useCallback(
-    (message, type = "info", duration = 5000) => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+  const hideNotification = () => {
+    setNotification((prev) => (prev ? { ...prev, show: false } : null));
+  };
 
-      setNotification({ message, type });
-
-      timerRef.current = setTimeout(() => {
-        setNotification(null);
-        timerRef.current = null;
-      }, duration);
-    },
-    []
-  );
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
-
-  const value = useMemo(() => ({ showNotification, hideNotification }), [
-    showNotification,
-    hideNotification,
-  ]);
+  const value = useMemo(() => ({ showNotification }), [showNotification]);
 
   return (
     <>
       <NotificationContext.Provider value={value}>
         {children}
       </NotificationContext.Provider>
-      {notification && (
-        <Notification {...notification} onClose={hideNotification} />
-      )}
+      <Notification
+        message={notification?.message}
+        type={notification?.type}
+        show={notification?.show}
+        hideNotification={hideNotification}
+      />
     </>
   );
 }

@@ -51,7 +51,7 @@ export function Layout({ children }) {
             <header className="bg-base-100 flex-none">
               <NavBar />
             </header>
-            <main className="grow bg-base-300 px-2 overflow-y-scroll">
+            <main className="grow bg-base-300 overflow-y-scroll">
               {children}
             </main>
             <DevelopmentConsole />

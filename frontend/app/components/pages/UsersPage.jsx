@@ -8,7 +8,7 @@ import SubTitle from "../ui/SubTitle";
 import Symbol from "../ui/Symbol";
 import Loading from "../ui/Loading";
 import { LuUserRound, LuUser, LuSearch } from "react-icons/lu";
-import FetchErrorMessage from "../utils/FetchErrorMessage";
+import DataFetchRetry from "../utils/DataFetchRetry";
 import { getIcon } from "../../utils/iconMap";
 
 function UserInfoItem({ label, value, IconComponent }) {
@@ -50,7 +50,7 @@ function UsersList({ users }) {
         {users.map((user) => (
           <li key={user.id}>
             <Collapse
-              className="bg-base-100"
+              className="bg-base-100 border border-white/20"
               label={<UserInfoLabel user={user} />}
             >
               {Object.keys(user)
@@ -102,7 +102,7 @@ function MainBody() {
   const [users, setUsers] = useState([]);
   // for fetching the users
   const [loading, setLoading] = useState(true);
-  // for server error
+  // for server error (retry - cannot fetch users)
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -127,7 +127,6 @@ function MainBody() {
       setError(null);
       setUsers(Array.isArray(resData) ? resData : []);
     }
-
     fetchUsers();
     return () => (mounted = false);
   }, []);
@@ -140,28 +139,34 @@ function MainBody() {
 
   if (error) {
     return (
-      <FetchErrorMessage
-        errorMessage={`Cannot get users: ${error}`}
-        fetchFunc={handleRetry}
+      <DataFetchRetry
+        errorMessage={`Cannot get the users. Try again!`}
+        retryFetchDataFunc={handleRetry}
         setData={setUsers}
         setError={setError}
       />
     );
   }
 
-  const termEdited = searchTerm.trim().toLowerCase();
-  // any user object value contains the search term
-  const filteredUsers =
-    !Array.isArray(users) || users.length === 0
-      ? []
-      : termEdited === ""
-      ? users
-      : users.filter((user) =>
-          Object.values(user).some(
-            (v) =>
-              v != null && String(v).toLowerCase().trim().includes(termEdited)
-          )
-        );
+  const searchTermEdited = searchTerm.trim().toLowerCase();
+  // users not an array or empty
+  const usersArrayInvalid = !Array.isArray(users) || users.length === 0;
+  const searchTermEmpty = searchTermEdited === "";
+
+  // not array or emtpy users -> empty list
+  // empty search term -> all users
+  // else filter users by any detail matching the search term
+  const filteredUsers = usersArrayInvalid
+    ? []
+    : searchTermEmpty
+    ? users
+    : users.filter((user) =>
+        Object.values(user).some(
+          (v) =>
+            v != null &&
+            String(v).toLowerCase().trim().includes(searchTermEdited)
+        )
+      );
 
   return (
     <>
@@ -178,7 +183,9 @@ function MainBody() {
 export default function UsersPage() {
   return (
     <>
-      <Title className="text-center mb-4 mt-12">Users Information</Title>
+      <Title className="text-center mb-4 mt-12" variant="page">
+        Users Information
+      </Title>
       <SubTitle className="text-center mb-12" variant="page">
         Search across all registered users by any of their details
       </SubTitle>

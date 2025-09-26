@@ -1,11 +1,10 @@
-from datetime import date, datetime, time
+from datetime import date, datetime, time, UTC
 from enum import Enum
 import re
 from pydantic import EmailStr, computed_field, field_validator, model_validator
 from sqlalchemy import UniqueConstraint
 from sqlmodel import Field, SQLModel
 from utils.errors import raise_app_error, AppError
-from utils.util_functions import get_naive_utc_datetime_now, get_naive_utc_date_now
 
 
 def validate_password(password: str | None) -> str | None:
@@ -28,14 +27,25 @@ def validate_email(email: str | None) -> str | None:
     return None
 
 
-def validate_full_name(full_name: str | None) -> str | None:
-    if full_name is None:
+def validate_name(name: str | None) -> str | None:
+    if name is None:
         return None  # OK
-    full_name = str(full_name).strip()
+    name = str(name).strip()
     min_len = 2
     max_len = 100
-    if not (min_len <= len(full_name) <= max_len):
-        return f"Full name must be {min_len}-{max_len} characters long"
+    if not (min_len <= len(name) <= max_len):
+        return f"Name must be {min_len}-{max_len} characters long"
+    return None
+
+
+def validate_surname(surname: str | None) -> str | None:
+    if surname is None:
+        return None  # OK
+    surname = str(surname).strip()
+    min_len = 2
+    max_len = 100
+    if not (min_len <= len(surname) <= max_len):
+        return f"Surname must be {min_len}-{max_len} characters long"
     return None
 
 
@@ -134,21 +144,29 @@ class TimeSlotPublic(TimeSlotBase):
 
 # ----- USER MODELS -----
 class UserBase(SQLModel):
-    full_name: str
+    name: str
+    surname: str
     email: EmailStr
     active: bool = Field(default=True)
     phone_number: str | None = None
     role: Role = Field(default=Role.player)
-    can_make_reservation: bool = Field(default=True)
     address: str | None = Field(default=None, max_length=255)
     date_of_birth: date | None = None
     profession: str | None = Field(default=None, max_length=100)
-    created_at: datetime = Field(default_factory=lambda: get_naive_utc_datetime_now())
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
-    @field_validator("full_name")
+    @field_validator("name")
     @classmethod
-    def validate_fullname_field(cls, v: str | None) -> str | None:
-        error = validate_email(v)
+    def validate_name_field(cls, v: str | None) -> str | None:
+        error = validate_name(v)
+        if error:
+            raise_app_error(AppError.VALIDATION_ERROR, detail=error)
+        return v
+
+    @field_validator("surname")
+    @classmethod
+    def validate_surname_field(cls, v: str | None) -> str | None:
+        error = validate_surname(v)
         if error:
             raise_app_error(AppError.VALIDATION_ERROR, detail=error)
         return v
@@ -192,7 +210,8 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(SQLModel):
-    full_name: str | None = None
+    name: str | None = None
+    surname: str | None = None
     phone_number: str | None = None
     address: str | None = None
     date_of_birth: date | None = None
@@ -200,10 +219,18 @@ class UserUpdate(SQLModel):
     password: str | None = None
     password_confirm: str | None = None
 
-    @field_validator("full_name")
+    @field_validator("name")
     @classmethod
-    def validate_fullname_field(cls, v: str | None) -> str | None:
-        error = validate_full_name(v)
+    def validate_name_field(cls, v: str | None) -> str | None:
+        error = validate_name(v)
+        if error:
+            raise_app_error(AppError.VALIDATION_ERROR, detail=error)
+        return v
+
+    @field_validator("surname")
+    @classmethod
+    def validate_surname_field(cls, v: str | None) -> str | None:
+        error = validate_surname(v)
         if error:
             raise_app_error(AppError.VALIDATION_ERROR, detail=error)
         return v
@@ -253,10 +280,18 @@ class UserRegister(UserBase):
     password: str
     password_confirm: str
 
-    @field_validator("full_name")
+    @field_validator("name")
     @classmethod
-    def validate_fullname_field(cls, v: str | None) -> str | None:
-        error = validate_full_name(v)
+    def validate_name_field(cls, v: str | None) -> str | None:
+        error = validate_name(v)
+        if error:
+            raise_app_error(AppError.VALIDATION_ERROR, detail=error)
+        return v
+
+    @field_validator("surname")
+    @classmethod
+    def validate_surname_field(cls, v: str | None) -> str | None:
+        error = validate_surname(v)
         if error:
             raise_app_error(AppError.VALIDATION_ERROR, detail=error)
         return v
@@ -281,7 +316,7 @@ class ReservationBase(SQLModel):
     user_id: int = Field(foreign_key="user.id")
     court_id: int = Field(foreign_key="court.id")
     timeslot_id: int = Field(foreign_key="timeslot.id")
-    reservation_date: date = Field(default_factory=lambda: get_naive_utc_date_now())
+    reservation_date: date = Field(default_factory=lambda: datetime.now(UTC).date())
     status: ReservationStatus = Field(default=ReservationStatus.pending)
 
 

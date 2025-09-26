@@ -48,10 +48,10 @@ export function Layout({ children }) {
       <body>
         <AppProviders>
           <div className="flex flex-row items-stretch text-base-content h-screen font-normal">
-            <header className="bg-base-100 flex-none">
+            <header className="h-full bg-base-100 flex-none">
               <NavBar />
             </header>
-            <main className="grow bg-base-300 overflow-y-scroll">
+            <main className="h-full grow bg-base-300 overflow-y-scroll">
               {children}
             </main>
             <DevelopmentConsole />

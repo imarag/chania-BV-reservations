@@ -4,7 +4,8 @@ from datetime import date, datetime, time
 users = [
     {
         "id": 1,
-        "full_name": "Alice Smith",
+        "name": "Alice",
+        "surname": "Smith",
         "email": "alice@example.com",
         "password": "alice123",
         "active": True,
@@ -17,7 +18,8 @@ users = [
     },
     {
         "id": 2,
-        "full_name": "Bob Johnson",
+        "name": "Bob",
+        "surname": "Johnson",
         "email": "bob@example.com",
         "password": "bob456",
         "active": True,
@@ -30,7 +32,8 @@ users = [
     },
     {
         "id": 3,
-        "full_name": "Carol White",
+        "name": "Carol",
+        "surname": "White",
         "email": "carol@example.com",
         "password": "carol789",
         "active": True,
@@ -43,7 +46,8 @@ users = [
     },
     {
         "id": 4,
-        "full_name": "David Lee",
+        "name": "David",
+        "surname": "Lee",
         "email": "david@example.com",
         "password": "david123",
         "active": True,
@@ -56,7 +60,8 @@ users = [
     },
     {
         "id": 5,
-        "full_name": "Emma Davis",
+        "name": "Emma",
+        "surname": "Davis",
         "email": "emma@example.com",
         "password": "emma456",
         "active": True,
@@ -69,7 +74,8 @@ users = [
     },
     {
         "id": 6,
-        "full_name": "Frank Miller",
+        "name": "Frank",
+        "surname": "Miller",
         "email": "frank@example.com",
         "password": "frank123",
         "active": True,
@@ -82,7 +88,8 @@ users = [
     },
     {
         "id": 7,
-        "full_name": "Grace Lee",
+        "name": "Grace",
+        "surname": "Lee",
         "email": "grace@example.com",
         "password": "grace456",
         "active": True,
@@ -95,7 +102,8 @@ users = [
     },
     {
         "id": 8,
-        "full_name": "Henry Adams",
+        "name": "Henry",
+        "surname": "Adams",
         "email": "henry@example.com",
         "password": "henry123",
         "active": True,
@@ -108,7 +116,8 @@ users = [
     },
     {
         "id": 9,
-        "full_name": "Isabel Clark",
+        "name": "Isabel",
+        "surname": "Clark",
         "email": "isabel@example.com",
         "password": "isabel456",
         "active": True,
@@ -121,7 +130,8 @@ users = [
     },
     {
         "id": 10,
-        "full_name": "Jack Turner",
+        "name": "Jack",
+        "surname": "Turner",
         "email": "jack@example.com",
         "password": "jack123",
         "active": True,
@@ -134,7 +144,8 @@ users = [
     },
     {
         "id": 11,
-        "full_name": "Karen Hall",
+        "name": "Karen",
+        "surname": "Hall",
         "email": "karen@example.com",
         "password": "karen456",
         "active": True,
@@ -147,7 +158,8 @@ users = [
     },
     {
         "id": 12,
-        "full_name": "Leo Scott",
+        "name": "Leo",
+        "surname": "Scott",
         "email": "leo@example.com",
         "password": "leo123",
         "active": True,
@@ -160,7 +172,8 @@ users = [
     },
     {
         "id": 13,
-        "full_name": "Ioannis Maragkakis",
+        "name": "Ioannis",
+        "surname": "Maragkakis",
         "email": "giannis.marar@hotmail.com",
         "password": "ioannis123",
         "active": True,

@@ -6,11 +6,10 @@ from fastapi import Depends, Request
 from models.db_models import UserPublic
 from sqlmodel import Session
 from utils.db_operations import (
-    get_reservation_by_user_id,
     get_user_by_id,
     get_user_session_by_id,
 )
-from utils.util_functions import get_naive_utc_datetime_now
+from datetime import datetime, UTC
 from utils.errors import AppError, raise_app_error
 
 AuthHandlerDep = Annotated[AuthHandler, Depends(get_auth_handler)]
@@ -42,19 +41,14 @@ async def get_current_user(
     if user_session is None:
         raise_app_error(AppError.INVALID_CREDENTIALS)
 
-    datetime_now = get_naive_utc_datetime_now()
-
-    if user_session.expires_at <= datetime_now:
+    datetime_now_utc = datetime.now(UTC)
+    if user_session.expires_at.timestamp() <= datetime_now_utc.timestamp():
         raise_app_error(AppError.SESSION_EXPIRED)
 
-    reservation = get_reservation_by_user_id(session, user_session.user_id)
     user = get_user_by_id(session, user_session.user_id)
 
     if user is None:
         raise_app_error(AppError.INVALID_CREDENTIALS)
-
-    if reservation:
-        user.can_make_reservation = False
 
     return UserPublic(**user.model_dump())
 

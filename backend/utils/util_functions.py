@@ -1,9 +1,11 @@
-from datetime import datetime, date, UTC
+from datetime import datetime, timedelta, UTC
+from dependencies import get_settings
+
+settings = get_settings()
 
 
-def get_naive_utc_datetime_now() -> datetime:
-    return datetime.now(UTC).replace(tzinfo=None)
-
-
-def get_naive_utc_date_now() -> date:
-    return datetime.now(UTC).replace(tzinfo=None).date()
+def get_reservation_cutoff_utc_date():
+    datetime_now = datetime.now(UTC)
+    if datetime_now.hour < settings.RESERVATION_CUTOFF_HOUR:
+        return (datetime_now - timedelta(days=1)).date()
+    return datetime_now.date()

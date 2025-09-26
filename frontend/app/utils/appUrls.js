@@ -53,6 +53,9 @@ export const apiEndpoints = {
 
   GET_BOOKING_CELLS: u(DB, "get-booking-cells"),
   GET_ALL_USERS: u(DB, "users"),
+  GET_ALL_COURTS: u(DB, "courts"),
+  GET_ALL_TIMESLOTS: u(DB, "timeslots"),
+  GET_CURRENT_RESERVATIONS: u(DB, "current-reservations"),
   UPDATE_USER_INFO: (id) =>
     u(DB, `update-user-info?user_id=${encodeURIComponent(id)}`),
   DELETE_USER: (id) => u(DB, `delete-user?user_id=${encodeURIComponent(id)}`),

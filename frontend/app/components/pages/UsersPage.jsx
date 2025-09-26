@@ -39,7 +39,7 @@ function UsersList({ users }) {
   }
 
   // items to exclude showing in the UI
-  const userInfoItemsExclude = ["id", "active", "role", "can_make_reservation"];
+  const userInfoItemsExclude = ["id", "active", "role"];
 
   return (
     <div className="p-8 space-y-4">
@@ -100,9 +100,7 @@ function NoUsersFound() {
 function MainBody() {
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState([]);
-  // for fetching the users
   const [loading, setLoading] = useState(true);
-  // for server error (retry - cannot fetch users)
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -131,10 +129,22 @@ function MainBody() {
     return () => (mounted = false);
   }, []);
 
-  function handleRetry() {
-    return apiRequest({
-      url: apiEndpoints.GET_ALL_USERS,
-    });
+  async function handleRetry() {
+    try {
+      const { resData, resError } = await apiRequest({
+        url: apiEndpoints.GET_ALL_USERS,
+      });
+      if (resError) {
+        setUsers([]);
+        setError(resError);
+      } else {
+        setUsers(Array.isArray(resData) ? resData : []);
+        setError(null);
+      }
+    } catch (err) {
+      setError(err.message || "Failed to fetch users.");
+      setUsers([]);
+    }
   }
 
   if (error) {
@@ -142,20 +152,14 @@ function MainBody() {
       <DataFetchRetry
         errorMessage={`Cannot get the users. Try again!`}
         retryFetchDataFunc={handleRetry}
-        setData={setUsers}
-        setError={setError}
       />
     );
   }
 
   const searchTermEdited = searchTerm.trim().toLowerCase();
-  // users not an array or empty
   const usersArrayInvalid = !Array.isArray(users) || users.length === 0;
   const searchTermEmpty = searchTermEdited === "";
 
-  // not array or emtpy users -> empty list
-  // empty search term -> all users
-  // else filter users by any detail matching the search term
   const filteredUsers = usersArrayInvalid
     ? []
     : searchTermEmpty

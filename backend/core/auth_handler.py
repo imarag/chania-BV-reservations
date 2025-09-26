@@ -21,6 +21,7 @@ class AuthHandler:
         existing_user = get_user_by_email(session, email)
         if not existing_user:
             return None
+        existing_user = existing_user.model_copy()
         if not self.validate_password_hash(password, existing_user.hashed_password):
             return None
         return existing_user

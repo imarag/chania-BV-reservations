@@ -2,39 +2,33 @@ import { useState } from "react";
 import Button from "../ui/Button";
 import { waitSec } from "../../utils/fetch-tools";
 
-export default function DataFetchRetry({
-  errorMessage,
-  retryFetchDataFunc,
-  setData,
-  setError,
-}) {
-  const [loading, setLoading] = useState(false);
+export default function DataFetchRetry({ errorMessage, retryFetchDataFunc }) {
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const [localError, setLocalError] = useState(null);
 
   async function handleFetch() {
-    setLoading(true);
+    setFetchLoading(true);
+    setLocalError(null);
 
     await waitSec(2);
 
-    const { resData, resError } = await retryFetchDataFunc();
-
-    setLoading(false);
-
-    if (resError) {
-      setError(resError);
-      setData([]);
-      return;
+    try {
+      await retryFetchDataFunc();
+    } catch (err) {
+      setLocalError(err.message || "Failed to fetch data.");
     }
 
-    setError(null);
-    setData(resData);
+    setFetchLoading(false);
   }
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <p className="text-error">{errorMessage}</p>
-      <Button onClick={handleFetch} disabled={loading}>
-        {loading ? "Retrying..." : "Try again"}
-      </Button>
+    <div className="size-full flex flex-col justify-center items-center gap-4">
+      <div className="flex flex-col justify-center items-center gap-4">
+        <p className="text-error">{localError || errorMessage}</p>
+        <Button onClick={handleFetch} disabled={fetchLoading}>
+          {fetchLoading ? "Retrying..." : "Try again"}
+        </Button>
+      </div>
     </div>
   );
 }

@@ -1,21 +1,22 @@
-from datetime import timedelta, UTC
+from datetime import timedelta, datetime, UTC
+from typing import Any
 
 from dependencies import AuthHandlerDep, CurrentUserDep, SessionDep, SettingsDep
 from fastapi import APIRouter, Response, Request, status
 from models.api_models import LoginResponse, RegisterResponse
-from models.db_models import User, UserLogin, UserPublic, UserRegister
+from models.db_models import UserCreate, UserLogin, UserPublic, UserRegister
 from models.auth_models import UserSession
+from utils.util_functions import get_reservation_cutoff_utc_date
 from utils.db_operations import (
     add_user,
     get_user_by_email,
     create_session,
     delete_session,
-    get_reservation_by_user_id_date,
+    get_reservation_by_user_id_by_date,
     get_user_by_id,
     get_user_session_by_id,
 )
 from utils.errors import AppError, raise_app_error
-from utils.util_functions import get_naive_utc_date_now, get_naive_utc_datetime_now
 
 router = APIRouter()
 
@@ -36,12 +37,9 @@ async def register(
         raise_app_error(AppError.EMAIL_ALREADY_REGISTERED)
 
     # Create new user
-    new_user = User(
-        **user_register_info.model_dump(),
-        hashed_password=auth_handler.generate_password_hash(user_password),
-    )
+    new_user = UserCreate(**user_register_info.model_dump(), password=user_password)
 
-    add_user(session, new_user)
+    add_user(session, new_user, auth_handler.generate_password_hash)
 
     return RegisterResponse(
         message="User registered succesfully", user=UserPublic(**new_user.model_dump())
@@ -71,7 +69,6 @@ async def login(
     session: SessionDep,
     auth_handler: AuthHandlerDep,
 ) -> LoginResponse:
-
     user = auth_handler.authenticate_user(
         user_login_info.email, user_login_info.password, session
     )
@@ -79,26 +76,19 @@ async def login(
     if not user:
         raise_app_error(AppError.INVALID_CREDENTIALS)
 
-    user = (
-        user.model_copy()
-    )  # keep this: for some reason sqlmodel deletes user after session commit
-
-    # create expire date of the session cookie
-    ttl_hours = (
-        settings.SESSION_LONG_HOURS
-        if user_login_info.stay_logged_in
-        else settings.SESSION_SHORT_HOURS
-    )
+    ttl_hours = settings.SESSION_LONG_HOURS
     ttl_delta = timedelta(hours=ttl_hours)
-    datetime_now = get_naive_utc_datetime_now()
-    expires_at = datetime_now + ttl_delta
-    user_session = UserSession(
-        user_id=user.id, created_at=datetime_now, expires_at=expires_at
-    )
-    new_session = create_session(session, user_session)
+    datetime_now_utc = datetime.now(UTC)
+    expires_utc = datetime_now_utc + ttl_delta
 
-    # set the session cookie
-    cookie_kwargs = dict(
+    user_session = UserSession(
+        user_id=user.id,
+        created_at=datetime_now_utc,  # tz-aware UTC
+        expires_at=expires_utc,  # tz-aware UTC
+    )
+
+    new_session = create_session(session, user_session)
+    cookie_kwargs: dict[str, Any] = dict(
         key=settings.SESSION_COOKIE_NAME,
         value=str(new_session.id),
         httponly=True,
@@ -108,12 +98,12 @@ async def login(
     )
 
     if user_login_info.stay_logged_in:
-        cookie_kwargs["expires"] = expires_at.replace(tzinfo=UTC)  # type: ignore
+        cookie_kwargs["max_age"] = int(ttl_delta.total_seconds())
 
-    response.set_cookie(**cookie_kwargs)  # type: ignore
+    response.set_cookie(**cookie_kwargs)
 
     return LoginResponse(
-        message="Login succesful",
+        message="Login successful",
         user=UserPublic(**user.model_dump()),
         stay_logged_in=user_login_info.stay_logged_in,
     )
@@ -161,13 +151,12 @@ def validate_user_create_reservation(
         raise_app_error(AppError.NOT_AUTHORIZED)
 
     user = get_user_by_id(session, user_session.user_id)
-
     if not user:
         raise_app_error(AppError.NOT_AUTHORIZED)
 
-    date_now = get_naive_utc_date_now()
-    existing_reservation = get_reservation_by_user_id_date(session, user.id, date_now)
-
+    existing_reservation = get_reservation_by_user_id_by_date(
+        session, user.id, get_reservation_cutoff_utc_date()
+    )
     # if user has already made a reservation
     if existing_reservation:
         raise_app_error(

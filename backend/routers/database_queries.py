@@ -1,6 +1,8 @@
 from typing import Annotated
-from dependencies import AuthHandlerDep, CurrentUserDep
+
+from dependencies import AuthHandlerDep, CurrentUserDep, SettingsDep
 from dependencies import SessionDep
+from utils.util_functions import get_reservation_cutoff_utc_date
 from fastapi import APIRouter, Body
 from models.db_models import (
     CourtPublic,
@@ -13,7 +15,6 @@ from models.db_models import (
 from utils.db_operations import (
     add_reservation,
     add_reservation_users,
-    delete_user,
     get_courts,
     get_reservation_players,
     get_reservations,
@@ -23,20 +24,46 @@ from utils.db_operations import (
     get_reservation_by_id,
     delete_reservation,
     delete_reservation_users,
+    get_reservations_by_date,
 )
 from utils.errors import AppError, raise_app_error
 
 router = APIRouter()
 
 
+@router.get("/users")
+async def get_users_api(session: SessionDep) -> list[UserPublic]:
+    users = get_users(session)
+    return [UserPublic(**u.model_dump()) for u in users]
+
+
+@router.get("/courts")
+async def get_courts_api(session: SessionDep) -> list[CourtPublic]:
+    all_courts = get_courts(session)
+    return [CourtPublic(**c.model_dump()) for c in all_courts]
+
+
+@router.get("/timeslots")
+async def get_time_slots_api(session: SessionDep) -> list[TimeSlotPublic]:
+    all_time_slots = get_time_slots(session)
+    return [TimeSlotPublic(**ts.model_dump()) for ts in all_time_slots]
+
+
+@router.get("/current-reservations")
+async def get_current_reservations_api(session: SessionDep) -> list[ReservationPublic]:
+    current_reservations = get_reservations_by_date(
+        session, get_reservation_cutoff_utc_date()
+    )
+    return [ReservationPublic(**r.model_dump()) for r in current_reservations]
+
+
 @router.get("/get-booking-cells")
-async def get_booking_cells(session: SessionDep) -> dict:
+async def get_booking_cells(session: SessionDep, settings: SettingsDep) -> dict:
 
     # Fetch all courts, timeslots, reservations, and reservation_players
     all_users = get_users(session)
     all_courts = get_courts(session)
     all_timeslots = get_time_slots(session)
-    reservations = get_reservations(session)
     reservation_players = get_reservation_players(session)
 
     # Dictionary mapping: user_id -> user details
@@ -57,8 +84,12 @@ async def get_booking_cells(session: SessionDep) -> dict:
                 UserPublic(**user_map[user_id].model_dump())
             )
 
+    current_reservations = get_reservations_by_date(
+        session, get_reservation_cutoff_utc_date()
+    )
+
     # Dictionary mapping: (court_id, timeslot_id) -> reservation
-    reservation_map = {(r.court_id, r.timeslot_id): r for r in reservations}
+    reservation_map = {(r.court_id, r.timeslot_id): r for r in current_reservations}
 
     # Build flattened schedule cells
     schedule_cells = {
@@ -66,6 +97,7 @@ async def get_booking_cells(session: SessionDep) -> dict:
         "timeslots": [TimeSlotPublic(**t.model_dump()) for t in all_timeslots],
         "bookings": {},
     }
+
     for t in all_timeslots:
         for c in all_courts:
             booking_id = f"{c.id}-{t.id}"
@@ -92,24 +124,23 @@ async def get_booking_cells(session: SessionDep) -> dict:
     return schedule_cells
 
 
-@router.get("/users")
-async def get_users_route(session: SessionDep) -> list[UserPublic]:
+@router.get("/available-users")
+async def get_available_users(session: SessionDep) -> list[UserPublic]:
     users = get_users(session)
-    return [UserPublic(**user.model_dump()) for user in users]
 
+    active_users = [user for user in users if user.active]
+    active_user_ids = {user.id for user in active_users}
 
-@router.get("/delete-user", response_model=UserPublic)
-async def delete_user_route(
-    user_id: int,
-    session: SessionDep,
-    current_user: CurrentUserDep,
-    auth_handler: AuthHandlerDep,
-) -> UserPublic:
-    if not auth_handler.check_admin_user(current_user.email):
-        raise_app_error(AppError.NOT_AUTHORIZED)
+    reservation_users = get_reservation_players(session)
+    reservation_user_ids = {ru.user_id for ru in reservation_users}
 
-    deleted_user = delete_user(session, user_id)
-    return UserPublic(**deleted_user.model_dump())
+    available_user_ids = active_user_ids - reservation_user_ids
+
+    return [
+        UserPublic(**user.model_dump())
+        for user in active_users
+        if user.id in available_user_ids
+    ]
 
 
 @router.post("/update-user-info", response_model=UserPublic)
@@ -124,15 +155,13 @@ async def update_user_info(
     if current_user.id != user_id:
         raise_app_error(AppError.NOT_AUTHORIZED)
 
-    updated_data = user.model_dump(exclude_unset=True)
+    updated_data_dict = user.model_dump(exclude_unset=True)
 
-    if "password" in updated_data:
-        updated_data["hashed_password"] = auth_handler.generate_password_hash(
-            updated_data["password"]
-        )
-        del updated_data["password"]
+    user_update = UserUpdate(**updated_data_dict)
 
-    updated_user = update_user(session, user_id, updated_data)
+    updated_user = update_user(
+        session, user_id, user_update, auth_handler.generate_password_hash
+    )
     return UserPublic(**updated_user.model_dump())
 
 
@@ -147,7 +176,15 @@ async def create_reservation_api(
     reservation: ReservationCreate,
     reservation_users: Annotated[list[int], Body()],
     session: SessionDep,
+    settings: SettingsDep,
+    current_user: CurrentUserDep,
 ) -> ReservationPublic:
+    # frontend sends 3 users, i add the current user in the backend
+    reservation_users += [current_user.id]
+    if len(set(reservation_users)) != settings.TOTAL_PLAYERS_PER_RESERVATION:
+        raise_app_error(
+            AppError.RESERVATION_NOT_ALLOWED, detail="Not enough players selected"
+        )
     new_reservation = add_reservation(session, reservation).model_copy()
     add_reservation_users(session, new_reservation.id, reservation_users)
     return ReservationPublic(**new_reservation.model_dump())

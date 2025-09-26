@@ -54,7 +54,7 @@ function BookedContent({ booking, showInfo }) {
         <ul className="text-center bg-neutral/80 p-2 rounded-md">
           <li className="font-bold">{booking.booking_user}</li>
           {booking.players.map((player) => (
-            <li key={player.id}>{player.full_name}</li>
+            <li key={player.id}>{`${player.name} ${player.surname}`}</li>
           ))}
         </ul>
       ) : (
@@ -113,9 +113,9 @@ function NotBookedContent({
 }
 
 function TimeSlotList({
-  timeslots,
+  timeSlots,
   courtId,
-  bookings,
+  reservations,
   loading,
   setLoading,
   showInfo,
@@ -126,18 +126,19 @@ function TimeSlotList({
         showInfo ? "flex-row flex-wrap" : "flex-col"
       } justify-center items-center gap-2 mt-4`}
     >
-      {timeslots.map((timeslot) => {
-        const bookingKey = `${courtId}-${timeslot.id}`;
-        const booking = bookings[bookingKey];
+      {timeSlots.map((ts) => {
+        const bookingKey = `${courtId}-${ts.id}`;
+        console.log(bookingKey, reservations);
+        const booking = reservations[bookingKey] || null;
         return (
-          <li key={timeslot.id} className={`${showInfo ? "size-28" : ""}`}>
-            {booking.booked ? (
+          <li key={ts.id} className={`${showInfo ? "size-28" : ""}`}>
+            {booking?.booked ? (
               <BookedContent booking={booking} showInfo={showInfo} />
             ) : (
               <NotBookedContent
                 courtId={courtId}
-                timeslotId={timeslot.id}
-                label={timeslot.name}
+                timeslotId={ts.id}
+                label={ts.name}
                 loading={loading}
                 setLoading={setLoading}
                 showInfo={showInfo}
@@ -151,9 +152,9 @@ function TimeSlotList({
 }
 
 function CourtRectangle({
-  timeslots,
+  timeSlots,
   courtId,
-  bookings,
+  reservations,
   title,
   loading,
   setLoading,
@@ -166,13 +167,13 @@ function CourtRectangle({
       </h2>
       <div className="flex lg:hidden">
         <Collapse
-          label={"Show Timeslots"}
+          label={"Show timeslots"}
           className={"bg-base-100/0 border-white/20 border-2"}
         >
           <TimeSlotList
-            timeslots={timeslots}
+            timeSlots={timeSlots}
             courtId={courtId}
-            bookings={bookings}
+            reservations={reservations}
             loading={loading}
             setLoading={setLoading}
             showInfo={showInfo}
@@ -181,9 +182,9 @@ function CourtRectangle({
       </div>
       <div className="hidden lg:flex lg:items-center lg:justify-center">
         <TimeSlotList
-          timeslots={timeslots}
+          timeSlots={timeSlots}
           courtId={courtId}
-          bookings={bookings}
+          reservations={reservations}
           loading={loading}
           setLoading={setLoading}
           showInfo={showInfo}
@@ -194,9 +195,10 @@ function CourtRectangle({
 }
 {
 }
-export default function ScheduleTable({ courts, timeslots, bookings }) {
+export default function ScheduleTable({ courts, timeSlots, reservations }) {
   const [loading, setLoading] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+
   return (
     <div className="size-full flex flex-col items-stretch">
       <div className="flex-grow-0 flex-shrink-0 p-4">
@@ -217,18 +219,18 @@ export default function ScheduleTable({ courts, timeslots, bookings }) {
         />
         <div className="flex-grow-1 grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-8">
           <CourtRectangle
-            timeslots={timeslots}
+            timeSlots={timeSlots}
             courtId={courts.find((court) => court.name === "Court 4").id}
-            bookings={bookings}
+            reservations={reservations}
             title="Court 4"
             loading={loading}
             setLoading={setLoading}
             showInfo={showInfo}
           />
           <CourtRectangle
-            timeslots={timeslots}
+            timeSlots={timeSlots}
             courtId={courts.find((court) => court.name === "Court 5").id}
-            bookings={bookings}
+            reservations={reservations}
             title="Court 5"
             loading={loading}
             setLoading={setLoading}
@@ -237,27 +239,27 @@ export default function ScheduleTable({ courts, timeslots, bookings }) {
         </div>
         <div className="flex-grow-1 grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-8">
           <CourtRectangle
-            timeslots={timeslots}
+            timeSlots={timeSlots}
             courtId={courts.find((court) => court.name === "Court 3").id}
-            bookings={bookings}
+            reservations={reservations}
             title="Court 3"
             loading={loading}
             setLoading={setLoading}
             showInfo={showInfo}
           />
           <CourtRectangle
-            timeslots={timeslots}
+            timeSlots={timeSlots}
             courtId={courts.find((court) => court.name === "Court 2").id}
-            bookings={bookings}
+            reservations={reservations}
             title="Court 2"
             loading={loading}
             setLoading={setLoading}
             showInfo={showInfo}
           />
           <CourtRectangle
-            timeslots={timeslots}
+            timeSlots={timeSlots}
             courtId={courts.find((court) => court.name === "Court 1").id}
-            bookings={bookings}
+            reservations={reservations}
             title="Court 1"
             loading={loading}
             setLoading={setLoading}

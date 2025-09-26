@@ -62,8 +62,6 @@ async def get_booking_cells(session: SessionDep, settings: SettingsDep) -> dict:
 
     # Fetch all courts, timeslots, reservations, and reservation_players
     all_users = get_users(session)
-    all_courts = get_courts(session)
-    all_timeslots = get_time_slots(session)
     reservation_players = get_reservation_players(session)
 
     # Dictionary mapping: user_id -> user details
@@ -89,37 +87,29 @@ async def get_booking_cells(session: SessionDep, settings: SettingsDep) -> dict:
     )
 
     # Dictionary mapping: (court_id, timeslot_id) -> reservation
-    reservation_map = {(r.court_id, r.timeslot_id): r for r in current_reservations}
+    reservation_map = {f"{r.court_id}-{r.timeslot_id}": r for r in current_reservations}
 
     # Build flattened schedule cells
-    schedule_cells = {
-        "courts": [CourtPublic(**c.model_dump()) for c in all_courts],
-        "timeslots": [TimeSlotPublic(**t.model_dump()) for t in all_timeslots],
-        "bookings": {},
-    }
+    schedule_cells = {}
 
-    for t in all_timeslots:
-        for c in all_courts:
-            booking_id = f"{c.id}-{t.id}"
-            cell = {}
+    for r_key in reservation_map.keys():
+        cell = {}
 
-            # Check if this (court_id, timeslot_id) is booked
-            r = reservation_map.get((c.id, t.id))
-            if r is not None:
-                cell["booking_user"] = user_map[
-                    r.user_id
-                ].full_name  # The user who made the reservation
-                cell["reservation"] = ReservationPublic(**r.model_dump())
-                cell["booked"] = True  # There is a reservation
-                cell["players"] = reservation_players_map.get(
-                    r.id, []
-                )  # List of user_ids
-            else:
-                cell["reservation"] = None
-                cell["booked"] = False  # No reservation
-                cell["players"] = []  # No players
+        # Check if this (court_id, timeslot_id) is booked
+        r = reservation_map.get(r_key)
+        if r is not None:
+            cell["booking_user"] = user_map[
+                r.user_id
+            ]  # The user who made the reservation
+            cell["reservation"] = ReservationPublic(**r.model_dump())
+            cell["booked"] = True  # There is a reservation
+            cell["players"] = reservation_players_map.get(r.id, [])  # List of user_ids
+        else:
+            cell["reservation"] = None
+            cell["booked"] = False  # No reservation
+            cell["players"] = []  # No players
 
-            schedule_cells["bookings"][booking_id] = cell
+        schedule_cells[r_key] = cell
 
     return schedule_cells
 

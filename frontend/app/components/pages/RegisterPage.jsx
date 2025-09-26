@@ -11,7 +11,8 @@ import { useNavigate } from "react-router";
 export default function RegisterPage() {
   const navigate = useNavigate();
   const [formInfo, setFormInfo] = useState({
-    full_name: "",
+    name: "",
+    surname: "",
     email: "",
     password: "",
     password_confirm: "",
@@ -53,12 +54,24 @@ export default function RegisterPage() {
         handleFormSubmit={handleSubmit}
       >
         <div className="flex flex-col gap-2">
-          <Label htmlFor="full_name">full name</Label>
+          <Label htmlFor="name">Name</Label>
           <Input
-            id="full_name"
+            id="name"
             type="text"
-            name="full_name"
-            value={formInfo.full_name}
+            name="name"
+            value={formInfo.name}
+            onChange={handleChange}
+            disabled={loading}
+            className="w-full"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="surname">Surname</Label>
+          <Input
+            id="surname"
+            type="text"
+            name="surname"
+            value={formInfo.surname}
             onChange={handleChange}
             disabled={loading}
             className="w-full"

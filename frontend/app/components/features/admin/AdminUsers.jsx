@@ -52,7 +52,7 @@ export default function AdminUsers() {
             >
               remove user
             </Button>
-            <Collapse label={user.full_name}>
+            <Collapse label={`${user.name} ${user.surname}`}>
               {Object.keys(user).map((key) => (
                 <p key={key}>
                   <span className="font-semibold">{key}</span>:{" "}

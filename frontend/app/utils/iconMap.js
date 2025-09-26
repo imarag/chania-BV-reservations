@@ -15,6 +15,8 @@ import { LiaBirthdayCakeSolid } from "react-icons/lia";
 
 export const iconMap = {
   full_name: LuIdCard,
+  name: LuIdCard,
+  surname: LuIdCard,
   email: MdAlternateEmail,
   phone_number: MdOutlineLocalPhone,
   role: LuUser,

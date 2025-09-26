@@ -19,7 +19,7 @@ function AvailableUsersList({ availableUsers, handleUserClicked }) {
             size="small"
             className={"w-full"}
           >
-            {user.full_name}
+            {`${user.name} ${user.surname}`}
           </Button>
         </li>
       ))}
@@ -38,7 +38,7 @@ function SelectedUsersList({ selectedUsers, handleUserClicked }) {
             size="small"
             className={"w-full"}
           >
-            {user.full_name}
+            {`${user.name} ${user.surname}`}
           </Button>
         </li>
       ))}

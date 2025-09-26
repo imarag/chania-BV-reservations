@@ -56,12 +56,23 @@ export default function PersonalInfoSettings() {
   return (
     <form onSubmit={handleUpdateData} className="space-y-4 w-md">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="email">full name</Label>
+        <Label htmlFor="name">Name</Label>
         <Input
-          id="full_name"
+          id="surname"
           type="text"
-          name="full_name"
-          value={userInfo?.full_name || ""}
+          name="surname"
+          value={userInfo?.surname || ""}
+          onChange={handleChange}
+          disabled={loading}
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="surname">Surname</Label>
+        <Input
+          id="surname"
+          type="text"
+          name="surname"
+          value={userInfo?.surname || ""}
           onChange={handleChange}
           disabled={loading}
         />

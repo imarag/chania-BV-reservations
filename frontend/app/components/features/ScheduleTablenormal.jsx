@@ -45,7 +45,7 @@ function BookedContent({ booking }) {
       >
         <ul className="space-y-1">
           {booking.players.map((player) => (
-            <li key={player.id}>{player.full_name}</li>
+            <li key={player.id}>{`${player.name} ${player.surname}`}</li>
           ))}
         </ul>
       </Collapse>

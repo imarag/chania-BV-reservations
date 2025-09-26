@@ -10,7 +10,6 @@ import { fetchCourts } from "../context_providers/CourtsProvider";
 import { fetchTimeSlots } from "../context_providers/TimeSlotsProvider";
 
 export default function schedule() {
-  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reservations, setReservations] = useState([]);
@@ -65,7 +64,7 @@ export default function schedule() {
       setLoading(true);
 
       const { resData, resError } = await apiRequest({
-        url: apiEndpoints.GET_CURRENT_RESERVATIONS,
+        url: apiEndpoints.GET_BOOKING_CELLS,
       });
 
       setLoading(false);
@@ -89,14 +88,14 @@ export default function schedule() {
     return Promise.all([
       fetchCourts(),
       fetchTimeSlots(),
-      apiRequest({ url: apiEndpoints.GET_CURRENT_RESERVATIONS }),
+      apiRequest({ url: apiEndpoints.GET_BOOKING_CELLS }),
     ])
       .then(([courtsData, timeSlotsData, reservationsResult]) => {
         setCourts(courtsData);
         setTimeSlots(timeSlotsData);
 
         const { resData, resError } = reservationsResult;
-        console.log(resData, resError, "888f");
+
         if (resError) {
           setReservations([]);
           setError(resError);
@@ -121,14 +120,14 @@ export default function schedule() {
   if (loading) {
     return <Loading />;
   }
-
+  console.log(reservations);
   return (
     <>
-      {data && (
+      {courts && timeSlots && reservations && (
         <ScheduleTable
-          courts={data.courts}
-          timeslots={data.timeslots}
-          bookings={data.bookings}
+          courts={courts}
+          timeSlots={timeSlots}
+          reservations={reservations}
         />
       )}
     </>

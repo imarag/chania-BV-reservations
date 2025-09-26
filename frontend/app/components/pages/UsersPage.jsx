@@ -27,7 +27,7 @@ function UserInfoLabel({ user }) {
   return (
     <p className="flex items-center gap-2">
       <Symbol IconComponent={LuUserRound} size="small" />
-      <span className="ms-4">{user.full_name}</span>
+      <span className="ms-4">{`${user.name} ${user.surnmae}`}</span>
       <span className="text-base-content/50">{user.email}</span>
     </p>
   );
